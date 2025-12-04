@@ -1,8 +1,10 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
+from config.db import Base, engine
+from routes.auth import auth
 
 app = Flask(__name__)
-from routes.auth import auth
+Base.metadata.create_all(bind=engine)
 
 CORS(
     app,
