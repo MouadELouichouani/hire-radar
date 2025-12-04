@@ -1,3 +1,4 @@
+
 # HireRadar – AI-Powered Recruitment Platform  
 HireRadar is a web platform that connects employers and candidates using AI-driven job and profile recommendations.  
 The system analyzes data from both sides to match candidates with the most relevant job opportunities.
@@ -151,3 +152,4 @@ More details are available in the `/docs` folder.
 cd frontend
 npm install
 npm run dev
+
