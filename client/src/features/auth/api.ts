@@ -15,3 +15,9 @@ export async function signup(userData : ISignupRequest) {
     setToken(data.token)
     return data ;
 }
+
+
+export const oAuth = async () => {
+  const response = await apiClient.get(`/auth/google`);
+  return response;
+};

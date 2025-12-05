@@ -14,6 +14,15 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import OAuth from "./o-auth"
 import { signup } from "@/features/auth/api"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
 
 export function SignupForm({
   className,
@@ -24,7 +33,7 @@ export function SignupForm({
     full_name: "",
     email: "",
     password: "",
-    role: "candidate",
+    role: "",
     confirmPassword: ""
   })
 
@@ -33,13 +42,15 @@ export function SignupForm({
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.id]: e.target.value })
-    setErrors({ ...errors, [e.target.id]: "" }) 
+    setErrors({ ...errors, [e.target.id]: "" })
   }
 
   function validate() {
     let errs: any = {}
 
-    if (!form.full_name.trim()) errs.name = "Full name is required."
+    if (!form.full_name.trim()) errs.full_name = "Full name is required."
+    if (!form.role) errs.role = "Please select a role."
+
     if (!form.email.trim()) errs.email = "Email is required."
     else if (!/\S+@\S+\.\S+/.test(form.email))
       errs.email = "Enter a valid email."
@@ -69,8 +80,6 @@ export function SignupForm({
 
     try {
       const res = await signup(form)
-      console.log(res);
-      
       toast.success("Account created successfully!")
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -82,7 +91,6 @@ export function SignupForm({
       setLoading(false)
     }
   }
-
 
   return (
     <form
@@ -98,20 +106,52 @@ export function SignupForm({
           </p>
         </div>
 
-        <Field>
-          <FieldLabel htmlFor="name">Full Name</FieldLabel>
-          <Input
-            id="full_name"
-            type="text"
-            placeholder="John Doe"
-            value={form.full_name}
-            onChange={handleChange}
-            required
-          />
-          {errors.full_name && (
-            <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>
-          )}
-        </Field>
+        <div className="flex gap-2">
+
+          <Field>
+            <FieldLabel htmlFor="full_name">Full Name</FieldLabel>
+            <Input
+              id="full_name"
+              type="text"
+              placeholder="John Doe"
+              value={form.full_name}
+              onChange={handleChange}
+              required
+            />
+            {errors.full_name && (
+              <p className="text-red-500 text-sm mt-1">{errors.full_name}</p>
+            )}
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="role">Role</FieldLabel>
+            <Select
+              value={form.role}
+              onValueChange={(value) => {
+                setForm({ ...form, role: value })
+                setErrors({ ...errors, role: "" })
+              }}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Roles</SelectLabel>
+                  <SelectItem value="candidate">
+                    Candidate - looking for opportunities
+                  </SelectItem>
+                  <SelectItem value="employer">
+                    Employer - looking for workers
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            {errors.role && (
+              <p className="text-red-500 text-sm mt-1">{errors.role}</p>
+            )}
+          </Field>
+        </div>
 
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -137,16 +177,14 @@ export function SignupForm({
             onChange={handleChange}
             required
           />
-          <FieldDescription>
-            Must be at least 8 characters long.
-          </FieldDescription>
+          <FieldDescription>Must be at least 8 characters long.</FieldDescription>
           {errors.password && (
             <p className="text-red-500 text-sm mt-1">{errors.password}</p>
           )}
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="confirm-password">Confirm Password</FieldLabel>
+          <FieldLabel htmlFor="confirmPassword">Confirm Password</FieldLabel>
           <Input
             id="confirmPassword"
             type="password"
@@ -154,9 +192,7 @@ export function SignupForm({
             onChange={handleChange}
             required
           />
-          <FieldDescription>
-            Please confirm your password.
-          </FieldDescription>
+          <FieldDescription>Please confirm your password.</FieldDescription>
           {errors.confirmPassword && (
             <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>
           )}
@@ -172,7 +208,6 @@ export function SignupForm({
 
         <Field>
           <OAuth />
-
           <FieldDescription className="px-6 text-center">
             Already have an account? <a href="/login">Sign in</a>
           </FieldDescription>
