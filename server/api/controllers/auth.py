@@ -5,16 +5,16 @@ import jwt
 from dotenv import load_dotenv
 from config.db import SessionLocal
 from core.models import User
-
 from google_auth_oauthlib.flow import Flow
 import os
+import requests
 
 load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
-
+GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
 
 def get_db():
     db = SessionLocal()
@@ -24,83 +24,98 @@ def get_db():
         db.close()
 
 
-def google_login():
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "redirect_uris": ["http://localhost:5000/auth/google/callback"],
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-            }
-        },
-        scopes=["openid", "email", "profile"],
-    )
+# def google_login():
+#     flow = Flow.from_client_config(
+#         {
+#             "web": {
+#                 "client_id": GOOGLE_CLIENT_ID,
+#                 "client_secret": GOOGLE_CLIENT_SECRET,
+#                 "redirect_uris": ["http://localhost:5000/auth/google/callback"],
+#                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+#                 "token_uri": "https://oauth2.googleapis.com/token",
+#             }
+#         },
+#         scopes=["openid", "email", "profile"],
+#     )
 
-    flow.redirect_uri = "http://localhost:5000/auth/google/callback"
+#     flow.redirect_uri = "http://localhost:5000/auth/google/callback"
 
-    authorization_url, state = flow.authorization_url(
-        access_type="offline", include_granted_scopes="true"
-    )
+#     authorization_url, state = flow.authorization_url(
+#         access_type="offline", include_granted_scopes="true"
+#     )
 
-    session["state"] = state
-    return redirect(authorization_url)
+#     session["state"] = state
+#     print(authorization_url)
+#     return jsonify({"auth_url":authorization_url})
 
 
-def google_callback():
-    state = session.get("state")
+# def google_callback():
+#     code = request.args.get("code")
+#     if not code:
+#         return jsonify({"error": "Missing authorization code"}), 400
 
-    flow = Flow.from_client_config(
-        {
-            "web": {
-                "client_id": GOOGLE_CLIENT_ID,
-                "client_secret": GOOGLE_CLIENT_SECRET,
-                "redirect_uris": ["http://localhost:5000/auth/google/callback"],
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-            }
-        },
-        scopes=["openid", "email", "profile"],
-        state=state
-    )
+#     token_url = "https://oauth2.googleapis.com/token"
+#     token_data = {
+#         "code": code,
+#         "client_id": GOOGLE_CLIENT_ID,
+#         "client_secret": GOOGLE_CLIENT_SECRET,
+#         "redirect_uri": GOOGLE_REDIRECT_URI,
+#         "grant_type": "authorization_code",
+#     }
 
-    flow.redirect_uri = "http://localhost:5000/auth/google/callback"
+#     token_res = requests.post(token_url, data=token_data).json()
+#     access_token = token_res.get("access_token")
 
-    flow.fetch_token(authorization_response=request.url)
+#     if not access_token:
+#         return jsonify({"error": "Token exchange failed", "details": token_res}), 400
 
-    from google.oauth2 import id_token
-    from google.auth.transport import requests
+#     user_info = requests.get(
+#         "https://www.googleapis.com/oauth2/v2/userinfo",
+#         headers={"Authorization": f"Bearer {access_token}"},
+#     ).json()
 
-    credentials = flow.credentials
-    token_info = id_token.verify_oauth2_token(
-        credentials.id_token,
-        requests.Request(),
-        GOOGLE_CLIENT_ID
-    )
+#     email = user_info.get("email")
+#     if not email:
+#         return jsonify({"error": "Google did not return an email"}), 400
 
-    email = token_info["email"]
-    name = token_info.get("name", "Unknown")
+#     name = user_info.get("name", "")
+#     picture = user_info.get("picture", "")
 
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter_by(email=email).first()
-        if not user:
-            user = User(full_name=name, email=email, role="candidate")
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+#     db = SessionLocal()
+#     try:
+#         user = db.query(User).filter(User.email == email).first()
 
-        token = jwt.encode(
-            {"id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
-            JWT_SECRET,
-            algorithm="HS256"
-        )
+#         if not user:
+#             user = User(
+#                 full_name=name,
+#                 email=email,
+#                 password=None,
+#                 role="candidate",
+#             )
+#             db.add(user)
+#             db.commit()
+#             db.refresh(user)
 
-        return jsonify({"token": token, "user": {"name": user.full_name, "email": user.email}})
+#         token = jwt.encode(
+#             {"id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+#             JWT_SECRET,
+#             algorithm="HS256",
+#         )
 
-    finally:
-        db.close()
+#         return jsonify(
+#             {
+#                 "token": token,
+#                 "user": {
+#                     "id": user.id,
+#                     "email": user.email,
+#                     "name": user.full_name,
+#                     "picture": picture,
+#                 },
+#             }
+#         ), 200
+
+#     finally:
+#         db.close()
 
 
 def get_current_user():

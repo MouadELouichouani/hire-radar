@@ -2,9 +2,14 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from config.db import Base, engine
 from routes.auth import auth
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 Base.metadata.create_all(bind=engine)
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 CORS(
     app,

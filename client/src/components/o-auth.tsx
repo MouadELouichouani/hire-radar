@@ -12,6 +12,8 @@ const OAuth = () => {
     try {
       setLoading(true);
       const res = await oAuth();
+      console.log(res);
+      
       if (res.status === 200) {
         window.location.href = res.data.auth_url;
       }
