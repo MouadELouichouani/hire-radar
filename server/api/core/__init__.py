@@ -1,11 +1,14 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-load_dotenv()
+# Load .env file from server root directory
+env_path = Path(__file__).parent.parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 
 database = SQLAlchemy()

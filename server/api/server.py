@@ -4,8 +4,11 @@ from config.db import Base, engine
 from routes.auth import auth
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+# Load .env file from server root directory
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 app = Flask(__name__)
 Base.metadata.create_all(bind=engine)

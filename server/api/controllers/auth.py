@@ -8,8 +8,11 @@ from core.models import User
 from google_auth_oauthlib.flow import Flow
 import os
 import requests
+from pathlib import Path
 
-load_dotenv()
+# Load .env file from server root directory
+env_path = Path(__file__).parent.parent.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
