@@ -162,8 +162,19 @@ More details are available in the `/docs` folder.
 #### **Frontend**
 
 ```bash
-cd frontend
+cd client
 npm install
 npm run dev
-
 ```
+
+#### **Backend**
+
+```bash
+cd server
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python -m flask run
+```
+
+---
