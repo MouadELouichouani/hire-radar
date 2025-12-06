@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Upload, FileText, X, Check } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { CandidateProfile } from '@/types/profile';
+import { useState } from "react";
+import { Upload, FileText, X, Check } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CandidateProfile } from "@/types/profile";
 
 interface UploadCVProps {
   profile: CandidateProfile;
@@ -11,16 +11,20 @@ interface UploadCVProps {
   isUploading?: boolean;
 }
 
-export default function UploadCV({ profile, onUpload, isUploading = false }: UploadCVProps) {
+export default function UploadCV({
+  profile,
+  onUpload,
+  isUploading = false,
+}: UploadCVProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
+    if (e.type === "dragenter" || e.type === "dragover") {
       setDragActive(true);
-    } else if (e.type === 'dragleave') {
+    } else if (e.type === "dragleave") {
       setDragActive(false);
     }
   };
@@ -32,7 +36,7 @@ export default function UploadCV({ profile, onUpload, isUploading = false }: Upl
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
-      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
         setSelectedFile(file);
       }
     }
@@ -41,7 +45,7 @@ export default function UploadCV({ profile, onUpload, isUploading = false }: Upl
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+      if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
         setSelectedFile(file);
       }
     }
@@ -55,23 +59,27 @@ export default function UploadCV({ profile, onUpload, isUploading = false }: Upl
   };
 
   const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
+    const sizes = ["Bytes", "KB", "MB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
 
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Resume / CV</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        Resume / CV
+      </h2>
 
       {profile.cv_url ? (
         <div className="space-y-4">
           <div className="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
             <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
             <div className="flex-1">
-              <p className="font-semibold text-green-900 dark:text-green-300">CV Uploaded</p>
+              <p className="font-semibold text-green-900 dark:text-green-300">
+                CV Uploaded
+              </p>
               <a
                 href={profile.cv_url}
                 target="_blank"
@@ -93,15 +101,17 @@ export default function UploadCV({ profile, onUpload, isUploading = false }: Upl
         onDrop={handleDrop}
         className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
           dragActive
-            ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-            : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-600'
+            ? "border-purple-500 bg-purple-50 dark:bg-purple-900/20"
+            : "border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-600"
         }`}
       >
         <Upload className="w-12 h-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
         <p className="text-gray-600 dark:text-gray-400 mb-2">
           Drag and drop your CV here, or click to browse
         </p>
-        <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">PDF files only (max 5MB)</p>
+        <p className="text-sm text-gray-500 dark:text-gray-500 mb-4">
+          PDF files only (max 5MB)
+        </p>
         <input
           type="file"
           accept=".pdf,application/pdf"
@@ -126,7 +136,9 @@ export default function UploadCV({ profile, onUpload, isUploading = false }: Upl
           <div className="flex items-center gap-3">
             <FileText className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">{selectedFile.name}</p>
+              <p className="font-medium text-gray-900 dark:text-white">
+                {selectedFile.name}
+              </p>
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 {formatFileSize(selectedFile.size)}
               </p>
@@ -145,7 +157,7 @@ export default function UploadCV({ profile, onUpload, isUploading = false }: Upl
               disabled={isUploading}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
-              {isUploading ? 'Uploading...' : 'Upload CV'}
+              {isUploading ? "Uploading..." : "Upload CV"}
             </Button>
           </div>
         </div>

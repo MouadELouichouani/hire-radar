@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Camera, MapPin, Briefcase, Building2 } from 'lucide-react';
-import { CandidateProfile, EmployerProfile } from '@/types/profile';
-import { Button } from '@/components/ui/button';
+import { Camera, MapPin, Briefcase, Building2 } from "lucide-react";
+import { CandidateProfile, EmployerProfile } from "@/types/profile";
+import { Button } from "@/components/ui/button";
 
 interface ProfileHeaderProps {
   profile: CandidateProfile | EmployerProfile;
-  role: 'candidate' | 'employer';
+  role: "candidate" | "employer";
   onEditClick: () => void;
   onImageClick?: () => void;
 }
@@ -17,7 +17,7 @@ export default function ProfileHeader({
   onEditClick,
   onImageClick,
 }: ProfileHeaderProps) {
-  const isCandidate = role === 'candidate';
+  const isCandidate = role === "candidate";
   const candidateProfile = isCandidate ? (profile as CandidateProfile) : null;
   const employerProfile = !isCandidate ? (profile as EmployerProfile) : null;
 
@@ -30,14 +30,19 @@ export default function ProfileHeader({
             {profile.profile_picture ? (
               <img
                 src={profile.profile_picture}
-                alt={isCandidate ? candidateProfile?.full_name || 'Candidate' : employerProfile?.company_name || 'Company'}
+                alt={
+                  isCandidate
+                    ? candidateProfile?.full_name || "Candidate"
+                    : employerProfile?.company_name || "Company"
+                }
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-purple-400 via-pink-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
                 {isCandidate
-                  ? candidateProfile?.full_name?.charAt(0).toUpperCase() || 'C'
-                  : employerProfile?.company_name?.charAt(0).toUpperCase() || 'E'}
+                  ? candidateProfile?.full_name?.charAt(0).toUpperCase() || "C"
+                  : employerProfile?.company_name?.charAt(0).toUpperCase() ||
+                    "E"}
               </div>
             )}
           </div>
@@ -58,8 +63,8 @@ export default function ProfileHeader({
             <div>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {isCandidate
-                  ? candidateProfile?.full_name || 'Candidate'
-                  : employerProfile?.company_name || 'Company'}
+                  ? candidateProfile?.full_name || "Candidate"
+                  : employerProfile?.company_name || "Company"}
               </h1>
               <div className="flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-400">
                 {isCandidate ? (
@@ -67,13 +72,17 @@ export default function ProfileHeader({
                     {candidateProfile?.location && (
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{candidateProfile.location}</span>
+                        <span className="text-sm">
+                          {candidateProfile.location}
+                        </span>
                       </div>
                     )}
                     {candidateProfile?.experience_years !== undefined && (
                       <div className="flex items-center gap-1.5">
                         <Briefcase className="w-4 h-4" />
-                        <span className="text-sm">{candidateProfile.experience_years} years experience</span>
+                        <span className="text-sm">
+                          {candidateProfile.experience_years} years experience
+                        </span>
                       </div>
                     )}
                   </>
@@ -82,13 +91,17 @@ export default function ProfileHeader({
                     {employerProfile?.location && (
                       <div className="flex items-center gap-1.5">
                         <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{employerProfile.location}</span>
+                        <span className="text-sm">
+                          {employerProfile.location}
+                        </span>
                       </div>
                     )}
                     {employerProfile?.industry && (
                       <div className="flex items-center gap-1.5">
                         <Building2 className="w-4 h-4" />
-                        <span className="text-sm">{employerProfile.industry}</span>
+                        <span className="text-sm">
+                          {employerProfile.industry}
+                        </span>
                       </div>
                     )}
                   </>

@@ -1,10 +1,17 @@
-'use client';
+"use client";
 
-import { MapPin, DollarSign, Briefcase, BookmarkCheck, ExternalLink, X } from 'lucide-react';
-import { Job } from '@/types/job';
-import { Button } from '@/components/ui/button';
-import { useUnsaveJob } from '@/features/jobs/hooks';
-import { toast } from 'sonner';
+import {
+  MapPin,
+  DollarSign,
+  Briefcase,
+  BookmarkCheck,
+  ExternalLink,
+  X,
+} from "lucide-react";
+import { Job } from "@/types/job";
+import { Button } from "@/components/ui/button";
+import { useUnsaveJob } from "@/features/jobs/hooks";
+import { toast } from "sonner";
 
 interface SavedJobCardProps {
   job: Job;
@@ -12,19 +19,23 @@ interface SavedJobCardProps {
   onUnsave?: (jobId: string) => void;
 }
 
-export default function SavedJobCard({ job, onApply, onUnsave }: SavedJobCardProps) {
+export default function SavedJobCard({
+  job,
+  onApply,
+  onUnsave,
+}: SavedJobCardProps) {
   const unsaveMutation = useUnsaveJob();
 
   const handleUnsave = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await unsaveMutation.mutateAsync(job.id);
-      toast.success('Job removed from saved');
+      toast.success("Job removed from saved");
       if (onUnsave) {
         onUnsave(job.id);
       }
     } catch (error) {
-      toast.error('Failed to unsave job. Please try again.');
+      toast.error("Failed to unsave job. Please try again.");
     }
   };
 
@@ -40,7 +51,7 @@ export default function SavedJobCard({ job, onApply, onUnsave }: SavedJobCardPro
 
   const formatSalary = () => {
     if (!job.salary_min && !job.salary_max) return null;
-    const currency = job.salary_currency || '$';
+    const currency = job.salary_currency || "$";
     if (job.salary_min && job.salary_max) {
       return `${currency}${job.salary_min.toLocaleString()} - ${currency}${job.salary_max.toLocaleString()}`;
     }
@@ -97,7 +108,9 @@ export default function SavedJobCard({ job, onApply, onUnsave }: SavedJobCardPro
         {job.employment_type && (
           <div className="flex items-center gap-1.5">
             <Briefcase className="w-4 h-4" />
-            <span className="capitalize">{job.employment_type.replace('-', ' ')}</span>
+            <span className="capitalize">
+              {job.employment_type.replace("-", " ")}
+            </span>
           </div>
         )}
       </div>
@@ -129,7 +142,7 @@ export default function SavedJobCard({ job, onApply, onUnsave }: SavedJobCardPro
         </Button>
         <Button
           variant="outline"
-          onClick={() => window.location.href = `/jobs/${job.id}`}
+          onClick={() => (window.location.href = `/jobs/${job.id}`)}
           className="flex items-center gap-2"
         >
           <ExternalLink className="w-4 h-4" />

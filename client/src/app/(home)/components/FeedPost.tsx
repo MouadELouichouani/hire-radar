@@ -35,20 +35,32 @@ export default function FeedPost({
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base shadow-lg flex-shrink-0 ring-2 ring-white/50 dark:ring-gray-700/50">
-            {author.name.split(' ').map(n => n[0]).join('')}
+            {author.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
           </div>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">{author.name}</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">{author.title}</p>
+            <h3 className="font-bold text-base text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
+              {author.name}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {author.title}
+            </p>
           </div>
         </div>
-        <button className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-xl hover:bg-gray-500/10 dark:hover:bg-gray-500/20 transition-all" aria-label="More options">
+        <button
+          className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-xl hover:bg-gray-500/10 dark:hover:bg-gray-500/20 transition-all"
+          aria-label="More options"
+        >
           <MoreVertical className="w-5 h-5" />
         </button>
       </div>
 
       {/* Post Title */}
-      <h2 className="font-bold text-xl mb-5 text-gray-900 dark:text-white leading-tight">{title}</h2>
+      <h2 className="font-bold text-xl mb-5 text-gray-900 dark:text-white leading-tight">
+        {title}
+      </h2>
 
       {/* Post Content */}
       {content && <div className="mb-6">{content}</div>}
@@ -63,10 +75,16 @@ export default function FeedPost({
           <MessageCircle className="w-5 h-5 group-hover:scale-125 transition-transform" />
           <span className="text-sm font-bold">{comments}</span>
         </button>
-        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20" aria-label="Share">
+        <button
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20"
+          aria-label="Share"
+        >
           <Send className="w-5 h-5 group-hover:scale-125 transition-transform" />
         </button>
-        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all ml-auto group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20" aria-label="Bookmark">
+        <button
+          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all ml-auto group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20"
+          aria-label="Bookmark"
+        >
           <Bookmark className="w-5 h-5 group-hover:scale-125 transition-transform" />
         </button>
       </div>
@@ -82,10 +100,16 @@ export default function FeedPost({
             placeholder="Write a comment..."
             className="flex-1 outline-none text-base bg-transparent placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-white"
           />
-          <button className="text-gray-400 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-all" aria-label="Voice input">
+          <button
+            className="text-gray-400 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-all"
+            aria-label="Voice input"
+          >
             <Mic className="w-5 h-5" />
           </button>
-          <button className="text-gray-400 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-all" aria-label="Add emoji">
+          <button
+            className="text-gray-400 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-all"
+            aria-label="Add emoji"
+          >
             <Smile className="w-5 h-5" />
           </button>
         </div>

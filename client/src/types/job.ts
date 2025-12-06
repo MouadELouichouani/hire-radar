@@ -8,8 +8,13 @@ export interface Job {
   salary_min?: number;
   salary_max?: number;
   salary_currency?: string;
-  employment_type?: 'full-time' | 'part-time' | 'contract' | 'internship' | 'remote';
-  experience_level?: 'entry' | 'mid' | 'senior' | 'executive';
+  employment_type?:
+    | "full-time"
+    | "part-time"
+    | "contract"
+    | "internship"
+    | "remote";
+  experience_level?: "entry" | "mid" | "senior" | "executive";
   skills: string[];
   requirements?: string;
   benefits?: string;

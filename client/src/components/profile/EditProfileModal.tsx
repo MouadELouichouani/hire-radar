@@ -1,17 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { CandidateProfile, EmployerProfile, UpdateCandidateProfileRequest, UpdateEmployerProfileRequest } from '@/types/profile';
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  CandidateProfile,
+  EmployerProfile,
+  UpdateCandidateProfileRequest,
+  UpdateEmployerProfileRequest,
+} from "@/types/profile";
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: CandidateProfile | EmployerProfile;
-  role: 'candidate' | 'employer';
-  onSave: (data: UpdateCandidateProfileRequest | UpdateEmployerProfileRequest) => Promise<void>;
+  role: "candidate" | "employer";
+  onSave: (
+    data: UpdateCandidateProfileRequest | UpdateEmployerProfileRequest,
+  ) => Promise<void>;
 }
 
 export default function EditProfileModal({
@@ -21,12 +28,14 @@ export default function EditProfileModal({
   role,
   onSave,
 }: EditProfileModalProps) {
-  const isCandidate = role === 'candidate';
+  const isCandidate = role === "candidate";
   const candidateProfile = isCandidate ? (profile as CandidateProfile) : null;
   const employerProfile = !isCandidate ? (profile as EmployerProfile) : null;
 
-  const [formData, setFormData] = useState<UpdateCandidateProfileRequest | UpdateEmployerProfileRequest>({});
-  const [skills, setSkills] = useState<string>('');
+  const [formData, setFormData] = useState<
+    UpdateCandidateProfileRequest | UpdateEmployerProfileRequest
+  >({});
+  const [skills, setSkills] = useState<string>("");
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -35,29 +44,29 @@ export default function EditProfileModal({
         setFormData({
           full_name: candidateProfile.full_name,
           email: candidateProfile.email,
-          phone: candidateProfile.phone || '',
-          location: candidateProfile.location || '',
-          bio: candidateProfile.bio || '',
+          phone: candidateProfile.phone || "",
+          location: candidateProfile.location || "",
+          bio: candidateProfile.bio || "",
           experience_years: candidateProfile.experience_years,
-          education: candidateProfile.education || '',
-          linkedin_url: candidateProfile.linkedin_url || '',
-          github_url: candidateProfile.github_url || '',
-          portfolio_url: candidateProfile.portfolio_url || '',
+          education: candidateProfile.education || "",
+          linkedin_url: candidateProfile.linkedin_url || "",
+          github_url: candidateProfile.github_url || "",
+          portfolio_url: candidateProfile.portfolio_url || "",
         });
-        setSkills(candidateProfile.skills?.join(', ') || '');
+        setSkills(candidateProfile.skills?.join(", ") || "");
       } else if (!isCandidate && employerProfile) {
         setFormData({
           company_name: employerProfile.company_name,
           email: employerProfile.email,
-          phone: employerProfile.phone || '',
-          location: employerProfile.location || '',
-          bio: employerProfile.bio || '',
-          website: employerProfile.website || '',
-          industry: employerProfile.industry || '',
-          company_size: employerProfile.company_size || '',
+          phone: employerProfile.phone || "",
+          location: employerProfile.location || "",
+          bio: employerProfile.bio || "",
+          website: employerProfile.website || "",
+          industry: employerProfile.industry || "",
+          company_size: employerProfile.company_size || "",
           founded_year: employerProfile.founded_year,
-          description: employerProfile.description || '',
-          linkedin_url: employerProfile.linkedin_url || '',
+          description: employerProfile.description || "",
+          linkedin_url: employerProfile.linkedin_url || "",
         });
       }
     }
@@ -69,19 +78,25 @@ export default function EditProfileModal({
 
     try {
       const dataToSave = isCandidate
-        ? { ...formData, skills: skills.split(',').map(s => s.trim()).filter(Boolean) }
+        ? {
+            ...formData,
+            skills: skills
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean),
+          }
         : formData;
       await onSave(dataToSave);
       onClose();
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error("Error saving profile:", error);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleChange = (field: string, value: string | number | undefined) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   if (!isOpen) return null;
@@ -112,8 +127,10 @@ export default function EditProfileModal({
                 </label>
                 <Input
                   type="text"
-                  value={(formData as UpdateCandidateProfileRequest).full_name || ''}
-                  onChange={(e) => handleChange('full_name', e.target.value)}
+                  value={
+                    (formData as UpdateCandidateProfileRequest).full_name || ""
+                  }
+                  onChange={(e) => handleChange("full_name", e.target.value)}
                   required
                   className="w-full"
                 />
@@ -124,8 +141,10 @@ export default function EditProfileModal({
                 </label>
                 <Input
                   type="email"
-                  value={(formData as UpdateCandidateProfileRequest).email || ''}
-                  onChange={(e) => handleChange('email', e.target.value)}
+                  value={
+                    (formData as UpdateCandidateProfileRequest).email || ""
+                  }
+                  onChange={(e) => handleChange("email", e.target.value)}
                   required
                   className="w-full"
                 />
@@ -137,8 +156,10 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="tel"
-                    value={(formData as UpdateCandidateProfileRequest).phone || ''}
-                    onChange={(e) => handleChange('phone', e.target.value)}
+                    value={
+                      (formData as UpdateCandidateProfileRequest).phone || ""
+                    }
+                    onChange={(e) => handleChange("phone", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -148,8 +169,10 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="text"
-                    value={(formData as UpdateCandidateProfileRequest).location || ''}
-                    onChange={(e) => handleChange('location', e.target.value)}
+                    value={
+                      (formData as UpdateCandidateProfileRequest).location || ""
+                    }
+                    onChange={(e) => handleChange("location", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -159,8 +182,8 @@ export default function EditProfileModal({
                   Bio
                 </label>
                 <textarea
-                  value={(formData as UpdateCandidateProfileRequest).bio || ''}
-                  onChange={(e) => handleChange('bio', e.target.value)}
+                  value={(formData as UpdateCandidateProfileRequest).bio || ""}
+                  onChange={(e) => handleChange("bio", e.target.value)}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                 />
@@ -184,8 +207,16 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="number"
-                    value={(formData as UpdateCandidateProfileRequest).experience_years || ''}
-                    onChange={(e) => handleChange('experience_years', parseInt(e.target.value) || undefined)}
+                    value={
+                      (formData as UpdateCandidateProfileRequest)
+                        .experience_years || ""
+                    }
+                    onChange={(e) =>
+                      handleChange(
+                        "experience_years",
+                        parseInt(e.target.value) || undefined,
+                      )
+                    }
                     min="0"
                     className="w-full"
                   />
@@ -196,8 +227,11 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="text"
-                    value={(formData as UpdateCandidateProfileRequest).education || ''}
-                    onChange={(e) => handleChange('education', e.target.value)}
+                    value={
+                      (formData as UpdateCandidateProfileRequest).education ||
+                      ""
+                    }
+                    onChange={(e) => handleChange("education", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -208,8 +242,11 @@ export default function EditProfileModal({
                 </label>
                 <Input
                   type="url"
-                  value={(formData as UpdateCandidateProfileRequest).linkedin_url || ''}
-                  onChange={(e) => handleChange('linkedin_url', e.target.value)}
+                  value={
+                    (formData as UpdateCandidateProfileRequest).linkedin_url ||
+                    ""
+                  }
+                  onChange={(e) => handleChange("linkedin_url", e.target.value)}
                   className="w-full"
                 />
               </div>
@@ -220,8 +257,11 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="url"
-                    value={(formData as UpdateCandidateProfileRequest).github_url || ''}
-                    onChange={(e) => handleChange('github_url', e.target.value)}
+                    value={
+                      (formData as UpdateCandidateProfileRequest).github_url ||
+                      ""
+                    }
+                    onChange={(e) => handleChange("github_url", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -231,8 +271,13 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="url"
-                    value={(formData as UpdateCandidateProfileRequest).portfolio_url || ''}
-                    onChange={(e) => handleChange('portfolio_url', e.target.value)}
+                    value={
+                      (formData as UpdateCandidateProfileRequest)
+                        .portfolio_url || ""
+                    }
+                    onChange={(e) =>
+                      handleChange("portfolio_url", e.target.value)
+                    }
                     className="w-full"
                   />
                 </div>
@@ -246,8 +291,11 @@ export default function EditProfileModal({
                 </label>
                 <Input
                   type="text"
-                  value={(formData as UpdateEmployerProfileRequest).company_name || ''}
-                  onChange={(e) => handleChange('company_name', e.target.value)}
+                  value={
+                    (formData as UpdateEmployerProfileRequest).company_name ||
+                    ""
+                  }
+                  onChange={(e) => handleChange("company_name", e.target.value)}
                   required
                   className="w-full"
                 />
@@ -258,8 +306,8 @@ export default function EditProfileModal({
                 </label>
                 <Input
                   type="email"
-                  value={(formData as UpdateEmployerProfileRequest).email || ''}
-                  onChange={(e) => handleChange('email', e.target.value)}
+                  value={(formData as UpdateEmployerProfileRequest).email || ""}
+                  onChange={(e) => handleChange("email", e.target.value)}
                   required
                   className="w-full"
                 />
@@ -271,8 +319,10 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="tel"
-                    value={(formData as UpdateEmployerProfileRequest).phone || ''}
-                    onChange={(e) => handleChange('phone', e.target.value)}
+                    value={
+                      (formData as UpdateEmployerProfileRequest).phone || ""
+                    }
+                    onChange={(e) => handleChange("phone", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -282,8 +332,10 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="text"
-                    value={(formData as UpdateEmployerProfileRequest).location || ''}
-                    onChange={(e) => handleChange('location', e.target.value)}
+                    value={
+                      (formData as UpdateEmployerProfileRequest).location || ""
+                    }
+                    onChange={(e) => handleChange("location", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -293,8 +345,8 @@ export default function EditProfileModal({
                   Bio
                 </label>
                 <textarea
-                  value={(formData as UpdateEmployerProfileRequest).bio || ''}
-                  onChange={(e) => handleChange('bio', e.target.value)}
+                  value={(formData as UpdateEmployerProfileRequest).bio || ""}
+                  onChange={(e) => handleChange("bio", e.target.value)}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                 />
@@ -306,8 +358,10 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="url"
-                    value={(formData as UpdateEmployerProfileRequest).website || ''}
-                    onChange={(e) => handleChange('website', e.target.value)}
+                    value={
+                      (formData as UpdateEmployerProfileRequest).website || ""
+                    }
+                    onChange={(e) => handleChange("website", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -317,8 +371,10 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="text"
-                    value={(formData as UpdateEmployerProfileRequest).industry || ''}
-                    onChange={(e) => handleChange('industry', e.target.value)}
+                    value={
+                      (formData as UpdateEmployerProfileRequest).industry || ""
+                    }
+                    onChange={(e) => handleChange("industry", e.target.value)}
                     className="w-full"
                   />
                 </div>
@@ -330,8 +386,13 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="text"
-                    value={(formData as UpdateEmployerProfileRequest).company_size || ''}
-                    onChange={(e) => handleChange('company_size', e.target.value)}
+                    value={
+                      (formData as UpdateEmployerProfileRequest).company_size ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      handleChange("company_size", e.target.value)
+                    }
                     placeholder="e.g., 50-100"
                     className="w-full"
                   />
@@ -342,8 +403,16 @@ export default function EditProfileModal({
                   </label>
                   <Input
                     type="number"
-                    value={(formData as UpdateEmployerProfileRequest).founded_year || ''}
-                    onChange={(e) => handleChange('founded_year', parseInt(e.target.value) || undefined)}
+                    value={
+                      (formData as UpdateEmployerProfileRequest).founded_year ||
+                      ""
+                    }
+                    onChange={(e) =>
+                      handleChange(
+                        "founded_year",
+                        parseInt(e.target.value) || undefined,
+                      )
+                    }
                     min="1900"
                     max={new Date().getFullYear()}
                     className="w-full"
@@ -355,8 +424,10 @@ export default function EditProfileModal({
                   Description
                 </label>
                 <textarea
-                  value={(formData as UpdateEmployerProfileRequest).description || ''}
-                  onChange={(e) => handleChange('description', e.target.value)}
+                  value={
+                    (formData as UpdateEmployerProfileRequest).description || ""
+                  }
+                  onChange={(e) => handleChange("description", e.target.value)}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                 />
@@ -367,8 +438,11 @@ export default function EditProfileModal({
                 </label>
                 <Input
                   type="url"
-                  value={(formData as UpdateEmployerProfileRequest).linkedin_url || ''}
-                  onChange={(e) => handleChange('linkedin_url', e.target.value)}
+                  value={
+                    (formData as UpdateEmployerProfileRequest).linkedin_url ||
+                    ""
+                  }
+                  onChange={(e) => handleChange("linkedin_url", e.target.value)}
                   className="w-full"
                 />
               </div>
@@ -389,7 +463,7 @@ export default function EditProfileModal({
               disabled={isSaving}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
-              {isSaving ? 'Saving...' : 'Save Changes'}
+              {isSaving ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

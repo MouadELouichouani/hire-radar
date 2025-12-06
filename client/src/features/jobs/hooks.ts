@@ -1,13 +1,25 @@
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
-import { searchJobs, saveJob, unsaveJob, getJobById, getSavedJobs, applyToJob } from "./api";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from "@tanstack/react-query";
+import {
+  searchJobs,
+  saveJob,
+  unsaveJob,
+  getJobById,
+  getSavedJobs,
+  applyToJob,
+} from "./api";
 import { JobSearchParams } from "@/types/job";
 import { useMemo } from "react";
 import { useDebounce } from "@/hooks/useDebounce";
 
 // Search jobs hook with debouncing
 export function useSearchJobs(params: JobSearchParams) {
-  const debouncedSearch = useDebounce(params.search || '', 500);
-  const debouncedLocation = useDebounce(params.location || '', 500);
+  const debouncedSearch = useDebounce(params.search || "", 500);
+  const debouncedLocation = useDebounce(params.location || "", 500);
 
   const queryParams = useMemo(
     () => ({
@@ -15,7 +27,14 @@ export function useSearchJobs(params: JobSearchParams) {
       search: debouncedSearch || undefined,
       location: debouncedLocation || undefined,
     }),
-    [debouncedSearch, debouncedLocation, params.salary_min, params.skill, params.page, params.limit]
+    [
+      debouncedSearch,
+      debouncedLocation,
+      params.salary_min,
+      params.skill,
+      params.page,
+      params.limit,
+    ],
   );
 
   return useQuery({
@@ -27,9 +46,9 @@ export function useSearchJobs(params: JobSearchParams) {
 }
 
 // Infinite scroll version
-export function useInfiniteJobs(params: Omit<JobSearchParams, 'page'>) {
-  const debouncedSearch = useDebounce(params.search || '', 500);
-  const debouncedLocation = useDebounce(params.location || '', 500);
+export function useInfiniteJobs(params: Omit<JobSearchParams, "page">) {
+  const debouncedSearch = useDebounce(params.search || "", 500);
+  const debouncedLocation = useDebounce(params.location || "", 500);
 
   const queryParams = useMemo(
     () => ({
@@ -37,7 +56,13 @@ export function useInfiniteJobs(params: Omit<JobSearchParams, 'page'>) {
       search: debouncedSearch || undefined,
       location: debouncedLocation || undefined,
     }),
-    [debouncedSearch, debouncedLocation, params.salary_min, params.skill, params.limit]
+    [
+      debouncedSearch,
+      debouncedLocation,
+      params.salary_min,
+      params.skill,
+      params.limit,
+    ],
   );
 
   return useInfiniteQuery({
@@ -107,8 +132,13 @@ export function useApplyToJob() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ jobId, applicationData }: { jobId: string; applicationData?: { cover_letter?: string; cv_file?: File } }) =>
-      applyToJob(jobId, applicationData),
+    mutationFn: ({
+      jobId,
+      applicationData,
+    }: {
+      jobId: string;
+      applicationData?: { cover_letter?: string; cv_file?: File };
+    }) => applyToJob(jobId, applicationData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
     },

@@ -1,11 +1,18 @@
-'use client';
+"use client";
 
-import { MapPin, DollarSign, Briefcase, Bookmark, BookmarkCheck, ExternalLink } from 'lucide-react';
-import { Job } from '@/types/job';
-import { Button } from '@/components/ui/button';
-import { useSaveJob, useUnsaveJob } from '@/features/jobs/hooks';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import {
+  MapPin,
+  DollarSign,
+  Briefcase,
+  Bookmark,
+  BookmarkCheck,
+  ExternalLink,
+} from "lucide-react";
+import { Job } from "@/types/job";
+import { Button } from "@/components/ui/button";
+import { useSaveJob, useUnsaveJob } from "@/features/jobs/hooks";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface JobCardProps {
   job: Job;
@@ -23,14 +30,14 @@ export default function JobCard({ job, onApply }: JobCardProps) {
       if (isSaved) {
         await unsaveMutation.mutateAsync(job.id);
         setIsSaved(false);
-        toast.success('Job unsaved');
+        toast.success("Job unsaved");
       } else {
         await saveMutation.mutateAsync(job.id);
         setIsSaved(true);
-        toast.success('Job saved');
+        toast.success("Job saved");
       }
     } catch (error) {
-      toast.error('Failed to save job. Please try again.');
+      toast.error("Failed to save job. Please try again.");
     }
   };
 
@@ -46,7 +53,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
 
   const formatSalary = () => {
     if (!job.salary_min && !job.salary_max) return null;
-    const currency = job.salary_currency || '$';
+    const currency = job.salary_currency || "$";
     if (job.salary_min && job.salary_max) {
       return `${currency}${job.salary_min.toLocaleString()} - ${currency}${job.salary_max.toLocaleString()}`;
     }
@@ -71,7 +78,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
           onClick={handleSave}
           disabled={saveMutation.isPending || unsaveMutation.isPending}
           className="p-2 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors flex-shrink-0"
-          aria-label={isSaved ? 'Unsave job' : 'Save job'}
+          aria-label={isSaved ? "Unsave job" : "Save job"}
         >
           {isSaved ? (
             <BookmarkCheck className="w-5 h-5 text-purple-600 dark:text-purple-400" />
@@ -101,7 +108,9 @@ export default function JobCard({ job, onApply }: JobCardProps) {
         {job.employment_type && (
           <div className="flex items-center gap-1.5">
             <Briefcase className="w-4 h-4" />
-            <span className="capitalize">{job.employment_type.replace('-', ' ')}</span>
+            <span className="capitalize">
+              {job.employment_type.replace("-", " ")}
+            </span>
           </div>
         )}
       </div>
@@ -133,7 +142,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
         </Button>
         <Button
           variant="outline"
-          onClick={() => window.location.href = `/jobs/${job.id}`}
+          onClick={() => (window.location.href = `/jobs/${job.id}`)}
           className="flex items-center gap-2"
         >
           <ExternalLink className="w-4 h-4" />

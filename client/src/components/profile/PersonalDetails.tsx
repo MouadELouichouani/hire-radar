@@ -1,7 +1,14 @@
-'use client';
+"use client";
 
-import { Mail, Phone, MapPin, Briefcase, GraduationCap, ExternalLink } from 'lucide-react';
-import { CandidateProfile } from '@/types/profile';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Briefcase,
+  GraduationCap,
+  ExternalLink,
+} from "lucide-react";
+import { CandidateProfile } from "@/types/profile";
 
 interface PersonalDetailsProps {
   profile: CandidateProfile;
@@ -9,16 +16,24 @@ interface PersonalDetailsProps {
 
 export default function PersonalDetails({ profile }: PersonalDetailsProps) {
   const details = [
-    { icon: Mail, label: 'Email', value: profile.email },
-    { icon: Phone, label: 'Phone', value: profile.phone },
-    { icon: MapPin, label: 'Location', value: profile.location },
-    { icon: Briefcase, label: 'Experience', value: profile.experience_years ? `${profile.experience_years} years` : null },
-    { icon: GraduationCap, label: 'Education', value: profile.education },
-  ].filter(item => item.value);
+    { icon: Mail, label: "Email", value: profile.email },
+    { icon: Phone, label: "Phone", value: profile.phone },
+    { icon: MapPin, label: "Location", value: profile.location },
+    {
+      icon: Briefcase,
+      label: "Experience",
+      value: profile.experience_years
+        ? `${profile.experience_years} years`
+        : null,
+    },
+    { icon: GraduationCap, label: "Education", value: profile.education },
+  ].filter((item) => item.value);
 
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Personal Details</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        Personal Details
+      </h2>
       <div className="space-y-4">
         {details.map((detail, index) => {
           const Icon = detail.icon;
@@ -31,7 +46,9 @@ export default function PersonalDetails({ profile }: PersonalDetailsProps) {
                 <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                   {detail.label}
                 </p>
-                <p className="text-base text-gray-900 dark:text-white mt-1">{detail.value}</p>
+                <p className="text-base text-gray-900 dark:text-white mt-1">
+                  {detail.value}
+                </p>
               </div>
             </div>
           );
@@ -39,9 +56,13 @@ export default function PersonalDetails({ profile }: PersonalDetailsProps) {
       </div>
 
       {/* Social Links */}
-      {(profile.linkedin_url || profile.github_url || profile.portfolio_url) && (
+      {(profile.linkedin_url ||
+        profile.github_url ||
+        profile.portfolio_url) && (
         <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Links</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            Links
+          </h3>
           <div className="flex flex-wrap gap-3">
             {profile.linkedin_url && (
               <a

@@ -1,7 +1,16 @@
-'use client';
+"use client";
 
-import { Mail, Phone, MapPin, Building2, Globe, Users, Calendar, ExternalLink } from 'lucide-react';
-import { EmployerProfile } from '@/types/profile';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+  Globe,
+  Users,
+  Calendar,
+  ExternalLink,
+} from "lucide-react";
+import { EmployerProfile } from "@/types/profile";
 
 interface CompanyInfoProps {
   profile: EmployerProfile;
@@ -9,19 +18,25 @@ interface CompanyInfoProps {
 
 export default function CompanyInfo({ profile }: CompanyInfoProps) {
   const details = [
-    { icon: Mail, label: 'Email', value: profile.email },
-    { icon: Phone, label: 'Phone', value: profile.phone },
-    { icon: MapPin, label: 'Location', value: profile.location },
-    { icon: Building2, label: 'Industry', value: profile.industry },
-    { icon: Users, label: 'Company Size', value: profile.company_size },
-    { icon: Calendar, label: 'Founded', value: profile.founded_year?.toString() },
-  ].filter(item => item.value);
+    { icon: Mail, label: "Email", value: profile.email },
+    { icon: Phone, label: "Phone", value: profile.phone },
+    { icon: MapPin, label: "Location", value: profile.location },
+    { icon: Building2, label: "Industry", value: profile.industry },
+    { icon: Users, label: "Company Size", value: profile.company_size },
+    {
+      icon: Calendar,
+      label: "Founded",
+      value: profile.founded_year?.toString(),
+    },
+  ].filter((item) => item.value);
 
   return (
     <div className="space-y-6">
       {/* Company Details */}
       <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Company Information</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+          Company Information
+        </h2>
         <div className="space-y-4">
           {details.map((detail, index) => {
             const Icon = detail.icon;
@@ -34,7 +49,9 @@ export default function CompanyInfo({ profile }: CompanyInfoProps) {
                   <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                     {detail.label}
                   </p>
-                  <p className="text-base text-gray-900 dark:text-white mt-1">{detail.value}</p>
+                  <p className="text-base text-gray-900 dark:text-white mt-1">
+                    {detail.value}
+                  </p>
                 </div>
               </div>
             );
@@ -44,7 +61,9 @@ export default function CompanyInfo({ profile }: CompanyInfoProps) {
         {/* Website and LinkedIn */}
         {(profile.website || profile.linkedin_url) && (
           <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Links</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Links
+            </h3>
             <div className="flex flex-wrap gap-3">
               {profile.website && (
                 <a
@@ -77,7 +96,9 @@ export default function CompanyInfo({ profile }: CompanyInfoProps) {
       {/* Company Description */}
       {profile.description && (
         <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About Us</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            About Us
+          </h2>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
             {profile.description}
           </p>

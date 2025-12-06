@@ -1,18 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import SavedJobCard from '@/components/jobs/SavedJobCard';
-import JobCardSkeleton from '@/components/jobs/JobCardSkeleton';
-import SavedJobsEmptyState from '@/components/jobs/SavedJobsEmptyState';
-import ApplyModal from '@/components/jobs/ApplyModal';
-import { useSavedJobs, useApplyToJob } from '@/features/jobs/hooks';
-import { useCurrentUserId } from '@/hooks/useCurrentUserId';
-import { Job } from '@/types/job';
-import { toast } from 'sonner';
+import { useState } from "react";
+import SavedJobCard from "@/components/jobs/SavedJobCard";
+import JobCardSkeleton from "@/components/jobs/JobCardSkeleton";
+import SavedJobsEmptyState from "@/components/jobs/SavedJobsEmptyState";
+import ApplyModal from "@/components/jobs/ApplyModal";
+import { useSavedJobs, useApplyToJob } from "@/features/jobs/hooks";
+import { useCurrentUserId } from "@/hooks/useCurrentUserId";
+import { Job } from "@/types/job";
+import { toast } from "sonner";
 
 export default function SavedJobsPage() {
   const candidateId = useCurrentUserId();
-  const { data: savedJobs, isLoading, isError, error, refetch } = useSavedJobs(candidateId);
+  const {
+    data: savedJobs,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSavedJobs(candidateId);
   const applyMutation = useApplyToJob();
 
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
@@ -26,7 +32,7 @@ export default function SavedJobsPage() {
   const handleSubmitApplication = async (
     jobId: string,
     coverLetter?: string,
-    cvFile?: File
+    cvFile?: File,
   ) => {
     try {
       await applyMutation.mutateAsync({
@@ -36,11 +42,11 @@ export default function SavedJobsPage() {
           cv_file: cvFile,
         },
       });
-      toast.success('Application submitted successfully!');
+      toast.success("Application submitted successfully!");
       setIsApplyModalOpen(false);
       setSelectedJob(null);
     } catch (error) {
-      toast.error('Failed to submit application. Please try again.');
+      toast.error("Failed to submit application. Please try again.");
       throw error;
     }
   };
@@ -60,8 +66,8 @@ export default function SavedJobsPage() {
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
             {savedJobs && savedJobs.length > 0
-              ? `${savedJobs.length} job${savedJobs.length !== 1 ? 's' : ''} saved`
-              : 'Jobs you save will appear here'}
+              ? `${savedJobs.length} job${savedJobs.length !== 1 ? "s" : ""} saved`
+              : "Jobs you save will appear here"}
           </p>
         </div>
 
@@ -78,7 +84,9 @@ export default function SavedJobsPage() {
         {isError && (
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 text-center">
             <p className="text-red-600 dark:text-red-400 mb-4">
-              {error instanceof Error ? error.message : 'Failed to load saved jobs. Please try again.'}
+              {error instanceof Error
+                ? error.message
+                : "Failed to load saved jobs. Please try again."}
             </p>
             <button
               onClick={() => refetch()}

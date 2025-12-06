@@ -1,6 +1,12 @@
 "use client";
 
-import { Image as ImageIcon, Video, Calendar, FileText, Send } from 'lucide-react';
+import {
+  Image as ImageIcon,
+  Video,
+  Calendar,
+  FileText,
+  Send,
+} from "lucide-react";
 
 export default function PostCreator() {
   return (

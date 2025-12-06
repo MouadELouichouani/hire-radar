@@ -23,7 +23,7 @@ const OAuth = () => {
     } catch (error: any) {
       console.error("OAuth error:", error);
       toast.error(
-        error?.response?.data?.error || "Failed to connect with Google"
+        error?.response?.data?.error || "Failed to connect with Google",
       );
       setLoading(false);
     }

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { X, MapPin, DollarSign, Code } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { X, MapPin, DollarSign, Code } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface JobFiltersProps {
   location: string;
@@ -28,7 +28,9 @@ export default function JobFilters({
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">Filters</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+          Filters
+        </h2>
         {hasActiveFilters && (
           <Button
             variant="ghost"

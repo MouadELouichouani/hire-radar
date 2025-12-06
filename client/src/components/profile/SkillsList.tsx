@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { CandidateProfile } from '@/types/profile';
+import { CandidateProfile } from "@/types/profile";
 
 interface SkillsListProps {
   profile: CandidateProfile;
@@ -10,7 +10,9 @@ export default function SkillsList({ profile }: SkillsListProps) {
   if (!profile.skills || profile.skills.length === 0) {
     return (
       <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Skills</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          Skills
+        </h2>
         <p className="text-gray-500 dark:text-gray-400">No skills added yet.</p>
       </div>
     );
@@ -18,7 +20,9 @@ export default function SkillsList({ profile }: SkillsListProps) {
 
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Skills</h2>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+        Skills
+      </h2>
       <div className="flex flex-wrap gap-3">
         {profile.skills.map((skill, index) => (
           <span

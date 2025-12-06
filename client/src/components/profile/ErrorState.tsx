@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface ErrorStateProps {
   message?: string;
@@ -17,7 +17,7 @@ export default function ErrorState({ message, onRetry }: ErrorStateProps) {
           Something went wrong
         </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {message || 'Failed to load profile. Please try again.'}
+          {message || "Failed to load profile. Please try again."}
         </p>
         {onRetry && (
           <Button

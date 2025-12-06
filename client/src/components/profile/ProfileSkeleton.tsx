@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 export default function ProfileSkeleton() {
   return (
@@ -32,7 +32,10 @@ export default function ProfileSkeleton() {
           <div className="h-6 w-32 bg-gray-300 dark:bg-gray-700 rounded"></div>
           <div className="flex flex-wrap gap-2">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="h-8 w-24 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+              <div
+                key={i}
+                className="h-8 w-24 bg-gray-300 dark:bg-gray-700 rounded-full"
+              ></div>
             ))}
           </div>
         </div>

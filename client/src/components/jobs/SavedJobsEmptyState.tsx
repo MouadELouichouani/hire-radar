@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Bookmark } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Bookmark } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function SavedJobsEmptyState() {
   return (
@@ -14,10 +14,11 @@ export default function SavedJobsEmptyState() {
           No saved jobs yet
         </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          You haven't saved any jobs yet. Start exploring opportunities and save the ones that interest you.
+          You haven't saved any jobs yet. Start exploring opportunities and save
+          the ones that interest you.
         </p>
         <Button
-          onClick={() => window.location.href = '/jobs/search'}
+          onClick={() => (window.location.href = "/jobs/search")}
           className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
         >
           Browse Jobs

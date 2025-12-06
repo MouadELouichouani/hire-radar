@@ -1,14 +1,17 @@
-'use client';
+"use client";
 
-import { Search, FilterX } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Search, FilterX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface EmptyStateProps {
   hasFilters?: boolean;
   onClearFilters?: () => void;
 }
 
-export default function EmptyState({ hasFilters, onClearFilters }: EmptyStateProps) {
+export default function EmptyState({
+  hasFilters,
+  onClearFilters,
+}: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] p-8">
       <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-12 shadow-lg max-w-md w-full text-center">
@@ -18,8 +21,8 @@ export default function EmptyState({ hasFilters, onClearFilters }: EmptyStatePro
         </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           {hasFilters
-            ? 'Try adjusting your filters to see more results.'
-            : 'We couldn\'t find any jobs matching your search. Try different keywords or check back later.'}
+            ? "Try adjusting your filters to see more results."
+            : "We couldn't find any jobs matching your search. Try different keywords or check back later."}
         </p>
         {hasFilters && onClearFilters && (
           <Button

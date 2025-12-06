@@ -1,23 +1,23 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import JobCard from '@/components/jobs/JobCard';
-import JobCardSkeleton from '@/components/jobs/JobCardSkeleton';
-import JobFilters from '@/components/jobs/JobFilters';
-import EmptyState from '@/components/jobs/EmptyState';
-import ApplyModal from '@/components/jobs/ApplyModal';
-import { useInfiniteJobs } from '@/features/jobs/hooks';
-import { Job } from '@/types/job';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import JobCard from "@/components/jobs/JobCard";
+import JobCardSkeleton from "@/components/jobs/JobCardSkeleton";
+import JobFilters from "@/components/jobs/JobFilters";
+import EmptyState from "@/components/jobs/EmptyState";
+import ApplyModal from "@/components/jobs/ApplyModal";
+import { useInfiniteJobs } from "@/features/jobs/hooks";
+import { Job } from "@/types/job";
+import { toast } from "sonner";
 
 export default function SearchJobsPage() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [location, setLocation] = useState('');
-  const [salaryMin, setSalaryMin] = useState('');
-  const [skill, setSkill] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [location, setLocation] = useState("");
+  const [salaryMin, setSalaryMin] = useState("");
+  const [skill, setSkill] = useState("");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
@@ -41,9 +41,9 @@ export default function SearchJobsPage() {
   const totalJobs = data?.pages[0]?.total || 0;
 
   const handleClearFilters = () => {
-    setLocation('');
-    setSalaryMin('');
-    setSkill('');
+    setLocation("");
+    setSalaryMin("");
+    setSkill("");
   };
 
   const handleApply = (job: Job) => {
@@ -54,16 +54,16 @@ export default function SearchJobsPage() {
   const handleSubmitApplication = async (
     jobId: string,
     coverLetter?: string,
-    cvFile?: File
+    cvFile?: File,
   ) => {
     try {
       // TODO: Implement actual API call to submit application
       // await submitApplication(jobId, { coverLetter, cvFile });
-      toast.success('Application submitted successfully!');
+      toast.success("Application submitted successfully!");
       setIsApplyModalOpen(false);
       setSelectedJob(null);
     } catch (error) {
-      toast.error('Failed to submit application. Please try again.');
+      toast.error("Failed to submit application. Please try again.");
       throw error;
     }
   };
@@ -119,10 +119,14 @@ export default function SearchJobsPage() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {totalJobs > 0 ? (
                     <>
-                      Found <span className="font-semibold text-purple-600 dark:text-purple-400">{totalJobs}</span> job{totalJobs !== 1 ? 's' : ''}
+                      Found{" "}
+                      <span className="font-semibold text-purple-600 dark:text-purple-400">
+                        {totalJobs}
+                      </span>{" "}
+                      job{totalJobs !== 1 ? "s" : ""}
                     </>
                   ) : (
-                    'No jobs found'
+                    "No jobs found"
                   )}
                 </p>
               </div>
@@ -141,7 +145,9 @@ export default function SearchJobsPage() {
             {isError && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6">
                 <p className="text-red-600 dark:text-red-400">
-                  {error instanceof Error ? error.message : 'Failed to load jobs. Please try again.'}
+                  {error instanceof Error
+                    ? error.message
+                    : "Failed to load jobs. Please try again."}
                 </p>
                 <Button
                   onClick={() => window.location.reload()}
@@ -185,7 +191,7 @@ export default function SearchJobsPage() {
                           Loading...
                         </>
                       ) : (
-                        'Load More Jobs'
+                        "Load More Jobs"
                       )}
                     </Button>
                   </div>

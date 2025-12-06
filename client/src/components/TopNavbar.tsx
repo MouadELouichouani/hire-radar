@@ -1,8 +1,16 @@
 "use client";
 
-import { Home, Users, Briefcase, Bell, MessageCircle, User, Search } from 'lucide-react';
-import Image from 'next/image';
-import ThemeToggle from './ThemeToggle';
+import {
+  Home,
+  Users,
+  Briefcase,
+  Bell,
+  MessageCircle,
+  User,
+  Search,
+} from "lucide-react";
+import Image from "next/image";
+import ThemeToggle from "./ThemeToggle";
 
 export default function TopNavbar() {
   return (
@@ -27,28 +35,46 @@ export default function TopNavbar() {
 
           {/* Center Navigation Icons */}
           <div className="flex items-center gap-2">
-            <button className="p-3 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 rounded-xl transition-all duration-200 group" aria-label="Home">
+            <button
+              className="p-3 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 rounded-xl transition-all duration-200 group"
+              aria-label="Home"
+            >
               <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
-            <button className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group" aria-label="Users">
+            <button
+              className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
+              aria-label="Users"
+            >
               <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
-            <button className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group" aria-label="Jobs">
+            <button
+              className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
+              aria-label="Jobs"
+            >
               <Briefcase className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
-            <button className="relative p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group" aria-label="Notifications">
+            <button
+              className="relative p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
+              aria-label="Notifications"
+            >
               <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="absolute top-1 right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
                 9+
               </span>
             </button>
-            <button className="relative p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group" aria-label="Messages">
+            <button
+              className="relative p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
+              aria-label="Messages"
+            >
               <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
               <span className="absolute top-1 right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
                 6
               </span>
             </button>
-            <button className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group" aria-label="Profile">
+            <button
+              className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
+              aria-label="Profile"
+            >
               <User className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </button>
           </div>

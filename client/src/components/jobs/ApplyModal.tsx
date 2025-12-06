@@ -1,19 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { X, FileText, Upload } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Job } from '@/types/job';
+import { useState } from "react";
+import { X, FileText, Upload } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Job } from "@/types/job";
 
 interface ApplyModalProps {
   isOpen: boolean;
   onClose: () => void;
   job: Job | null;
-  onApply: (jobId: string, coverLetter?: string, cvFile?: File) => Promise<void>;
+  onApply: (
+    jobId: string,
+    coverLetter?: string,
+    cvFile?: File,
+  ) => Promise<void>;
 }
 
-export default function ApplyModal({ isOpen, onClose, job, onApply }: ApplyModalProps) {
-  const [coverLetter, setCoverLetter] = useState('');
+export default function ApplyModal({
+  isOpen,
+  onClose,
+  job,
+  onApply,
+}: ApplyModalProps) {
+  const [coverLetter, setCoverLetter] = useState("");
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,11 +40,11 @@ export default function ApplyModal({ isOpen, onClose, job, onApply }: ApplyModal
     try {
       await onApply(job.id, coverLetter, cvFile || undefined);
       // Reset form
-      setCoverLetter('');
+      setCoverLetter("");
       setCvFile(null);
       onClose();
     } catch (error) {
-      console.error('Error applying:', error);
+      console.error("Error applying:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -91,7 +100,7 @@ export default function ApplyModal({ isOpen, onClose, job, onApply }: ApplyModal
               <label htmlFor="cv-upload" className="cursor-pointer">
                 <Upload className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {cvFile ? cvFile.name : 'Click to upload or drag and drop'}
+                  {cvFile ? cvFile.name : "Click to upload or drag and drop"}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
                   PDF, DOC, DOCX (max 5MB)
@@ -127,7 +136,7 @@ export default function ApplyModal({ isOpen, onClose, job, onApply }: ApplyModal
               disabled={isSubmitting}
               className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Application'}
+              {isSubmitting ? "Submitting..." : "Submit Application"}
             </Button>
           </div>
         </form>
