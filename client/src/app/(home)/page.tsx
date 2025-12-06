@@ -120,6 +120,11 @@ export default function Home() {
         {/* Right Sidebar */}
         <RightSidebar />
       </div>
+    );
+
+  return (
+    <div className="mt-10 mx-auto w-[50%] flex justify-center gap-2 text-xl">
+      Logged in as <strong className="text-blue-500"> {data?.full_name}</strong>
     </div>
   );
 }

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Calendar, MessageCircle, ChevronUp } from 'lucide-react';
+import { Calendar, MessageCircle, ChevronUp } from "lucide-react";
 
 export default function RightSidebar() {
   const suggestedPeople = [
-    { name: 'Steve Jobs', title: 'CEO of Apple', avatar: 'SJ' },
-    { name: 'Ryan Roslansky', title: 'CEO of Linkedin', avatar: 'RR' },
-    { name: 'Dylan Field', title: 'CEO of Figma', avatar: 'DF' },
+    { name: "Steve Jobs", title: "CEO of Apple", avatar: "SJ" },
+    { name: "Ryan Roslansky", title: "CEO of Linkedin", avatar: "RR" },
+    { name: "Dylan Field", title: "CEO of Figma", avatar: "DF" },
   ];
 
   return (
@@ -94,4 +94,3 @@ export default function RightSidebar() {
     </aside>
   );
 }
-

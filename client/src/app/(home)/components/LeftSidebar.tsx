@@ -1,9 +1,27 @@
-'use client';
+"use client";
 
-import { Play, BarChart3, UserPlus, Bookmark, Gamepad2, Settings, Plus } from 'lucide-react';
+import {
+  Play,
+  BarChart3,
+  UserPlus,
+  Bookmark,
+  Gamepad2,
+  Settings,
+  Plus,
+} from "lucide-react";
 
 export default function LeftSidebar() {
-  const hashtags = ['work', 'business', 'hr', 'userinterface', 'digital', 'userexperience', 'ux', 'ui', 'freelance'];
+  const hashtags = [
+    "work",
+    "business",
+    "hr",
+    "userinterface",
+    "digital",
+    "userexperience",
+    "ux",
+    "ui",
+    "freelance",
+  ];
 
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border-r border-gray-200/50 dark:border-gray-800/50 overflow-y-auto">
@@ -86,4 +104,3 @@ export default function LeftSidebar() {
     </aside>
   );
 }
-

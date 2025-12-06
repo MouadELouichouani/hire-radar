@@ -1,6 +1,14 @@
-'use client';
+"use client";
 
-import { ThumbsUp, MessageCircle, Send, Bookmark, Mic, Smile, MoreVertical } from 'lucide-react';
+import {
+  ThumbsUp,
+  MessageCircle,
+  Send,
+  Bookmark,
+  Mic,
+  Smile,
+  MoreVertical,
+} from "lucide-react";
 
 interface FeedPostProps {
   author: {
@@ -14,7 +22,13 @@ interface FeedPostProps {
   comments: number;
 }
 
-export default function FeedPost({ author, title, content, likes, comments }: FeedPostProps) {
+export default function FeedPost({
+  author,
+  title,
+  content,
+  likes,
+  comments,
+}: FeedPostProps) {
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-300/50 dark:hover:border-purple-600/50">
       {/* Post Header */}
@@ -79,4 +93,3 @@ export default function FeedPost({ author, title, content, likes, comments }: Fe
     </div>
   );
 }
-
