@@ -43,9 +43,7 @@ export function LoginForm({
         typeof err.response.data === "object" &&
         "error" in err.response.data
       ) {
-        setError(
-          (err.response.data.error as string) || "Something went wrong",
-        );
+        setError((err.response.data.error as string) || "Something went wrong");
       } else if (err && typeof err === "object" && "message" in err) {
         setError((err.message as string) || "Something went wrong");
       } else {
