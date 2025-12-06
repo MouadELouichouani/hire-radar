@@ -23,9 +23,12 @@ export function useSearchJobs(params: JobSearchParams) {
 
   const queryParams = useMemo(
     () => ({
-      ...params,
       search: debouncedSearch || undefined,
       location: debouncedLocation || undefined,
+      salary_min: params.salary_min,
+      skill: params.skill,
+      page: params.page,
+      limit: params.limit,
     }),
     [
       debouncedSearch,
@@ -52,9 +55,11 @@ export function useInfiniteJobs(params: Omit<JobSearchParams, "page">) {
 
   const queryParams = useMemo(
     () => ({
-      ...params,
       search: debouncedSearch || undefined,
       location: debouncedLocation || undefined,
+      salary_min: params.salary_min,
+      skill: params.skill,
+      limit: params.limit,
     }),
     [
       debouncedSearch,

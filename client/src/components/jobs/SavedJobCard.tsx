@@ -34,7 +34,7 @@ export default function SavedJobCard({
       if (onUnsave) {
         onUnsave(job.id);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to unsave job. Please try again.");
     }
   };

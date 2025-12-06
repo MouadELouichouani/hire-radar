@@ -51,11 +51,7 @@ export default function SearchJobsPage() {
     setIsApplyModalOpen(true);
   };
 
-  const handleSubmitApplication = async (
-    jobId: string,
-    coverLetter?: string,
-    cvFile?: File,
-  ) => {
+  const handleSubmitApplication = async () => {
     try {
       // TODO: Implement actual API call to submit application
       // await submitApplication(jobId, { coverLetter, cvFile });
@@ -201,7 +197,7 @@ export default function SearchJobsPage() {
                 {!hasNextPage && jobs.length > 0 && (
                   <div className="mt-8 text-center">
                     <p className="text-gray-500 dark:text-gray-400">
-                      You've reached the end of the results
+                      You&apos;ve reached the end of the results
                     </p>
                   </div>
                 )}

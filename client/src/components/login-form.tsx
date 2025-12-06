@@ -29,13 +29,27 @@ export function LoginForm({
     setLoading(true);
 
     try {
-      const res = await login(email, password);
+      await login(email, password);
       toast.success("Logged in successfully!");
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setError(err.response.data.error || "Something went wrong");
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        err.response &&
+        typeof err.response === "object" &&
+        "data" in err.response &&
+        err.response.data &&
+        typeof err.response.data === "object" &&
+        "error" in err.response.data
+      ) {
+        setError(
+          (err.response.data.error as string) || "Something went wrong",
+        );
+      } else if (err && typeof err === "object" && "message" in err) {
+        setError((err.message as string) || "Something went wrong");
       } else {
-        setError(err.message || "Something went wrong");
+        setError("Something went wrong");
       }
     } finally {
       setLoading(false);

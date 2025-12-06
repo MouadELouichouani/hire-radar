@@ -36,7 +36,7 @@ export function SignupForm({
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -45,7 +45,7 @@ export function SignupForm({
   }
 
   function validate() {
-    let errs: any = {};
+    const errs: Record<string, string> = {};
 
     if (!form.full_name.trim()) errs.full_name = "Full name is required.";
     if (!form.role) errs.role = "Please select a role.";
@@ -78,11 +78,23 @@ export function SignupForm({
     }
 
     try {
-      const res = await signup(form);
+      await signup(form);
       toast.success("Account created successfully!");
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setErrors({ email: err.response.data.error });
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        err.response &&
+        typeof err.response === "object" &&
+        "data" in err.response &&
+        err.response.data &&
+        typeof err.response.data === "object" &&
+        "error" in err.response.data
+      ) {
+        setErrors({
+          email: (err.response.data.error as string) || "Something went wrong",
+        });
       } else {
         setErrors({ password: "Something went wrong" });
       }

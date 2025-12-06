@@ -33,7 +33,7 @@ export const me = async (token?: string) => {
       },
     });
     return response.data;
-  } catch (err) {
+  } catch {
     return null;
   }
 };

@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     });
 
     return response2;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("OAuth callback error:", error);
 
     // Redirect to login with error
@@ -53,10 +53,20 @@ export async function GET(req: NextRequest) {
       process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
     );
     errorUrl.pathname = "/login";
-    errorUrl.searchParams.set(
-      "error",
-      error?.response?.data?.error || "oauth_error",
-    );
+    const errorMessage =
+      error &&
+      typeof error === "object" &&
+      "response" in error &&
+      error.response &&
+      typeof error.response === "object" &&
+      "data" in error.response &&
+      error.response.data &&
+      typeof error.response.data === "object" &&
+      "error" in error.response.data &&
+      typeof error.response.data.error === "string"
+        ? error.response.data.error
+        : "oauth_error";
+    errorUrl.searchParams.set("error", errorMessage);
 
     return NextResponse.redirect(errorUrl.toString());
   }

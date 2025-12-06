@@ -36,7 +36,7 @@ export default function JobCard({ job, onApply }: JobCardProps) {
         setIsSaved(true);
         toast.success("Job saved");
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to save job. Please try again.");
     }
   };

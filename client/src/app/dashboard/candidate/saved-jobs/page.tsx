@@ -51,7 +51,7 @@ export default function SavedJobsPage() {
     }
   };
 
-  const handleUnsave = (jobId: string) => {
+  const handleUnsave = () => {
     // The query will automatically refetch after unsave mutation
     // This callback can be used for additional cleanup if needed
   };

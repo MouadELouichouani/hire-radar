@@ -20,11 +20,22 @@ const OAuth = () => {
         toast.error("Failed to initiate Google OAuth");
         setLoading(false);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("OAuth error:", error);
-      toast.error(
-        error?.response?.data?.error || "Failed to connect with Google",
-      );
+      const errorMessage =
+        error &&
+        typeof error === "object" &&
+        "response" in error &&
+        error.response &&
+        typeof error.response === "object" &&
+        "data" in error.response &&
+        error.response.data &&
+        typeof error.response.data === "object" &&
+        "error" in error.response.data &&
+        typeof error.response.data.error === "string"
+          ? error.response.data.error
+          : "Failed to connect with Google";
+      toast.error(errorMessage);
       setLoading(false);
     }
   };

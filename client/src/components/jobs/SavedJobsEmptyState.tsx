@@ -14,8 +14,8 @@ export default function SavedJobsEmptyState() {
           No saved jobs yet
         </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          You haven't saved any jobs yet. Start exploring opportunities and save
-          the ones that interest you.
+          You haven&apos;t saved any jobs yet. Start exploring opportunities and
+          save the ones that interest you.
         </p>
         <Button
           onClick={() => (window.location.href = "/jobs/search")}
