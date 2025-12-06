@@ -7,14 +7,32 @@ import {
   FileText,
   Send,
 } from "lucide-react";
+import { useCurrentUser } from "@/features/auth/hook";
+import { useMemo } from "react";
 
 export default function PostCreator() {
+  const { data: currentUser, isLoading } = useCurrentUser();
+
+  const userInitials = useMemo(() => {
+    if (!currentUser?.full_name) return "ME";
+    return currentUser.full_name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [currentUser]);
+
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-300/50 dark:hover:border-purple-600/50">
       <div className="flex items-start gap-4">
-        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
-          ME
-        </div>
+        {isLoading ? (
+          <div className="w-14 h-14 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse flex-shrink-0"></div>
+        ) : (
+          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
+            {userInitials}
+          </div>
+        )}
         <div className="flex-1 min-w-0">
           <input
             type="text"

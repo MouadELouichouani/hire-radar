@@ -9,6 +9,8 @@ import {
   Smile,
   MoreVertical,
 } from "lucide-react";
+import { useCurrentUser } from "@/features/auth/hook";
+import { useMemo } from "react";
 
 interface FeedPostProps {
   author: {
@@ -29,16 +31,24 @@ export default function FeedPost({
   likes,
   comments,
 }: FeedPostProps) {
+  const { data: currentUser } = useCurrentUser();
+
+  const userInitials = useMemo(() => {
+    if (!currentUser?.full_name) return "ME";
+    return currentUser.full_name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [currentUser]);
   return (
     <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-300/50 dark:hover:border-purple-600/50">
       {/* Post Header */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base shadow-lg flex-shrink-0 ring-2 ring-white/50 dark:ring-gray-700/50">
-            {author.name
-              .split(" ")
-              .map((n) => n[0])
-              .join("")}
+            {author.avatar}
           </div>
           <div>
             <h3 className="font-bold text-base text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
@@ -92,7 +102,7 @@ export default function FeedPost({
       {/* Comment Input */}
       <div className="flex items-center gap-3">
         <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
-          ME
+          {userInitials}
         </div>
         <div className="flex-1 flex items-center gap-2 px-5 py-3 border border-gray-300/50 dark:border-gray-700/50 rounded-xl focus-within:ring-2 focus-within:ring-purple-500/50 dark:focus-within:ring-purple-400/50 focus-within:border-transparent transition-all bg-white/50 dark:bg-gray-700/50 backdrop-blur-md hover:bg-white/70 dark:hover:bg-gray-700/70">
           <input

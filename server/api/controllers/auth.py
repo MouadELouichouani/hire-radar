@@ -8,16 +8,15 @@ from core.models import User
 from google_auth_oauthlib.flow import Flow
 import os
 import requests
-from pathlib import Path
 
-# Load .env file from server root directory
-env_path = Path(__file__).parent.parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
+load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
-GOOGLE_REDIRECT_URI = os.getenv("GOOGLE_REDIRECT_URI")
+GOOGLE_REDIRECT_URI = os.getenv(
+    "GOOGLE_REDIRECT_URI", "http://localhost:3000/api/auth/google/callback"
+)
 
 
 def get_db():
@@ -29,12 +28,15 @@ def get_db():
 
 
 def google_login():
+    # Ensure redirect URI is set (must point to Next.js frontend, not Flask backend)
+    redirect_uri = GOOGLE_REDIRECT_URI or "http://localhost:3000/api/auth/google/callback"
+    
     flow = Flow.from_client_config(
         {
             "web": {
                 "client_id": GOOGLE_CLIENT_ID,
                 "client_secret": GOOGLE_CLIENT_SECRET,
-                "redirect_uris": ["http://localhost:5000/api/auth/google/callback"],
+                "redirect_uris": [redirect_uri],
                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                 "token_uri": "https://oauth2.googleapis.com/token",
             }
@@ -42,7 +44,7 @@ def google_login():
         scopes=["openid", "email", "profile"],
     )
 
-    flow.redirect_uri = "http://localhost:3000/api/auth/google/callback"
+    flow.redirect_uri = redirect_uri
 
     authorization_url, state = flow.authorization_url(
         access_type="offline", include_granted_scopes="true"
@@ -58,11 +60,13 @@ def google_callback():
         return jsonify({"error": "Missing authorization code"}), 400
 
     token_url = "https://oauth2.googleapis.com/token"
+    redirect_uri = GOOGLE_REDIRECT_URI or "http://localhost:3000/api/auth/google/callback"
+    
     token_data = {
         "code": code,
         "client_id": GOOGLE_CLIENT_ID,
         "client_secret": GOOGLE_CLIENT_SECRET,
-        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "redirect_uri": redirect_uri,
         "grant_type": "authorization_code",
     }
 

@@ -1,13 +1,33 @@
 "use client";
 
 import { Calendar, MessageCircle, ChevronUp } from "lucide-react";
+import { useRecommendedJobs } from "@/features/jobs/hooks";
+import { Job } from "@/types/job";
+import { useMemo } from "react";
+import Link from "next/link";
 
 export default function RightSidebar() {
-  const suggestedPeople = [
-    { name: "Steve Jobs", title: "CEO of Apple", avatar: "SJ" },
-    { name: "Ryan Roslansky", title: "CEO of Linkedin", avatar: "RR" },
-    { name: "Dylan Field", title: "CEO of Figma", avatar: "DF" },
-  ];
+  const {
+    data: recommendedJobsData,
+    isLoading: isLoadingRecommended,
+  } = useRecommendedJobs(5);
+
+  const recommendedJobs = recommendedJobsData?.jobs || [];
+
+  // Format jobs as suggested items
+  const suggestedItems = useMemo(() => {
+    return recommendedJobs.slice(0, 3).map((job: Job) => ({
+      name: job.company_name,
+      title: job.title,
+      avatar: job.company_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2),
+      jobId: job.id,
+    }));
+  }, [recommendedJobs]);
 
   return (
     <aside className="fixed right-0 top-16 bottom-0 w-96 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl border-l border-gray-200/50 dark:border-gray-800/50 overflow-y-auto">
@@ -29,40 +49,64 @@ export default function RightSidebar() {
           <Calendar className="absolute bottom-4 right-4 w-14 h-14 text-purple-300/50 dark:text-purple-500/30" />
         </div>
 
-        {/* People You May Know */}
+        {/* Recommended Jobs */}
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300">
           <h3 className="font-bold mb-5 text-gray-900 dark:text-white">
-            People you may know:
+            Recommended Jobs:
           </h3>
-          <div className="space-y-4">
-            {suggestedPeople.map((person, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-500/10 dark:hover:bg-gray-500/20 transition-all duration-200"
-              >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
-                  {person.avatar}
+          {isLoadingRecommended ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="animate-pulse flex items-center gap-3 p-3 rounded-xl"
+                >
+                  <div className="w-14 h-14 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+                  <div className="flex-1">
+                    <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-bold text-sm truncate text-gray-900 dark:text-white">
-                    {person.name}
-                  </h4>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {person.title}
-                  </p>
-                </div>
-                <button className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 text-white px-4 py-2 rounded-xl hover:from-purple-700 hover:to-pink-700 dark:hover:from-purple-600 dark:hover:to-pink-600 transition-all text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg">
-                  Connect
-                </button>
+              ))}
+            </div>
+          ) : suggestedItems.length > 0 ? (
+            <>
+              <div className="space-y-4">
+                {suggestedItems.map((item, index) => (
+                  <Link
+                    key={index}
+                    href={`/jobs/${item.jobId}`}
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-500/10 dark:hover:bg-gray-500/20 transition-all duration-200"
+                  >
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
+                      {item.avatar}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-sm truncate text-gray-900 dark:text-white">
+                        {item.name}
+                      </h4>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                        {item.title}
+                      </p>
+                    </div>
+                    <button className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 text-white px-4 py-2 rounded-xl hover:from-purple-700 hover:to-pink-700 dark:hover:from-purple-600 dark:hover:to-pink-600 transition-all text-sm font-semibold whitespace-nowrap shadow-md hover:shadow-lg">
+                      View
+                    </button>
+                  </Link>
+                ))}
               </div>
-            ))}
-          </div>
-          <a
-            href="#"
-            className="block text-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold mt-5 py-3 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 rounded-xl transition-all"
-          >
-            See All
-          </a>
+              <Link
+                href="/jobs/search"
+                className="block text-center text-sm text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 font-semibold mt-5 py-3 hover:bg-purple-500/10 dark:hover:bg-purple-500/20 rounded-xl transition-all"
+              >
+                See All Jobs
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
+              No recommended jobs at the moment
+            </p>
+          )}
         </div>
 
         {/* Skills/Interests */}

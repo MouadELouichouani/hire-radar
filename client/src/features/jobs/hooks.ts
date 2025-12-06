@@ -149,3 +149,21 @@ export function useApplyToJob() {
     },
   });
 }
+
+// Get recent jobs for feed
+export function useRecentJobs(limit: number = 10) {
+  return useQuery({
+    queryKey: ["jobs", "recent", limit],
+    queryFn: () => searchJobs({ limit, page: 1 }),
+    staleTime: 60000, // 1 minute
+  });
+}
+
+// Get recommended jobs (for now, just recent jobs - can be enhanced with AI recommendations later)
+export function useRecommendedJobs(limit: number = 5) {
+  return useQuery({
+    queryKey: ["jobs", "recommended", limit],
+    queryFn: () => searchJobs({ limit, page: 1 }),
+    staleTime: 60000, // 1 minute
+  });
+}

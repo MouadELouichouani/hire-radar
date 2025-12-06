@@ -9,8 +9,30 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
+import { useCurrentUser } from "@/features/auth/hook";
+import { useMemo } from "react";
 
 export default function LeftSidebar() {
+  const { data: currentUser, isLoading } = useCurrentUser();
+
+  const userInitials = useMemo(() => {
+    if (!currentUser?.full_name) return "ME";
+    return currentUser.full_name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  }, [currentUser]);
+
+  const userDisplayName = currentUser?.full_name || "Loading...";
+  const userTitle =
+    currentUser?.role === "candidate"
+      ? "Candidate"
+      : currentUser?.role === "employer"
+        ? "Employer"
+        : "User";
+
   const hashtags = [
     "work",
     "business",
@@ -28,19 +50,34 @@ export default function LeftSidebar() {
       <div className="p-5">
         {/* User Profile Card */}
         <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-5 mb-5 shadow-lg hover:shadow-xl transition-all duration-300">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50 flex-shrink-0">
-              ME
+          {isLoading ? (
+            <div className="animate-pulse">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-14 h-14 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+                  <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-2/3"></div>
+                </div>
+              </div>
+              <div className="h-2 bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-bold text-sm truncate text-gray-900 dark:text-white">
-                Mouad EL.
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                UI/UX Designer
-              </p>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50 flex-shrink-0">
+                  {userInitials}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-sm truncate text-gray-900 dark:text-white">
+                    {userDisplayName}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate capitalize">
+                    {userTitle}
+                  </p>
+                </div>
+              </div>
+            </>
+          )}
           <div className="mb-4">
             <div className="flex justify-between text-xs mb-2">
               <span className="text-gray-600 dark:text-gray-400 font-semibold">

@@ -6,15 +6,14 @@ from controllers.auth import (
     logout,
     signup,
     login,
-    logout,
 )
 
 auth = Blueprint("auth", __name__)
 
-auth.get("/google")(google_login)
-auth.get("/google/callback")(google_callback)
-auth.get("/me")(get_current_user)
-auth.post("/logout")(logout)
-auth.post("/signup")(signup)
-auth.post("/login")(login)
-auth.post("/logout")(logout)
+# Auth routes - using proper Flask blueprint syntax
+auth.add_url_rule("/google", "google_login", google_login, methods=["GET"])
+auth.add_url_rule("/google/callback", "google_callback", google_callback, methods=["GET"])
+auth.add_url_rule("/me", "get_current_user", get_current_user, methods=["GET"])
+auth.add_url_rule("/logout", "logout", logout, methods=["POST"])
+auth.add_url_rule("/signup", "signup", signup, methods=["POST"])
+auth.add_url_rule("/login", "login", login, methods=["POST"])
