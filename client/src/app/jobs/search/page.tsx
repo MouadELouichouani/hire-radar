@@ -68,7 +68,7 @@ export default function SearchJobsPage() {
     }
   };
 
-  const hasActiveFilters = location || salaryMin || skill;
+  const hasActiveFilters = !!(location || salaryMin || skill);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 via-pink-50/20 to-white dark:from-gray-950 dark:via-purple-950/30 dark:via-pink-950/20 dark:to-gray-900">

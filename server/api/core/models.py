@@ -1,33 +1,17 @@
 from sqlalchemy import (
-    create_engine,
     Column,
     Integer,
     String,
     Text,
     DateTime,
     Enum,
-    MetaData,
+    Numeric,
+    ARRAY,
+    ForeignKey,
 )
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
-import os
-from dotenv import load_dotenv
-from pathlib import Path
-
-# Load .env file from server root directory
-env_path = Path(__file__).parent.parent.parent / ".env"
-load_dotenv(dotenv_path=env_path)
-
-DB_USER = os.getenv("DB_USERNAME")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
-
-DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-engine = create_engine(DATABASE_URL, echo=True)
-Base = declarative_base(metadata=MetaData(schema="public"))
+from sqlalchemy.orm import relationship
+from config.db import Base
 
 
 class User(Base):
@@ -42,6 +26,30 @@ class User(Base):
     created_at = Column(DateTime, server_default=func.now())
 
 
-Base.metadata.create_all(engine)
+class Job(Base):
+    __tablename__ = "jobs"
 
-print("Users table created successfully!")
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, nullable=False)
+    company_name = Column(String(200), nullable=False)
+    employer_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    location = Column(String(200))
+    salary_min = Column(Numeric(10, 2))
+    salary_max = Column(Numeric(10, 2))
+    salary_currency = Column(String(10), default="USD")
+    employment_type = Column(
+        Enum("full-time", "part-time", "contract", "internship", "remote", name="employment_types")
+    )
+    experience_level = Column(
+        Enum("entry", "mid", "senior", "executive", name="experience_levels")
+    )
+    skills = Column(ARRAY(String), default=[])
+    requirements = Column(Text)
+    benefits = Column(Text)
+    application_deadline = Column(DateTime)
+    posted_at = Column(DateTime, server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationship
+    employer = relationship("User", foreign_keys=[employer_id])
