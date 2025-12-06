@@ -24,108 +24,109 @@ def get_db():
         db.close()
 
 
-# def google_login():
-#     flow = Flow.from_client_config(
-#         {
-#             "web": {
-#                 "client_id": GOOGLE_CLIENT_ID,
-#                 "client_secret": GOOGLE_CLIENT_SECRET,
-#                 "redirect_uris": ["http://localhost:5000/auth/google/callback"],
-#                 "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-#                 "token_uri": "https://oauth2.googleapis.com/token",
-#             }
-#         },
-#         scopes=["openid", "email", "profile"],
-#     )
+def google_login():
+    flow = Flow.from_client_config(
+        {
+            "web": {
+                "client_id": GOOGLE_CLIENT_ID,
+                "client_secret": GOOGLE_CLIENT_SECRET,
+                "redirect_uris": ["http://localhost:5000/api/auth/google/callback"],
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+            }
+        },
+        scopes=["openid", "email", "profile"],
+    )
 
-#     flow.redirect_uri = "http://localhost:5000/auth/google/callback"
+    flow.redirect_uri = "http://localhost:3000/api/auth/google/callback"
 
-#     authorization_url, state = flow.authorization_url(
-#         access_type="offline", include_granted_scopes="true"
-#     )
+    authorization_url, state = flow.authorization_url(
+        access_type="offline", include_granted_scopes="true"
+    )
 
-#     session["state"] = state
-#     print(authorization_url)
-#     return jsonify({"auth_url":authorization_url})
+    session["state"] = state
+    return jsonify({"auth_url":authorization_url})
 
 
-# def google_callback():
-#     code = request.args.get("code")
-#     if not code:
-#         return jsonify({"error": "Missing authorization code"}), 400
+def google_callback():
+    code = request.args.get("code")
+    if not code:
+        return jsonify({"error": "Missing authorization code"}), 400
 
-#     token_url = "https://oauth2.googleapis.com/token"
-#     token_data = {
-#         "code": code,
-#         "client_id": GOOGLE_CLIENT_ID,
-#         "client_secret": GOOGLE_CLIENT_SECRET,
-#         "redirect_uri": GOOGLE_REDIRECT_URI,
-#         "grant_type": "authorization_code",
-#     }
+    token_url = "https://oauth2.googleapis.com/token"
+    token_data = {
+        "code": code,
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri": GOOGLE_REDIRECT_URI,
+        "grant_type": "authorization_code",
+    }
 
-#     token_res = requests.post(token_url, data=token_data).json()
-#     access_token = token_res.get("access_token")
+    token_res = requests.post(token_url, data=token_data).json()
+    access_token = token_res.get("access_token")
 
-#     if not access_token:
-#         return jsonify({"error": "Token exchange failed", "details": token_res}), 400
+    if not access_token:
+        return jsonify({"error": "Token exchange failed", "details": token_res}), 400
 
-#     user_info = requests.get(
-#         "https://www.googleapis.com/oauth2/v2/userinfo",
-#         headers={"Authorization": f"Bearer {access_token}"},
-#     ).json()
+    user_info = requests.get(
+        "https://www.googleapis.com/oauth2/v2/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+    ).json()
 
-#     email = user_info.get("email")
-#     if not email:
-#         return jsonify({"error": "Google did not return an email"}), 400
+    email = user_info.get("email")
+    if not email:
+        return jsonify({"error": "Google did not return an email"}), 400
 
-#     name = user_info.get("name", "")
-#     picture = user_info.get("picture", "")
+    name = user_info.get("name", "")
+    picture = user_info.get("picture", "")
 
-#     db = SessionLocal()
-#     try:
-#         user = db.query(User).filter(User.email == email).first()
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.email == email).first()
 
-#         if not user:
-#             user = User(
-#                 full_name=name,
-#                 email=email,
-#                 password=None,
-#                 role="candidate",
-#             )
-#             db.add(user)
-#             db.commit()
-#             db.refresh(user)
+        if not user:
+            user = User(
+                full_name=name,
+                email=email,
+                password=None,
+                role="candidate",
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
 
-#         token = jwt.encode(
-#             {"id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
-#             JWT_SECRET,
-#             algorithm="HS256",
-#         )
+        token = jwt.encode(
+            {"id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+            JWT_SECRET,
+            algorithm="HS256",
+        )
 
-#         return jsonify(
-#             {
-#                 "token": token,
-#                 "user": {
-#                     "id": user.id,
-#                     "email": user.email,
-#                     "name": user.full_name,
-#                     "picture": picture,
-#                 },
-#             }
-#         ), 200
+        return jsonify(
+            {
+                "token": token,
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "name": user.full_name,
+                    "picture": picture,
+                },
+            }
+        ), 200
 
-#     finally:
-#         db.close()
+    finally:
+        db.close()
 
 
 def get_current_user():
-    token = request.headers.get("Authorization")
+    token = request.headers.get("Authorization").split(' ')[1]
+
     if not token:
         return jsonify({"error": "Missing token"}), 401
 
     db = SessionLocal()
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        print(decoded)
         user = db.query(User).get(decoded["id"])
         if not user:
             return jsonify({"error": "User not found"}), 404
