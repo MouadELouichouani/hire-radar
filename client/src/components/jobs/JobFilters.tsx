@@ -3,6 +3,8 @@
 import { X, MapPin, DollarSign, Code } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 
 interface JobFiltersProps {
   location: string;
@@ -26,71 +28,73 @@ export default function JobFilters({
   const hasActiveFilters = location || salaryMin || skill;
 
   return (
-    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-          Filters
-        </h2>
+    <Card className="border-border bg-card sticky top-20">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-bold">Filters</CardTitle>
         {hasActiveFilters && (
           <Button
             variant="ghost"
             size="sm"
             onClick={onClearFilters}
-            className="text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+              className="h-8 text-xs"
           >
-            <X className="w-4 h-4 mr-1" />
+              <X className="w-3 h-3 mr-1" />
             Clear
           </Button>
         )}
       </div>
-
-      <div className="space-y-5">
+      </CardHeader>
+      <CardContent className="space-y-5">
         {/* Location Filter */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            <MapPin className="w-4 h-4 inline mr-1" />
+        <div className="space-y-2">
+          <Label htmlFor="location" className="flex items-center gap-2 text-sm font-medium">
+            <MapPin className="w-4 h-4" />
             Location
-          </label>
+          </Label>
           <Input
+            id="location"
             type="text"
             placeholder="e.g., New York, Remote"
             value={location}
             onChange={(e) => onLocationChange(e.target.value)}
-            className="w-full"
+            className="bg-background border-border"
           />
         </div>
 
         {/* Salary Filter */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            <DollarSign className="w-4 h-4 inline mr-1" />
+        <div className="space-y-2">
+          <Label htmlFor="salary" className="flex items-center gap-2 text-sm font-medium">
+            <DollarSign className="w-4 h-4" />
             Minimum Salary
-          </label>
+          </Label>
           <Input
+            id="salary"
             type="number"
             placeholder="e.g., 50000"
             value={salaryMin}
             onChange={(e) => onSalaryMinChange(e.target.value)}
             min="0"
-            className="w-full"
+            className="bg-background border-border"
           />
         </div>
 
         {/* Skill Filter */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            <Code className="w-4 h-4 inline mr-1" />
+        <div className="space-y-2">
+          <Label htmlFor="skill" className="flex items-center gap-2 text-sm font-medium">
+            <Code className="w-4 h-4" />
             Skill
-          </label>
+          </Label>
           <Input
+            id="skill"
             type="text"
             placeholder="e.g., React, Python"
             value={skill}
             onChange={(e) => onSkillChange(e.target.value)}
-            className="w-full"
+            className="bg-background border-border"
           />
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

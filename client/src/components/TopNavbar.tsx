@@ -1,133 +1,192 @@
 "use client";
 
-import {
-  Home,
-  Users,
-  Briefcase,
-  Bell,
-  MessageCircle,
-  User,
-  Search,
-} from "lucide-react";
-import Image from "next/image";
+import { Search, Bell, User, LogOut, Briefcase, Bookmark } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/auth/hook";
-import ThemeToggle from "./ThemeToggle";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { getToken } from "@/lib";
 
 export default function TopNavbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: currentUser } = useCurrentUser();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Determine profile URL based on user role
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/jobs/search?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push("/jobs/search");
+    }
+  };
+
+  const handleLogout = () => {
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    router.push("/login");
+  };
+
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Note: employer_id is not available from /auth/me endpoint
+  // Using user.id as fallback for employer profile
   const profileUrl =
     currentUser?.role === "candidate"
       ? "/dashboard/candidate/profile"
       : currentUser?.role === "employer"
         ? "/dashboard/employer/profile"
-        : "/dashboard/candidate/profile"; // Default to candidate
+        : "/dashboard/candidate/profile";
 
-  const isActive = (path: string) => pathname === path;
+  // Note: candidate_id is not available from /auth/me endpoint
+  // Saved jobs endpoint doesn't exist in backend yet anyway
+  const savedJobsUrl =
+    currentUser?.role === "candidate"
+      ? "/dashboard/candidate/saved-jobs"
+      : "#";
+
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50 z-50 shadow-lg dark:shadow-purple-900/10">
-      <div className="max-w-[1920px] mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-6">
-          {/* Logo */}
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
+        >
+          <Briefcase className="h-6 w-6" />
+          <span className="hidden sm:inline">Hire Radar</span>
+        </Link>
+
+        {/* Search Bar - Desktop */}
+        <form
+          onSubmit={handleSearch}
+          className="hidden md:flex flex-1 max-w-md mx-8"
+        >
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search jobs..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleSearch(e);
+                }
+              }}
+              className="pl-9 h-9 bg-background border-border"
+              aria-label="Search jobs"
+            />
+          </div>
+        </form>
+
+        {/* Right Side Actions */}
+        <div className="flex items-center gap-2">
+          {/* Search Icon - Mobile */}
           <Link
-            href="/"
-            className="flex items-center gap-3 flex-shrink-0 hover:opacity-80 transition-opacity"
+            href="/jobs/search"
+            className="md:hidden p-2 rounded-md hover:bg-accent transition-colors"
+            aria-label="Search jobs"
           >
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Image
-                src="/radar.svg"
-                alt="Hire Radar Logo"
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent dark:from-purple-400 dark:via-pink-400 dark:to-purple-400">
-              Hire Radar
-            </span>
+            <Search className="h-5 w-5" />
           </Link>
 
-          {/* Center Navigation Icons */}
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className={`p-3 rounded-xl transition-all duration-200 group ${
-                isActive("/")
-                  ? "text-purple-600 dark:text-purple-400 bg-purple-500/10 dark:bg-purple-500/20"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20"
-              }`}
-              aria-label="Home"
-            >
-              <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </Link>
-            <button
-              className="p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
-              aria-label="Users"
-            >
-              <Users className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
-            <Link
-              href="/jobs/search"
-              className={`p-3 rounded-xl transition-all duration-200 group ${
-                pathname?.startsWith("/jobs")
-                  ? "text-purple-600 dark:text-purple-400 bg-purple-500/10 dark:bg-purple-500/20"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20"
-              }`}
-              aria-label="Jobs"
-            >
-              <Briefcase className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </Link>
-            <button
-              className="relative p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
-              aria-label="Notifications"
-            >
-              <Bell className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="absolute top-1 right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
-                9+
-              </span>
-            </button>
-            <button
-              className="relative p-3 text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20 rounded-xl transition-all duration-200 group"
-              aria-label="Messages"
-            >
-              <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              <span className="absolute top-1 right-1 w-5 h-5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg">
-                6
-              </span>
-            </button>
-            <Link
-              href={profileUrl}
-              className={`p-3 rounded-xl transition-all duration-200 group ${
-                pathname?.includes("/profile")
-                  ? "text-purple-600 dark:text-purple-400 bg-purple-500/10 dark:bg-purple-500/20"
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-500/10 dark:hover:bg-gray-500/20"
-              }`}
-              aria-label="Profile"
-            >
-              <User className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </Link>
-          </div>
+          {/* Notifications - Placeholder */}
+          <button
+            className="relative p-2 rounded-md hover:bg-accent transition-colors"
+            aria-label="Notifications"
+          >
+            <Bell className="h-5 w-5" />
+            <span className="absolute top-1 right-1 h-2 w-2 bg-foreground rounded-full" />
+          </button>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-md ml-8">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search for anything (Jobs)"
-                className="w-full pl-4 pr-10 py-2.5 bg-white/50 dark:bg-gray-800/50 backdrop-blur-md border border-gray-300/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 dark:focus:ring-purple-400/50 focus:border-transparent transition-all text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
-              />
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-600 dark:text-purple-400" />
-            </div>
-          </div>
-
-          {/* Theme Toggle */}
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
-          </div>
+          {/* User Avatar Dropdown */}
+          {currentUser ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  className="flex items-center gap-2 p-1 rounded-md hover:bg-accent transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
+                  aria-label="User menu"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage
+                      src={currentUser.image || undefined}
+                      alt={currentUser.full_name}
+                    />
+                    <AvatarFallback className="bg-foreground text-background text-xs font-semibold">
+                      {getInitials(currentUser.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {currentUser.full_name}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {currentUser.email}
+                    </p>
+                    <Badge
+                      variant="secondary"
+                      className="mt-1 w-fit text-xs capitalize"
+                    >
+                      {currentUser.role}
+                    </Badge>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={profileUrl} className="cursor-pointer">
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                {currentUser.role === "candidate" && (
+                  <DropdownMenuItem asChild>
+                    <Link href={savedJobsUrl} className="cursor-pointer">
+                      <Bookmark className="mr-2 h-4 w-4" />
+                      Saved Jobs
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer text-destructive focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link
+              href="/login"
+              className="px-4 py-2 text-sm font-medium rounded-md border border-border bg-background hover:bg-accent transition-colors"
+            >
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </nav>

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -8,19 +9,34 @@ import JobCard from "@/components/jobs/JobCard";
 import JobCardSkeleton from "@/components/jobs/JobCardSkeleton";
 import JobFilters from "@/components/jobs/JobFilters";
 import EmptyState from "@/components/jobs/EmptyState";
-import ApplyModal from "@/components/jobs/ApplyModal";
 import TopNavbar from "@/components/TopNavbar";
-import { useInfiniteJobs } from "@/features/jobs/hooks";
-import { Job } from "@/types/job";
-import { toast } from "sonner";
+import { useInfiniteJobs, useApplyJob } from "@/features/jobs/hooks";
+import { Job } from "@/types";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 
 export default function SearchJobsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [location, setLocation] = useState("");
-  const [salaryMin, setSalaryMin] = useState("");
-  const [skill, setSkill] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [salaryMin, setSalaryMin] = useState(searchParams.get("salary_min") || "");
+  const [skill, setSkill] = useState(searchParams.get("skill") || "");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
+  const [coverLetter, setCoverLetter] = useState("");
+
+  const applyMutation = useApplyJob();
 
   const {
     data,
@@ -31,20 +47,31 @@ export default function SearchJobsPage() {
     isError,
     error,
   } = useInfiniteJobs({
-    search: searchQuery,
-    location: location,
+    search: searchQuery || undefined,
+    location: location || undefined,
     salary_min: salaryMin ? parseInt(salaryMin) : undefined,
-    skill: skill,
+    skill: skill || undefined,
     limit: 10,
   });
 
   const jobs = data?.pages.flatMap((page) => page.jobs) || [];
   const totalJobs = data?.pages[0]?.total || 0;
 
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (searchQuery) params.set("search", searchQuery);
+    if (location) params.set("location", location);
+    if (salaryMin) params.set("salary_min", salaryMin);
+    if (skill) params.set("skill", skill);
+    router.replace(`/jobs/search?${params.toString()}`, { scroll: false });
+  }, [searchQuery, location, salaryMin, skill, router]);
+
   const handleClearFilters = () => {
     setLocation("");
     setSalaryMin("");
     setSkill("");
+    setSearchQuery("");
   };
 
   const handleApply = (job: Job) => {
@@ -53,46 +80,51 @@ export default function SearchJobsPage() {
   };
 
   const handleSubmitApplication = async () => {
+    if (!selectedJob) return;
     try {
-      // TODO: Implement actual API call to submit application
-      // await submitApplication(jobId, { coverLetter, cvFile });
-      toast.success("Application submitted successfully!");
+      await applyMutation.mutateAsync({
+        jobId: selectedJob.id,
+        coverLetter: coverLetter || undefined,
+      });
       setIsApplyModalOpen(false);
       setSelectedJob(null);
+      setCoverLetter("");
     } catch (error) {
-      toast.error("Failed to submit application. Please try again.");
-      throw error;
+      // Error is handled by the mutation
     }
   };
 
   const hasActiveFilters = !!(location || salaryMin || skill);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/30 via-pink-50/20 to-white dark:from-gray-950 dark:via-purple-950/30 dark:via-pink-950/20 dark:to-gray-900">
+    <div className="min-h-screen bg-background">
       <TopNavbar />
-      <div className="pt-16 max-w-7xl mx-auto px-8 py-8">
+      <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl pt-24">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Find Your Dream Job
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <h1 className="text-4xl font-bold mb-2 tracking-tight">Find Your Dream Job</h1>
+          <p className="text-muted-foreground">
             Discover opportunities that match your skills and interests
           </p>
         </div>
 
         {/* Search Bar */}
         <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
+            className="relative"
+          >
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search jobs by title, keywords, or company..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-12 pr-4 py-6 text-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-purple-500/50"
+              className="pl-12 pr-4 py-6 text-lg bg-background border-border"
             />
-          </div>
+          </form>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -114,11 +146,11 @@ export default function SearchJobsPage() {
             {/* Results Count */}
             {!isLoading && (
               <div className="mb-4 flex items-center justify-between">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   {totalJobs > 0 ? (
                     <>
                       Found{" "}
-                      <span className="font-semibold text-purple-600 dark:text-purple-400">
+                      <span className="font-semibold text-foreground">
                         {totalJobs}
                       </span>{" "}
                       job{totalJobs !== 1 ? "s" : ""}
@@ -141,8 +173,9 @@ export default function SearchJobsPage() {
 
             {/* Error State */}
             {isError && (
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-6">
-                <p className="text-red-600 dark:text-red-400">
+              <Card className="border-border">
+                <CardContent className="p-6">
+                  <p className="text-destructive mb-4">
                   {error instanceof Error
                     ? error.message
                     : "Failed to load jobs. Please try again."}
@@ -150,11 +183,12 @@ export default function SearchJobsPage() {
                 <Button
                   onClick={() => window.location.reload()}
                   variant="outline"
-                  className="mt-4"
+                    className="border-border"
                 >
                   Reload Page
                 </Button>
-              </div>
+                </CardContent>
+              </Card>
             )}
 
             {/* Empty State */}
@@ -181,16 +215,9 @@ export default function SearchJobsPage() {
                       onClick={() => fetchNextPage()}
                       disabled={isFetchingNextPage}
                       variant="outline"
-                      className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md"
+                      className="border-border"
                     >
-                      {isFetchingNextPage ? (
-                        <>
-                          <span className="animate-spin mr-2">⏳</span>
-                          Loading...
-                        </>
-                      ) : (
-                        "Load More Jobs"
-                      )}
+                      {isFetchingNextPage ? "Loading..." : "Load More Jobs"}
                     </Button>
                   </div>
                 )}
@@ -198,7 +225,7 @@ export default function SearchJobsPage() {
                 {/* End of Results */}
                 {!hasNextPage && jobs.length > 0 && (
                   <div className="mt-8 text-center">
-                    <p className="text-gray-500 dark:text-gray-400">
+                    <p className="text-muted-foreground">
                       You&apos;ve reached the end of the results
                     </p>
                   </div>
@@ -209,15 +236,47 @@ export default function SearchJobsPage() {
         </div>
 
         {/* Apply Modal */}
-        <ApplyModal
-          isOpen={isApplyModalOpen}
-          onClose={() => {
+        <Dialog open={isApplyModalOpen} onOpenChange={setIsApplyModalOpen}>
+          <DialogContent className="border-border">
+            <DialogHeader>
+              <DialogTitle>Apply to {selectedJob?.title}</DialogTitle>
+              <DialogDescription>
+                {selectedJob?.company_name || selectedJob?.company}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="coverLetter">Cover Letter (Optional)</Label>
+                <Textarea
+                  id="coverLetter"
+                  placeholder="Tell the employer why you're a great fit..."
+                  value={coverLetter}
+                  onChange={(e) => setCoverLetter(e.target.value)}
+                  className="min-h-[120px] bg-background border-border"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
             setIsApplyModalOpen(false);
-            setSelectedJob(null);
+                  setCoverLetter("");
           }}
-          job={selectedJob}
-          onApply={handleSubmitApplication}
-        />
+                className="border-border"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitApplication}
+                disabled={applyMutation.isPending}
+                className="bg-foreground text-background hover:bg-foreground/90"
+              >
+                {applyMutation.isPending ? "Submitting..." : "Submit Application"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

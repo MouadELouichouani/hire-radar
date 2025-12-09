@@ -1,76 +1,72 @@
 "use client";
 
 import {
+  Pencil,
   Image as ImageIcon,
   Video,
   Calendar,
   FileText,
   Send,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/features/auth/hook";
-import { useMemo } from "react";
 
 export default function PostCreator() {
-  const { data: currentUser, isLoading } = useCurrentUser();
+  const { data: currentUser } = useCurrentUser();
 
-  const userInitials = useMemo(() => {
-    if (!currentUser?.full_name) return "ME";
-    return currentUser.full_name
+  const getInitials = (name: string) => {
+    return name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  }, [currentUser]);
+  };
 
   return (
-    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-300/50 dark:hover:border-purple-600/50">
-      <div className="flex items-start gap-4">
-        {isLoading ? (
-          <div className="w-14 h-14 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse flex-shrink-0"></div>
-        ) : currentUser?.image ? (
-          <img
-            src={currentUser.image}
-            alt={currentUser.full_name || "User"}
-            className="w-14 h-14 rounded-full object-cover flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50"
-          />
-        ) : (
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
-            {userInitials}
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <input
+    <Card className="border-border">
+      <CardContent className="p-4">
+      <div className="flex items-start gap-3">
+          <Avatar className="h-10 w-10">
+            <AvatarFallback className="bg-foreground text-background font-semibold">
+              {currentUser ? getInitials(currentUser.full_name) : "ME"}
+            </AvatarFallback>
+          </Avatar>
+        <div className="flex-1">
+            <Input
             type="text"
-            placeholder="Share your thoughts..."
-            className="w-full px-5 py-4 border border-gray-300/50 dark:border-gray-700/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/50 dark:focus:ring-purple-400/50 focus:border-transparent mb-4 transition-all text-base bg-white/50 dark:bg-gray-700/50 backdrop-blur-md hover:bg-white/70 dark:hover:bg-gray-700/70 placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-white"
+            placeholder="Write something..."
+              className="mb-3 bg-background border-border"
           />
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2.5 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20">
-                <ImageIcon className="w-5 h-5 group-hover:scale-125 transition-transform" />
-                <span className="text-sm font-semibold">Photo</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <ImageIcon className="w-5 h-5" />
+                <span className="text-sm">Photo</span>
               </button>
-              <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2.5 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20">
-                <Video className="w-5 h-5 group-hover:scale-125 transition-transform" />
-                <span className="text-sm font-semibold">Video</span>
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <Video className="w-5 h-5" />
+                <span className="text-sm">Video</span>
               </button>
-              <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2.5 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20">
-                <Calendar className="w-5 h-5 group-hover:scale-125 transition-transform" />
-                <span className="text-sm font-semibold">Event</span>
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <Calendar className="w-5 h-5" />
+                <span className="text-sm">Event</span>
               </button>
-              <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2.5 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20">
-                <FileText className="w-5 h-5 group-hover:scale-125 transition-transform" />
-                <span className="text-sm font-semibold">Article</span>
+                <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+                <FileText className="w-5 h-5" />
+                <span className="text-sm">Article</span>
               </button>
             </div>
-            <button className="bg-gradient-to-r from-purple-600 to-pink-600 dark:from-purple-500 dark:to-pink-500 text-white px-6 py-2.5 rounded-xl hover:from-purple-700 hover:to-pink-700 dark:hover:from-purple-600 dark:hover:to-pink-600 transition-all flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0 font-bold">
+              <Button className="bg-foreground text-background hover:bg-foreground/90">
               <Send className="w-4 h-4" />
-              <span>Post</span>
-            </button>
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

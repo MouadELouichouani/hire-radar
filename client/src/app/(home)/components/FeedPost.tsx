@@ -9,8 +9,11 @@ import {
   Smile,
   MoreVertical,
 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/features/auth/hook";
-import { useMemo } from "react";
 
 interface FeedPostProps {
   author: {
@@ -33,105 +36,82 @@ export default function FeedPost({
 }: FeedPostProps) {
   const { data: currentUser } = useCurrentUser();
 
-  const userInitials = useMemo(() => {
-    if (!currentUser?.full_name) return "ME";
-    return currentUser.full_name
+  const getInitials = (name: string) => {
+    return name
       .split(" ")
       .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
-  }, [currentUser]);
+  };
+
   return (
-    <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl p-6 mb-6 shadow-lg hover:shadow-xl transition-all duration-300 hover:border-purple-300/50 dark:hover:border-purple-600/50">
+    <Card className="border-border">
+      <CardContent className="p-4">
       {/* Post Header */}
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-base shadow-lg flex-shrink-0 ring-2 ring-white/50 dark:ring-gray-700/50">
-            {author.avatar}
-          </div>
+            <Avatar className="h-10 w-10">
+              <AvatarFallback className="bg-foreground text-background font-semibold">
+                {getInitials(author.name)}
+              </AvatarFallback>
+            </Avatar>
           <div>
-            <h3 className="font-bold text-base text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors cursor-pointer">
-              {author.name}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              {author.title}
-            </p>
+            <h3 className="font-semibold text-sm">{author.name}</h3>
+              <p className="text-xs text-muted-foreground">{author.title}</p>
+            </div>
           </div>
-        </div>
-        <button
-          className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 p-2 rounded-xl hover:bg-gray-500/10 dark:hover:bg-gray-500/20 transition-all"
-          aria-label="More options"
-        >
+          <button className="text-muted-foreground hover:text-foreground">
           <MoreVertical className="w-5 h-5" />
         </button>
       </div>
 
       {/* Post Title */}
-      <h2 className="font-bold text-xl mb-5 text-gray-900 dark:text-white leading-tight">
-        {title}
-      </h2>
+      <h2 className="font-semibold text-lg mb-3">{title}</h2>
 
       {/* Post Content */}
-      {content && <div className="mb-6">{content}</div>}
+      {content && <div className="mb-4">{content}</div>}
 
       {/* Post Actions */}
-      <div className="flex items-center gap-4 mb-5 pb-5 border-b border-gray-200/50 dark:border-gray-700/50">
-        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20">
-          <ThumbsUp className="w-5 h-5 group-hover:scale-125 transition-transform" />
-          <span className="text-sm font-bold">{likes}</span>
+        <div className="flex items-center gap-6 mb-3 pb-3 border-b border-border">
+          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <ThumbsUp className="w-5 h-5" />
+          <span className="text-sm">+{likes}</span>
         </button>
-        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20">
-          <MessageCircle className="w-5 h-5 group-hover:scale-125 transition-transform" />
-          <span className="text-sm font-bold">{comments}</span>
+          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <MessageCircle className="w-5 h-5" />
+          <span className="text-sm">{comments}</span>
         </button>
-        <button
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20"
-          aria-label="Share"
-        >
-          <Send className="w-5 h-5 group-hover:scale-125 transition-transform" />
+          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <Send className="w-5 h-5" />
         </button>
-        <button
-          className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all ml-auto group px-4 py-2 rounded-xl hover:bg-purple-500/10 dark:hover:bg-purple-500/20"
-          aria-label="Bookmark"
-        >
-          <Bookmark className="w-5 h-5 group-hover:scale-125 transition-transform" />
+          <button className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors ml-auto">
+          <Bookmark className="w-5 h-5" />
         </button>
       </div>
 
       {/* Comment Input */}
-      <div className="flex items-center gap-3">
-        {currentUser?.image ? (
-          <img
-            src={currentUser.image}
-            alt={currentUser.full_name || "User"}
-            className="w-11 h-11 rounded-full object-cover flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50"
-          />
-        ) : (
-          <div className="w-11 h-11 rounded-full bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-lg ring-2 ring-white/50 dark:ring-gray-700/50">
-            {userInitials}
-          </div>
-        )}
-        <div className="flex-1 flex items-center gap-2 px-5 py-3 border border-gray-300/50 dark:border-gray-700/50 rounded-xl focus-within:ring-2 focus-within:ring-purple-500/50 dark:focus-within:ring-purple-400/50 focus-within:border-transparent transition-all bg-white/50 dark:bg-gray-700/50 backdrop-blur-md hover:bg-white/70 dark:hover:bg-gray-700/70">
-          <input
+      <div className="flex items-center gap-2">
+          <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-foreground text-background font-semibold text-xs">
+              {currentUser ? getInitials(currentUser.full_name) : "ME"}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 flex items-center gap-2 px-3 py-2 border border-border rounded-lg bg-background">
+            <Input
             type="text"
-            placeholder="Write a comment..."
-            className="flex-1 outline-none text-base bg-transparent placeholder:text-gray-500 dark:placeholder:text-gray-400 text-gray-900 dark:text-white"
+            placeholder="Write a comment"
+              className="flex-1 border-0 bg-transparent outline-none text-sm p-0 h-auto focus-visible:ring-0"
           />
-          <button
-            className="text-gray-400 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-all"
-            aria-label="Voice input"
-          >
-            <Mic className="w-5 h-5" />
+            <button className="text-muted-foreground hover:text-foreground">
+            <Mic className="w-4 h-4" />
           </button>
-          <button
-            className="text-gray-400 dark:text-gray-500 hover:text-purple-600 dark:hover:text-purple-400 p-2 rounded-lg hover:bg-purple-500/10 dark:hover:bg-purple-500/20 transition-all"
-            aria-label="Add emoji"
-          >
-            <Smile className="w-5 h-5" />
+            <button className="text-muted-foreground hover:text-foreground">
+            <Smile className="w-4 h-4" />
           </button>
         </div>
       </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,169 +1,184 @@
+import { useQuery, useMutation, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  useInfiniteQuery,
-} from "@tanstack/react-query";
-import {
-  searchJobs,
-  saveJob,
-  unsaveJob,
-  getJobById,
-  getSavedJobs,
-  applyToJob,
-} from "./api";
-import { JobSearchParams } from "@/types/job";
-import { useMemo } from "react";
-import { useDebounce } from "@/hooks/useDebounce";
+  jobsApi,
+  candidatesApi,
+  aiApi,
+  applicationsApi,
+} from "@/lib/api";
+import type { Job, JobFilters, SavedJob } from "@/types";
+import { toast } from "sonner";
 
-// Search jobs hook with debouncing
-export function useSearchJobs(params: JobSearchParams) {
-  const debouncedSearch = useDebounce(params.search || "", 500);
-  const debouncedLocation = useDebounce(params.location || "", 500);
-
-  const queryParams = useMemo(
-    () => ({
-      search: debouncedSearch || undefined,
-      location: debouncedLocation || undefined,
-      salary_min: params.salary_min,
-      skill: params.skill,
-      page: params.page,
-      limit: params.limit,
-    }),
-    [
-      debouncedSearch,
-      debouncedLocation,
-      params.salary_min,
-      params.skill,
-      params.page,
-      params.limit,
-    ],
-  );
-
+// Get all jobs with filters
+export function useJobs(filters?: JobFilters) {
   return useQuery({
-    queryKey: ["jobs", "search", queryParams],
-    queryFn: () => searchJobs(queryParams),
-    enabled: true,
-    staleTime: 30000, // 30 seconds
+    queryKey: ["jobs", filters],
+    queryFn: () => jobsApi.getAll(filters),
+    staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
 
-// Infinite scroll version
-export function useInfiniteJobs(params: Omit<JobSearchParams, "page">) {
-  const debouncedSearch = useDebounce(params.search || "", 500);
-  const debouncedLocation = useDebounce(params.location || "", 500);
-
-  const queryParams = useMemo(
-    () => ({
-      search: debouncedSearch || undefined,
-      location: debouncedLocation || undefined,
-      salary_min: params.salary_min,
-      skill: params.skill,
-      limit: params.limit,
-    }),
-    [
-      debouncedSearch,
-      debouncedLocation,
-      params.salary_min,
-      params.skill,
-      params.limit,
-    ],
-  );
-
+// Infinite scroll for jobs
+export function useInfiniteJobs(filters?: JobFilters) {
   return useInfiniteQuery({
-    queryKey: ["jobs", "infinite", queryParams],
-    queryFn: ({ pageParam = 1 }) =>
-      searchJobs({ ...queryParams, page: pageParam }),
-    getNextPageParam: (lastPage) => {
-      if (lastPage.page < lastPage.total_pages) {
-        return lastPage.page + 1;
+    queryKey: ["jobs", "infinite", filters],
+    queryFn: ({ pageParam = 0 }) =>
+      jobsApi.getAll({
+        ...filters,
+        offset: pageParam,
+        limit: filters?.limit || 10,
+      }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const totalLoaded = allPages.reduce(
+        (sum, page) => sum + page.jobs.length,
+        0
+      );
+      // Check if there are more pages to load
+      if (totalLoaded < lastPage.total) {
+        return totalLoaded;
       }
       return undefined;
     },
-    initialPageParam: 1,
-    staleTime: 30000,
+    staleTime: 1000 * 60 * 2,
   });
 }
 
 // Get single job
-export function useJob(id: string) {
+export function useJob(id: number) {
   return useQuery({
     queryKey: ["job", id],
-    queryFn: () => getJobById(id),
+    queryFn: () => jobsApi.getById(id),
     enabled: !!id,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+// Get recent jobs (for home page)
+export function useRecentJobs(limit: number = 5) {
+  return useQuery({
+    queryKey: ["jobs", "recent", limit],
+    queryFn: () => jobsApi.getAll({ limit }),
+    staleTime: 1000 * 60 * 2,
   });
 }
 
 // Save job mutation
+// Note: Endpoint doesn't exist in backend - will show error toast
 export function useSaveJob() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (jobId: string) => saveJob(jobId),
-    onSuccess: (data, jobId) => {
-      // Invalidate all job queries to update saved status
+    mutationFn: async (jobId: number) => {
+      try {
+        await jobsApi.save(jobId);
+      } catch (error: any) {
+        toast.error(error.message || "Save job feature not available yet");
+        throw error;
+      }
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      queryClient.invalidateQueries({ queryKey: ["job", jobId] });
+      queryClient.invalidateQueries({ queryKey: ["saved-jobs"] });
+      toast.success("Job saved");
     },
   });
 }
 
 // Unsave job mutation
+// Note: Endpoint doesn't exist in backend - will show error toast
 export function useUnsaveJob() {
   const queryClient = useQueryClient();
-
   return useMutation({
-    mutationFn: (jobId: string) => unsaveJob(jobId),
-    onSuccess: (data, jobId) => {
+    mutationFn: async (jobId: number) => {
+      try {
+        await jobsApi.unsave(jobId);
+      } catch (error: any) {
+        toast.error(error.message || "Unsave job feature not available yet");
+        throw error;
+      }
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      queryClient.invalidateQueries({ queryKey: ["job", jobId] });
       queryClient.invalidateQueries({ queryKey: ["saved-jobs"] });
+      toast.success("Job unsaved");
+    },
+  });
+}
+
+// Apply to job mutation
+// Note: Endpoint doesn't exist in backend - will show error toast
+export function useApplyJob() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({
+      jobId,
+      coverLetter,
+    }: {
+      jobId: number;
+      coverLetter?: string;
+    }) => {
+      try {
+        return await jobsApi.apply(jobId, { cover_letter: coverLetter });
+      } catch (error: any) {
+        toast.error(error.message || "Application feature not available yet");
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+      queryClient.invalidateQueries({ queryKey: ["applications"] });
+      toast.success("Application submitted successfully!");
+    },
+    onError: () => {
+      // Error already shown in mutationFn
     },
   });
 }
 
 // Get saved jobs for a candidate
-export function useSavedJobs(candidateId: string) {
+// Note: Endpoint doesn't exist in backend - returns empty array
+export function useSavedJobs(candidateId: number) {
   return useQuery({
     queryKey: ["saved-jobs", candidateId],
-    queryFn: () => getSavedJobs(candidateId),
-    enabled: !!candidateId,
-    staleTime: 30000,
-  });
-}
-
-// Apply to job mutation
-export function useApplyToJob() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({
-      jobId,
-      applicationData,
-    }: {
-      jobId: string;
-      applicationData?: { cover_letter?: string; cv_file?: File };
-    }) => applyToJob(jobId, applicationData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    queryFn: async () => {
+      try {
+        return await candidatesApi.getSavedJobs(candidateId);
+      } catch (error) {
+        // Endpoint doesn't exist, return empty array
+        return [];
+      }
     },
+    enabled: !!candidateId,
+    staleTime: 1000 * 60 * 2,
   });
 }
 
-// Get recent jobs for feed
-export function useRecentJobs(limit: number = 10) {
+// Get applications for a candidate
+export function useCandidateApplications(candidateId: number) {
   return useQuery({
-    queryKey: ["jobs", "recent", limit],
-    queryFn: () => searchJobs({ limit, page: 1 }),
-    staleTime: 60000, // 1 minute
+    queryKey: ["applications", "candidate", candidateId],
+    queryFn: () => candidatesApi.getApplications(candidateId),
+    enabled: !!candidateId,
+    staleTime: 1000 * 60 * 2,
   });
 }
 
-// Get recommended jobs (for now, just recent jobs - can be enhanced with AI recommendations later)
-export function useRecommendedJobs(limit: number = 5) {
+// Get recommended jobs for a candidate
+export function useRecommendedJobs(candidateId: number) {
   return useQuery({
-    queryKey: ["jobs", "recommended", limit],
-    queryFn: () => searchJobs({ limit, page: 1 }),
-    staleTime: 60000, // 1 minute
+    queryKey: ["recommended-jobs", candidateId],
+    queryFn: () => aiApi.recommendJobs(candidateId),
+    enabled: !!candidateId,
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+// Get recommended candidates for a job
+// Note: Endpoint doesn't exist in backend - returns empty array
+export function useRecommendedCandidates(jobId: number) {
+  return useQuery({
+    queryKey: ["recommended-candidates", jobId],
+    queryFn: () => aiApi.recommendCandidates(jobId),
+    enabled: !!jobId,
+    staleTime: 1000 * 60 * 5,
   });
 }

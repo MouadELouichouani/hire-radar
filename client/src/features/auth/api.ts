@@ -1,18 +1,34 @@
 import { getToken, setToken } from "@/lib";
 import apiClient from "@/lib/apiClient";
+import { authApi } from "@/lib/api";
+import type { User } from "@/types";
+
+type ISignupRequest = {
+  full_name: string;
+  password: string;
+  confirmPassword: string;
+  email: string;
+  role: string;
+};
+
+type ISignupResponse = {
+  token: string;
+  user: User;
+};
+
+type LoginResponse = {
+  token: string;
+  user: User;
+};
 
 export async function login(email: string, password: string) {
-  const { data } = await apiClient.post<LoginResponse>("/auth/login", {
-    email,
-    password,
-  });
-
+  const data = await authApi.login(email, password);
   setToken(data.token);
   return data;
 }
 
 export async function signup(userData: ISignupRequest) {
-  const { data } = await apiClient.post<ISignupResponse>("/auth/signup", {
+  const { data } = await apiClient.post<ISignupResponse>("/api/auth/signup", {
     ...userData,
   });
 
@@ -21,19 +37,24 @@ export async function signup(userData: ISignupRequest) {
 }
 
 export const oAuth = async () => {
-  const response = await apiClient.get(`/auth/google`);
+  const response = await apiClient.get(`/api/auth/google`);
   return response;
 };
 
-export const me = async (token?: string) => {
+export const me = async (token?: string): Promise<User | null> => {
   try {
-    const response = await apiClient.get("/auth/me", {
+    if (token) {
+      // If token is provided (e.g., from middleware), use it directly
+      const { data } = await apiClient.get<User>("/api/auth/me", {
       headers: {
-        Authorization: `Bearer ${token || getToken()}`,
+          Authorization: `Bearer ${token}`,
       },
     });
-    return response.data;
-  } catch {
+      return data;
+    }
+    // Otherwise use the centralized API
+    return await authApi.me();
+  } catch (err) {
     return null;
   }
 };
