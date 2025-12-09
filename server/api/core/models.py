@@ -36,8 +36,15 @@ Base = declarative_base(metadata=MetaData(schema="public"))
 user_skills = Table(
     "user_skills",
     Base.metadata,
-    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
-    Column("skill_id", Integer, ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "skill_id",
+        Integer,
+        ForeignKey("skills.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
 
 # ============================================================
@@ -46,8 +53,12 @@ user_skills = Table(
 job_applicants = Table(
     "job_applicants",
     Base.metadata,
-    Column("job_id", Integer, ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True),
-    Column("user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "job_id", Integer, ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "user_id", Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    ),
 )
 
 # ============================================================
@@ -56,9 +67,17 @@ job_applicants = Table(
 job_skills = Table(
     "job_skills",
     Base.metadata,
-    Column("job_id", Integer, ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True),
-    Column("skill_id", Integer, ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True),
+    Column(
+        "job_id", Integer, ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "skill_id",
+        Integer,
+        ForeignKey("skills.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
 )
+
 
 # ============================================================
 # USER MODEL
@@ -84,7 +103,9 @@ class User(Base):
 
     # Relationships
     educations = relationship("Education", backref="user", cascade="all, delete-orphan")
-    experiences = relationship("Experience", backref="user", cascade="all, delete-orphan")
+    experiences = relationship(
+        "Experience", backref="user", cascade="all, delete-orphan"
+    )
     saved_jobs = relationship("SavedJob", backref="user", cascade="all, delete-orphan")
     skills = relationship("Skill", secondary=user_skills, backref="users")
 
@@ -96,7 +117,9 @@ class Education(Base):
     __tablename__ = "educations"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
     school_name = Column(String(150))
     degree = Column(String(150))
@@ -113,7 +136,9 @@ class Experience(Base):
     __tablename__ = "experiences"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
 
     job_title = Column(String(150), nullable=False)
     company = Column(String(150))
@@ -130,7 +155,6 @@ class Skill(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(150), unique=True, nullable=False)
-
 
 
 # ============================================================
@@ -168,6 +192,7 @@ class Job(Base):
     applicants = relationship("User", secondary=job_applicants, backref="applied_jobs")
     skills = relationship("Skill", secondary=job_skills, backref="job_with_skill")
 
+
 # ============================================================
 # APPLICATION MODEL
 # ============================================================
@@ -197,7 +222,6 @@ class SavedJob(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"))
     saved_at = Column(DateTime, server_default=func.now())
-
 
 
 Base.metadata.create_all(engine)
