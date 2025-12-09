@@ -51,6 +51,16 @@ job_applicants = Table(
 )
 
 # ============================================================
+# MANY-TO-MANY: JOB ↔ SKILLS (job_skills)
+# ============================================================
+job_skills = Table(
+    "job_skills",
+    Base.metadata,
+    Column("job_id", Integer, ForeignKey("jobs.id", ondelete="CASCADE"), primary_key=True),
+    Column("skill_id", Integer, ForeignKey("skills.id", ondelete="CASCADE"), primary_key=True),
+)
+
+# ============================================================
 # USER MODEL
 # ============================================================
 class User(Base):
@@ -149,7 +159,6 @@ class Job(Base):
     salary_range = Column(String(100))
     emp_type = Column(String(50))
     description = Column(Text)
-    skills = Column(ARRAY(String))
     responsibilities = Column(ARRAY(String))
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now(), server_default=func.now())
@@ -157,7 +166,7 @@ class Job(Base):
     employer = relationship("User", backref="jobs_posted")
     category = relationship("Category")
     applicants = relationship("User", secondary=job_applicants, backref="applied_jobs")
-
+    skills = relationship("Skill", secondary=job_skills, backref="job_with_skill")
 
 # ============================================================
 # APPLICATION MODEL
