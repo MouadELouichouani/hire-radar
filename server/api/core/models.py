@@ -8,11 +8,18 @@ from sqlalchemy import (
     Numeric,
     ARRAY,
     ForeignKey,
+    Table,
 )
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from config.db import Base
 
+job_applicants = Table(
+    "job_applicants",
+    Base.metadata,
+    Column("job_id", Integer, ForeignKey("jobs.id"), primary_key=True),
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+)
 
 class User(Base):
     __tablename__ = "users"
@@ -62,3 +69,4 @@ class Job(Base):
 
     # Relationship
     employer = relationship("User", foreign_keys=[employer_id])
+    applicants = relationship("User", secondary=job_applicants, backref="applied_jobs")
