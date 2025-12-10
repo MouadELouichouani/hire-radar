@@ -17,7 +17,7 @@ import { Plus } from "lucide-react"
 import { useState } from "react"
 import { toast } from "sonner"
 
-export function AddSkillCategory({ toAdd }: { toAdd: string }) {
+export function AddSkillCategory({ toAdd, onAdded }: { toAdd: string, onAdded: (data?: any) => void }) {
 
     const [loading,setLoading] = useState(false)
     const [name, setName] = useState('')
@@ -31,6 +31,7 @@ export function AddSkillCategory({ toAdd }: { toAdd: string }) {
                 const res = await addSkill(getToken()!, name)
                 if(res.status === 200){
                     toast.success("New skill added successfully")
+                    onAdded?.(res.data)
                 }
                 break
 

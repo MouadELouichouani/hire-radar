@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { DataTable } from '@/components/dataTable'
 import { getSkills } from '@/services/shared'
 import { Button } from '@/components/ui/button'
+import { AddSkillCategory } from '@/components/add-edit'
 
 const columns = [
   { accessorKey: "id", header: "ID" },
@@ -30,6 +31,11 @@ const page = () => {
     setSkills(prev => prev.filter(s => s.id !== skillId)) 
   }
 
+  const handleAdd = (newSkill: Skill) => {
+    setSkills(prev => [...prev, newSkill])
+  }
+
+
   useEffect(() =>{
     fetchSkills()
   },[])
@@ -43,6 +49,7 @@ const page = () => {
         content={'skill'} 
         columns={columns} 
         showMenu={false}
+        addComponent={<AddSkillCategory toAdd="skill" onAdded={handleAdd} />}
         actions={[
         { label: "Delete", onClick: (userId: number) => handleDelete(userId), variant: "destructive" },
         { label: "Edit", onClick: (userId: number) => handleDelete(userId), variant: "destructive" },

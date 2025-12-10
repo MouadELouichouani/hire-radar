@@ -161,7 +161,7 @@ def add_skill():
     db.refresh(new_skill)
     db.close()
 
-    return jsonify({"message": "Skill added successfully", "skill": {"id": new_skill.id, "name": new_skill.name}})
+    return jsonify({"id": new_skill.id, "name": new_skill.name})
 
 # ============================================================
 # 8. DELETE /admin/skills/<id> → Delete skill
@@ -249,7 +249,7 @@ def add_category():
     db.refresh(new_category)
     db.close()
 
-    return jsonify({"message": "Category added successfully", "category": {"id": new_category.id, "name": new_category.name}})
+    return jsonify({"id": new_category.id, "name": new_category.name})
 
 
 # ============================================================

@@ -12,7 +12,7 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table"
-import { ChevronDown, Plus } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -40,6 +40,7 @@ interface DataTableProps<TData> {
   columns: any[]
   content: string
   showMenu?: boolean
+  addComponent?: React.ReactNode
   actions?: {
     label: string
     onClick: (id: number) => void
@@ -47,7 +48,7 @@ interface DataTableProps<TData> {
   }[]
 }
 
-export function DataTable<TData extends { id: number, name?: string }>({ data, columns, showMenu= true, content, actions }: DataTableProps<TData>) {
+export function DataTable<TData extends { id: number, name?: string }>({ data, columns, showMenu= true, content, actions, addComponent }: DataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
@@ -121,15 +122,7 @@ export function DataTable<TData extends { id: number, name?: string }>({ data, c
                 </DropdownMenu>
               )}
             </div>
-
-            {content === "skill" && (
-              <AddSkillCategory toAdd="skill"/>
-            )}
-
-            {content === "category" && (
-              <AddSkillCategory toAdd="category"/>
-            )}
-
+            {addComponent}
         </div>
       </div>
 
