@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from config.db import Base, engine
 from routes.auth import auth
+from routes.admin import admin_bp
 import os
 from dotenv import load_dotenv
 
@@ -19,6 +20,7 @@ CORS(
 )
 
 app.register_blueprint(auth, url_prefix="/api/auth")
+app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
 
 @app.route("/")

@@ -192,7 +192,7 @@ def signup():
         db.refresh(new_user)
 
         token = jwt.encode(
-            {"id": new_user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+            {"id": new_user.id,"role": new_user.role, "exp": datetime.utcnow() + timedelta(hours=24)},
             JWT_SECRET,
             algorithm="HS256",
         )
@@ -225,7 +225,7 @@ def login():
             return jsonify({"error": "Invalid email or password"}), 400
 
         token = jwt.encode(
-            {"id": user.id, "exp": datetime.utcnow() + timedelta(hours=24)},
+            {"id": user.id, "role": user.role, "exp": datetime.utcnow() + timedelta(hours=24)},
             JWT_SECRET,
             algorithm="HS256",
         )

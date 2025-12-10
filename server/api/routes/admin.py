@@ -1,0 +1,32 @@
+from flask import Blueprint
+from middlewares.auth import admin_required
+from controllers.admin import (
+    get_platform_stats,
+    get_all_users,
+    delete_user,
+    get_all_jobs,
+    delete_job,
+    get_all_skills,
+    delete_skill,
+    update_skill,
+    get_all_categories,
+    delete_category,
+    update_category,
+)
+
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+
+admin_bp.get("/stats")(admin_required(get_platform_stats))
+admin_bp.get("/users")(admin_required(get_all_users))
+admin_bp.delete("/users/<int:user_id>")(admin_required(delete_user))
+
+admin_bp.get("/jobs")(admin_required(get_all_jobs))
+admin_bp.delete("/jobs/<int:job_id>")(admin_required(delete_job))
+
+admin_bp.get("/skills")(admin_required(get_all_skills))
+admin_bp.delete("/skills/<int:skill_id>")(admin_required(delete_skill))
+admin_bp.put("/skills/<int:skill_id>")(admin_required(update_skill))
+
+admin_bp.get("/categories")(admin_required(get_all_categories))
+admin_bp.delete("/categories/<int:category_id>")(admin_required(delete_category))
+admin_bp.put("/categories/<int:category_id>")(admin_required(update_category))
