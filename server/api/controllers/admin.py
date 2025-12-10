@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func
-
+from sqlalchemy.exc import IntegrityError
 from config.db import SessionLocal
 from core.models import User, Job, Application, Skill, Category
 
@@ -134,9 +134,37 @@ def get_all_skills():
     db.close()
     return jsonify(data), 200
 
+# ============================================================
+# 7. POST /admin/skills → add skill
+# ============================================================
+def add_skill():
+    db = SessionLocal()
+
+    data = request.get_json()
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"error": "Skill name is required"}), 400
+
+    if db.query(Skill).filter(Skill.name.ilike(name)).first():
+        return jsonify({"error": "Skill already exists"}), 400
+
+    new_skill = Skill(name=name)
+
+    db.add(new_skill)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return jsonify({"error": "Skill already exists"}), 400
+
+    db.refresh(new_skill)
+    db.close()
+
+    return jsonify({"message": "Skill added successfully", "skill": {"id": new_skill.id, "name": new_skill.name}})
 
 # ============================================================
-# 7. DELETE /admin/skills/<id> → Delete skill
+# 8. DELETE /admin/skills/<id> → Delete skill
 # ============================================================
 def delete_skill(skill_id):
     db = SessionLocal()
@@ -155,7 +183,7 @@ def delete_skill(skill_id):
 
 
 # ============================================================
-# 8. PUT /admin/skills/<id> → Update skill
+# 9. PUT /admin/skills/<id> → Update skill
 # ============================================================
 def update_skill(skill_id):
     db = SessionLocal()
@@ -181,7 +209,7 @@ def update_skill(skill_id):
 
 
 # ============================================================
-# 9. GET /admin/categories → List all categories
+# 10. GET /admin/categories → List all categories
 # ============================================================
 def get_all_categories():
     db = SessionLocal()
@@ -194,7 +222,38 @@ def get_all_categories():
 
 
 # ============================================================
-# 10. DELETE /admin/categories/<id>
+# 11. POST /admin/categories → add new category
+# ============================================================
+def add_category():
+    db = SessionLocal()
+
+    data = request.get_json()
+    name = data.get("name")
+
+    if not name:
+        return jsonify({"error": "Category name is required"}), 400
+
+    # Check if category already exists
+    if db.query(Category).filter(Category.name.ilike(name)).first():
+        return jsonify({"error": "Category already exists"}), 400
+
+    new_category = Category(name=name)
+
+    db.add(new_category)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        return jsonify({"error": "Category already exists"}), 400
+
+    db.refresh(new_category)
+    db.close()
+
+    return jsonify({"message": "Category added successfully", "category": {"id": new_category.id, "name": new_category.name}})
+
+
+# ============================================================
+# 12. DELETE /admin/categories/<id>
 # ============================================================
 def delete_category(category_id):
     db = SessionLocal()
@@ -213,11 +272,11 @@ def delete_category(category_id):
 
 
 # ============================================================
-# 11. PUT /admin/categories/<id> → Update category name
+# 13. PUT /admin/categories/<id> → Update category name
 # ============================================================
 def update_category(category_id):
     db = SessionLocal()
-
+    print(category_id)
     category = db.query(Category).filter(Category.id == category_id).first()
 
     if not category:
