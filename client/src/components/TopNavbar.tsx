@@ -72,7 +72,13 @@ export default function TopNavbar() {
           href="/"
           className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
         >
-          <Image src="/radar.svg" alt="Hire Radar" width={28} height={28} />
+          <Image 
+            src="/radar.svg" 
+            alt="Hire Radar" 
+            width={28} 
+            height={28} 
+            className="invert dark:invert-0" 
+          />
           <span className="hidden sm:inline">Hire Radar</span>
         </Link>
 
@@ -131,7 +137,7 @@ export default function TopNavbar() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={currentUser.image || undefined}
+                      src={currentUser.image && currentUser.image.trim() !== "" ? currentUser.image : undefined}
                       alt={currentUser.full_name}
                     />
                     <AvatarFallback className="bg-foreground text-background text-xs font-semibold">

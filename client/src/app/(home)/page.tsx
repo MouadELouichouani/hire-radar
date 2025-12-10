@@ -23,45 +23,55 @@ export default function Home() {
 
   // Format job as feed post
   const jobFeedPosts = useMemo(() => {
-    return jobs.map((job) => ({
-      id: job.id,
-      author: {
-        name: job.company_name || job.company || "Company",
-        title: job.employment_type
-          ? `${job.employment_type.replace("-", " ")} • ${job.location || "Remote"}`
-          : job.location || "Remote",
-        avatar: (job.company_name || job.company || "C")
-          .split(" ")
-          .map((n: string) => n[0])
-          .join("")
-          .toUpperCase()
-          .slice(0, 2),
-      },
-      title: job.title,
-      content: (
-        <div className="my-6">
-          <p className="text-muted-foreground mb-4 line-clamp-3">
-            {job.description}
-          </p>
-          {job.skills && job.skills.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {job.skills.slice(0, 6).map((skill, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-muted text-muted-foreground rounded-lg text-xs font-semibold"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      ),
-      likes: 0,
-      comments: 0,
-      job: job,
-    }));
-  }, [jobs]);
+    return jobs.map((job) => {
+      // If current user is the employer who posted this job, use their image
+      const isCurrentUserJob = currentUser?.role === "employer" && 
+        currentUser?.id === job.employer_id;
+      const avatarUrl = isCurrentUserJob && currentUser?.image && currentUser.image.trim() !== "" 
+        ? currentUser.image 
+        : undefined;
+      
+      return {
+        id: job.id,
+        author: {
+          name: job.company_name || job.company || "Company",
+          title: job.employment_type
+            ? `${job.employment_type.replace("-", " ")} • ${job.location || "Remote"}`
+            : job.location || "Remote",
+          avatar: (job.company_name || job.company || "C")
+            .split(" ")
+            .map((n: string) => n[0])
+            .join("")
+            .toUpperCase()
+            .slice(0, 2),
+          avatarUrl: avatarUrl || undefined,
+        },
+        title: job.title,
+        content: (
+          <div className="my-6">
+            <p className="text-muted-foreground mb-4 line-clamp-3">
+              {job.description}
+            </p>
+            {job.skills && job.skills.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {job.skills.slice(0, 6).map((skill, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-muted text-muted-foreground rounded-lg text-xs font-semibold"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ),
+        likes: 0,
+        comments: 0,
+        job: job,
+      };
+    });
+  }, [jobs, currentUser]);
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">

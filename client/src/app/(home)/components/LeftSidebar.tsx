@@ -9,14 +9,14 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useCurrentUser } from "@/features/auth/hook";
+import type { User } from "@/types";
+import ProfileHeader from "@/app/profile/components/profile-header";
 
 export default function LeftSidebar() {
-  const { data: currentUser } = useCurrentUser();
+  const { data } = useCurrentUser();
+  const currentUser = data as User | undefined;
   const hashtags = [
     "work",
     "business",
@@ -29,63 +29,13 @@ export default function LeftSidebar() {
     "freelance",
   ];
 
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
   return (
     <aside className="fixed left-0 top-16 bottom-0 w-64 bg-card border-r border-border overflow-y-auto">
       <div className="p-4">
         {/* User Profile Card */}
-        <Card className="border-border mb-4">
-          <CardContent className="p-4">
-          <div className="flex items-center gap-3 mb-3">
-              <Avatar className="h-12 w-12">
-                <AvatarFallback className="bg-foreground text-background font-semibold">
-                  {currentUser
-                    ? getInitials(currentUser.full_name)
-                    : "ME"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-sm truncate">
-                  {currentUser?.full_name || "User"}
-                </h3>
-                <p className="text-xs text-muted-foreground truncate">
-                  {currentUser?.role === "candidate"
-                    ? "Candidate"
-                    : currentUser?.role === "employer"
-                      ? "Employer"
-                      : "User"}
-                </p>
-            </div>
-          </div>
-          <div className="mb-3">
-            <div className="flex justify-between text-xs mb-1">
-                <span className="text-muted-foreground">Profile completion</span>
-                <span className="text-muted-foreground">90%</span>
-            </div>
-              <div className="w-full bg-muted rounded-full h-2">
-              <div
-                  className="bg-foreground h-2 rounded-full"
-                style={{ width: "90%" }}
-                />
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              className="w-full border-border"
-              size="sm"
-            >
-            + Add another account
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="mb-4">
+          <ProfileHeader user={currentUser} compact={true} />
+        </div>
 
         {/* Navigation Links */}
         <nav className="space-y-1 mb-6">

@@ -53,7 +53,10 @@ export default function FeedPost({
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={author.avatarUrl || undefined} alt={author.name} />
+            <AvatarImage 
+              src={author.avatarUrl && author.avatarUrl.trim() !== "" ? author.avatarUrl : undefined} 
+              alt={author.name} 
+            />
             <AvatarFallback className="bg-foreground text-background font-semibold">
               {getInitials(author.name)}
             </AvatarFallback>
@@ -96,7 +99,7 @@ export default function FeedPost({
       <div className="flex items-center gap-2">
           <Avatar className="h-8 w-8">
           <AvatarImage
-            src={currentUser?.image || undefined}
+            src={currentUser?.image && currentUser.image.trim() !== "" ? currentUser.image : undefined}
             alt={currentUser?.full_name || "User"}
           />
           <AvatarFallback className="bg-foreground text-background font-semibold text-xs">

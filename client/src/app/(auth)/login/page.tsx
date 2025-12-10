@@ -26,12 +26,13 @@ export default function LoginPage() {
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="/" className="flex items-center gap-2 font-medium">
-            <div className=" size-6 items-center justify-center rounded-md">
+            <div className="size-6 items-center justify-center rounded-md">
               <Image
                 src={"/radar.svg"}
                 alt="hire-radar"
                 width={25}
                 height={25}
+                className="invert dark:invert-0"
               />
             </div>
             Hire-radar

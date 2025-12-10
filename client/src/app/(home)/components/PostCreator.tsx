@@ -32,7 +32,7 @@ export default function PostCreator() {
       <div className="flex items-start gap-3">
         <Avatar className="h-10 w-10">
           <AvatarImage
-            src={currentUser?.image || undefined}
+            src={currentUser?.image && currentUser.image.trim() !== "" ? currentUser.image : undefined}
             alt={currentUser?.full_name || "User"}
           />
           <AvatarFallback className="bg-foreground text-background font-semibold">
