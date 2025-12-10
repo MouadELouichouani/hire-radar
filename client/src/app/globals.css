@@ -150,4 +150,10 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+  img[src*="radar.svg"] {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
 }

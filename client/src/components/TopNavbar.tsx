@@ -2,7 +2,6 @@
 
 import { Search, Bell, User, LogOut, Bookmark } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/auth/hook";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -72,12 +71,13 @@ export default function TopNavbar() {
           href="/"
           className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
         >
-          <Image 
+          <img 
             src="/radar.svg" 
             alt="Hire Radar" 
             width={28} 
             height={28} 
-            className="invert dark:invert-0" 
+            className="invert dark:invert-0 border-0 bg-transparent outline-none" 
+            style={{ display: 'block' }}
           />
           <span className="hidden sm:inline">Hire Radar</span>
         </Link>
