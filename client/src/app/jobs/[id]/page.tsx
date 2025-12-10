@@ -1,7 +1,11 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useJob, useApplyJob, useRecommendedCandidates } from "@/features/jobs/hooks";
+import {
+  useJob,
+  useApplyJob,
+  useRecommendedCandidates,
+} from "@/features/jobs/hooks";
 import { useCurrentUser } from "@/features/auth/hook";
 import TopNavbar from "@/components/TopNavbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,16 +41,10 @@ export default function JobDetailsPage() {
   const jobId = parseInt(params.id as string);
   const { data: currentUser } = useCurrentUser();
 
-  const {
-    data: job,
-    isLoading,
-    isError,
-  } = useJob(jobId);
+  const { data: job, isLoading, isError } = useJob(jobId);
 
-  const {
-    data: recommendedCandidates,
-    isLoading: isLoadingCandidates,
-  } = useRecommendedCandidates(jobId);
+  const { data: recommendedCandidates, isLoading: isLoadingCandidates } =
+    useRecommendedCandidates(jobId);
 
   const applyMutation = useApplyJob();
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -165,19 +163,31 @@ export default function JobDetailsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2 mb-6">
                       {formatSalary() && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
                           <DollarSign className="w-3 h-3" />
                           {formatSalary()}
                         </Badge>
                       )}
                       {(job.employment_type || job.emp_type) && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
                           <Briefcase className="w-3 h-3" />
-                          {(job.employment_type || job.emp_type || "").replace("-", " ")}
+                          {(job.employment_type || job.emp_type || "").replace(
+                            "-",
+                            " ",
+                          )}
                         </Badge>
                       )}
                       {job.created_at && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
+                        <Badge
+                          variant="secondary"
+                          className="flex items-center gap-1"
+                        >
                           <Calendar className="w-3 h-3" />
                           Posted {new Date(job.created_at).toLocaleDateString()}
                         </Badge>
@@ -271,59 +281,62 @@ export default function JobDetailsPage() {
             </Card>
 
             {/* Recommended Candidates (for employers) */}
-            {isEmployer && recommendedCandidates && recommendedCandidates.length > 0 && (
-              <Card className="border-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    Recommended Candidates
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {isLoadingCandidates ? (
-                      <div className="space-y-2">
-                        {[1, 2, 3].map((i) => (
-                          <Skeleton key={i} className="h-16 w-full" />
-                        ))}
-                      </div>
-                    ) : (
-                      recommendedCandidates.slice(0, 5).map((candidate) => (
-                        <div
-                          key={candidate.id}
-                          className="flex items-center gap-3 p-3 rounded-md hover:bg-accent transition-colors cursor-not-allowed opacity-50"
-                        >
-                          <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              src={candidate.user?.image || undefined}
-                              alt={candidate.user?.full_name || "Candidate"}
-                            />
-                            <AvatarFallback className="bg-foreground text-background text-xs">
-                              {candidate.user?.full_name
-                                ?.split(" ")
-                                .map((n) => n[0])
-                                .join("")
-                                .toUpperCase()
-                                .slice(0, 2) || "C"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">
-                              {candidate.user?.full_name || "Candidate"}
-                            </p>
-                            {candidate.match_score && (
-                              <p className="text-xs text-muted-foreground">
-                                {Math.round(candidate.match_score * 100)}% match
-                              </p>
-                            )}
-                          </div>
+            {isEmployer &&
+              recommendedCandidates &&
+              recommendedCandidates.length > 0 && (
+                <Card className="border-border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="w-5 h-5" />
+                      Recommended Candidates
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {isLoadingCandidates ? (
+                        <div className="space-y-2">
+                          {[1, 2, 3].map((i) => (
+                            <Skeleton key={i} className="h-16 w-full" />
+                          ))}
                         </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                      ) : (
+                        recommendedCandidates.slice(0, 5).map((candidate) => (
+                          <div
+                            key={candidate.id}
+                            className="flex items-center gap-3 p-3 rounded-md hover:bg-accent transition-colors cursor-not-allowed opacity-50"
+                          >
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage
+                                src={candidate.user?.image || undefined}
+                                alt={candidate.user?.full_name || "Candidate"}
+                              />
+                              <AvatarFallback className="bg-foreground text-background text-xs">
+                                {candidate.user?.full_name
+                                  ?.split(" ")
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()
+                                  .slice(0, 2) || "C"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-sm truncate">
+                                {candidate.user?.full_name || "Candidate"}
+                              </p>
+                              {candidate.match_score && (
+                                <p className="text-xs text-muted-foreground">
+                                  {Math.round(candidate.match_score * 100)}%
+                                  match
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
           </div>
         </div>
 
@@ -364,7 +377,9 @@ export default function JobDetailsPage() {
                 disabled={applyMutation.isPending}
                 className="bg-foreground text-background hover:bg-foreground/90"
               >
-                {applyMutation.isPending ? "Submitting..." : "Submit Application"}
+                {applyMutation.isPending
+                  ? "Submitting..."
+                  : "Submit Application"}
               </Button>
             </DialogFooter>
           </DialogContent>

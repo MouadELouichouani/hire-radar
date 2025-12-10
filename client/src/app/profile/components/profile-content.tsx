@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { Shield, Key, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -13,8 +19,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useCurrentUser } from "@/features/auth/hook";
-import { useCandidateProfile, useUpdateCandidateProfile } from "@/features/profile/hooks";
-import { useEmployerProfile, useUpdateEmployerProfile } from "@/features/profile/hooks";
+import {
+  useCandidateProfile,
+  useUpdateCandidateProfile,
+} from "@/features/profile/hooks";
+import {
+  useEmployerProfile,
+  useUpdateEmployerProfile,
+} from "@/features/profile/hooks";
 import type { User } from "@/types";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 
@@ -24,17 +36,17 @@ export default function ProfileContent() {
   const userId = useCurrentUserId();
 
   // Fetch profile data based on role
-  const { data: candidateProfile, isLoading: isLoadingCandidate } = useCandidateProfile(
-    userId,
-  );
-  const { data: employerProfile, isLoading: isLoadingEmployer } = useEmployerProfile(
-    userId,
-  );
+  const { data: candidateProfile, isLoading: isLoadingCandidate } =
+    useCandidateProfile(userId);
+  const { data: employerProfile, isLoading: isLoadingEmployer } =
+    useEmployerProfile(userId);
   const updateCandidate = useUpdateCandidateProfile(userId);
   const updateEmployer = useUpdateEmployerProfile(userId);
 
-  const isLoading = currentUser?.role === "candidate" ? isLoadingCandidate : isLoadingEmployer;
-  const profile = currentUser?.role === "candidate" ? candidateProfile : employerProfile;
+  const isLoading =
+    currentUser?.role === "candidate" ? isLoadingCandidate : isLoadingEmployer;
+  const profile =
+    currentUser?.role === "candidate" ? candidateProfile : employerProfile;
 
   // Form state
   const [formData, setFormData] = useState({
@@ -58,9 +70,11 @@ export default function ProfileContent() {
   });
 
   // Update form data when profile loads
+  // Note: This syncs form state with async profile data - necessary use case
   useEffect(() => {
     if (profile) {
       if (currentUser?.role === "candidate" && candidateProfile) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFormData({
           full_name: candidateProfile.full_name || "",
           company_name: "",
@@ -81,6 +95,7 @@ export default function ProfileContent() {
           portfolio_url: candidateProfile.portfolio_url || "",
         });
       } else if (currentUser?.role === "employer" && employerProfile) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFormData({
           full_name: "",
           company_name: employerProfile.company_name || "",
@@ -110,7 +125,7 @@ export default function ProfileContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (currentUser?.role === "candidate") {
       try {
         await updateCandidate.mutateAsync({
@@ -173,7 +188,9 @@ export default function ProfileContent() {
           <Card>
             <CardHeader>
               <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your personal details and profile information.</CardDescription>
+              <CardDescription>
+                Update your personal details and profile information.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -184,7 +201,9 @@ export default function ProfileContent() {
                       <Input
                         id="full_name"
                         value={formData.full_name}
-                        onChange={(e) => handleInputChange("full_name", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("full_name", e.target.value)
+                        }
                         required
                       />
                     </div>
@@ -194,7 +213,9 @@ export default function ProfileContent() {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
                         required
                       />
                     </div>
@@ -203,7 +224,9 @@ export default function ProfileContent() {
                       <Input
                         id="phone"
                         value={formData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -211,16 +234,25 @@ export default function ProfileContent() {
                       <Input
                         id="location"
                         value={formData.location}
-                        onChange={(e) => handleInputChange("location", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("location", e.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="experience_years">Years of Experience</Label>
+                      <Label htmlFor="experience_years">
+                        Years of Experience
+                      </Label>
                       <Input
                         id="experience_years"
                         type="number"
                         value={formData.experience_years || ""}
-                        onChange={(e) => handleInputChange("experience_years", parseInt(e.target.value) || 0)}
+                        onChange={(e) =>
+                          handleInputChange(
+                            "experience_years",
+                            parseInt(e.target.value) || 0,
+                          )
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -228,7 +260,9 @@ export default function ProfileContent() {
                       <Input
                         id="education"
                         value={formData.education}
-                        onChange={(e) => handleInputChange("education", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("education", e.target.value)
+                        }
                       />
                     </div>
                   </>
@@ -239,7 +273,9 @@ export default function ProfileContent() {
                       <Input
                         id="company_name"
                         value={formData.company_name}
-                        onChange={(e) => handleInputChange("company_name", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("company_name", e.target.value)
+                        }
                         required
                       />
                     </div>
@@ -249,7 +285,9 @@ export default function ProfileContent() {
                         id="email"
                         type="email"
                         value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("email", e.target.value)
+                        }
                         required
                       />
                     </div>
@@ -258,7 +296,9 @@ export default function ProfileContent() {
                       <Input
                         id="phone"
                         value={formData.phone}
-                        onChange={(e) => handleInputChange("phone", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("phone", e.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -267,7 +307,9 @@ export default function ProfileContent() {
                         id="website"
                         type="url"
                         value={formData.website}
-                        onChange={(e) => handleInputChange("website", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("website", e.target.value)
+                        }
                         placeholder="https://example.com"
                       />
                     </div>
@@ -276,7 +318,9 @@ export default function ProfileContent() {
                       <Input
                         id="industry"
                         value={formData.industry}
-                        onChange={(e) => handleInputChange("industry", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("industry", e.target.value)
+                        }
                       />
                     </div>
                     <div className="space-y-2">
@@ -284,7 +328,9 @@ export default function ProfileContent() {
                       <Input
                         id="company_size"
                         value={formData.company_size}
-                        onChange={(e) => handleInputChange("company_size", e.target.value)}
+                        onChange={(e) =>
+                          handleInputChange("company_size", e.target.value)
+                        }
                         placeholder="e.g., 1-10, 11-50, 51-200"
                       />
                     </div>
@@ -309,7 +355,9 @@ export default function ProfileContent() {
                       id="linkedin_url"
                       type="url"
                       value={formData.linkedin_url}
-                      onChange={(e) => handleInputChange("linkedin_url", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("linkedin_url", e.target.value)
+                      }
                       placeholder="https://linkedin.com/in/yourprofile"
                     />
                   </div>
@@ -319,7 +367,9 @@ export default function ProfileContent() {
                       id="github_url"
                       type="url"
                       value={formData.github_url}
-                      onChange={(e) => handleInputChange("github_url", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("github_url", e.target.value)
+                      }
                       placeholder="https://github.com/yourusername"
                     />
                   </div>
@@ -329,7 +379,9 @@ export default function ProfileContent() {
                       id="portfolio_url"
                       type="url"
                       value={formData.portfolio_url}
-                      onChange={(e) => handleInputChange("portfolio_url", e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("portfolio_url", e.target.value)
+                      }
                       placeholder="https://yourportfolio.com"
                     />
                   </div>
@@ -342,7 +394,9 @@ export default function ProfileContent() {
                     id="linkedin_url"
                     type="url"
                     value={formData.linkedin_url}
-                    onChange={(e) => handleInputChange("linkedin_url", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("linkedin_url", e.target.value)
+                    }
                     placeholder="https://linkedin.com/company/yourcompany"
                   />
                 </div>
@@ -350,7 +404,9 @@ export default function ProfileContent() {
               <div className="flex justify-end gap-2">
                 <Button
                   type="submit"
-                  disabled={updateCandidate.isPending || updateEmployer.isPending}
+                  disabled={
+                    updateCandidate.isPending || updateEmployer.isPending
+                  }
                 >
                   {(updateCandidate.isPending || updateEmployer.isPending) && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -368,15 +424,22 @@ export default function ProfileContent() {
         <Card>
           <CardHeader>
             <CardTitle>Account Settings</CardTitle>
-            <CardDescription>Manage your account preferences and subscription.</CardDescription>
+            <CardDescription>
+              Manage your account preferences and subscription.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <Label className="text-base">Account Status</Label>
-                <p className="text-muted-foreground text-sm">Your account is currently active</p>
+                <p className="text-muted-foreground text-sm">
+                  Your account is currently active
+                </p>
               </div>
-              <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+              <Badge
+                variant="outline"
+                className="border-green-200 bg-green-50 text-green-700"
+              >
                 Active
               </Badge>
             </div>
@@ -384,7 +447,9 @@ export default function ProfileContent() {
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <Label className="text-base">Subscription Plan</Label>
-                <p className="text-muted-foreground text-sm">Pro Plan - $29/month</p>
+                <p className="text-muted-foreground text-sm">
+                  Pro Plan - $29/month
+                </p>
               </div>
               <Button variant="outline">Manage Subscription</Button>
             </div>
@@ -402,7 +467,9 @@ export default function ProfileContent() {
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <Label className="text-base">Data Export</Label>
-                <p className="text-muted-foreground text-sm">Download a copy of your data</p>
+                <p className="text-muted-foreground text-sm">
+                  Download a copy of your data
+                </p>
               </div>
               <Button variant="outline">Export Data</Button>
             </div>
@@ -412,7 +479,9 @@ export default function ProfileContent() {
         <Card className="border-destructive/50">
           <CardHeader>
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            <CardDescription>Irreversible and destructive actions</CardDescription>
+            <CardDescription>
+              Irreversible and destructive actions
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -436,14 +505,18 @@ export default function ProfileContent() {
         <Card>
           <CardHeader>
             <CardTitle>Security Settings</CardTitle>
-            <CardDescription>Manage your account security and authentication.</CardDescription>
+            <CardDescription>
+              Manage your account security and authentication.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label className="text-base">Password</Label>
-                  <p className="text-muted-foreground text-sm">Last changed 3 months ago</p>
+                  <p className="text-muted-foreground text-sm">
+                    Last changed 3 months ago
+                  </p>
                 </div>
                 <Button variant="outline">
                   <Key className="mr-2 h-4 w-4" />
@@ -459,7 +532,10 @@ export default function ProfileContent() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
+                  <Badge
+                    variant="outline"
+                    className="border-green-200 bg-green-50 text-green-700"
+                  >
                     Enabled
                   </Badge>
                   <Button variant="outline" size="sm">
@@ -500,14 +576,18 @@ export default function ProfileContent() {
         <Card>
           <CardHeader>
             <CardTitle>Notification Preferences</CardTitle>
-            <CardDescription>Choose what notifications you want to receive.</CardDescription>
+            <CardDescription>
+              Choose what notifications you want to receive.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <Label className="text-base">Email Notifications</Label>
-                  <p className="text-muted-foreground text-sm">Receive notifications via email</p>
+                  <p className="text-muted-foreground text-sm">
+                    Receive notifications via email
+                  </p>
                 </div>
                 <Switch defaultChecked />
               </div>

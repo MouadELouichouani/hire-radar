@@ -34,13 +34,8 @@ export function useCandidate(id: number) {
 export function useUpdateCandidate() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: number;
-      data: Partial<Candidate>;
-    }) => candidatesApi.update(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Candidate> }) =>
+      candidatesApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["candidate", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["candidates"] });

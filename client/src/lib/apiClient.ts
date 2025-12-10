@@ -32,7 +32,8 @@ apiClient.interceptors.response.use(
       // Only redirect if we're on the client side
       if (typeof window !== "undefined") {
         // Clear token
-        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         // Redirect to login
         window.location.href = "/login";
       }

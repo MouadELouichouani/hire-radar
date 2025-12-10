@@ -27,10 +27,14 @@ import { Label } from "@/components/ui/label";
 export default function SearchJobsPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("search") || "");
+
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("search") || "",
+  );
   const [location, setLocation] = useState(searchParams.get("location") || "");
-  const [salaryMin, setSalaryMin] = useState(searchParams.get("salary_min") || "");
+  const [salaryMin, setSalaryMin] = useState(
+    searchParams.get("salary_min") || "",
+  );
   const [skill, setSkill] = useState(searchParams.get("skill") || "");
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
@@ -102,7 +106,9 @@ export default function SearchJobsPage() {
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl pt-24">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 tracking-tight">Find Your Dream Job</h1>
+          <h1 className="text-4xl font-bold mb-2 tracking-tight">
+            Find Your Dream Job
+          </h1>
           <p className="text-muted-foreground">
             Discover opportunities that match your skills and interests
           </p>
@@ -176,17 +182,17 @@ export default function SearchJobsPage() {
               <Card className="border-border">
                 <CardContent className="p-6">
                   <p className="text-destructive mb-4">
-                  {error instanceof Error
-                    ? error.message
-                    : "Failed to load jobs. Please try again."}
-                </p>
-                <Button
-                  onClick={() => window.location.reload()}
-                  variant="outline"
+                    {error instanceof Error
+                      ? error.message
+                      : "Failed to load jobs. Please try again."}
+                  </p>
+                  <Button
+                    onClick={() => window.location.reload()}
+                    variant="outline"
                     className="border-border"
-                >
-                  Reload Page
-                </Button>
+                  >
+                    Reload Page
+                  </Button>
                 </CardContent>
               </Card>
             )}
@@ -260,9 +266,9 @@ export default function SearchJobsPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-            setIsApplyModalOpen(false);
+                  setIsApplyModalOpen(false);
                   setCoverLetter("");
-          }}
+                }}
                 className="border-border"
               >
                 Cancel
@@ -272,7 +278,9 @@ export default function SearchJobsPage() {
                 disabled={applyMutation.isPending}
                 className="bg-foreground text-background hover:bg-foreground/90"
               >
-                {applyMutation.isPending ? "Submitting..." : "Submit Application"}
+                {applyMutation.isPending
+                  ? "Submitting..."
+                  : "Submit Application"}
               </Button>
             </DialogFooter>
           </DialogContent>

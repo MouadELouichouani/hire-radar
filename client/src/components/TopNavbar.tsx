@@ -27,7 +27,9 @@ export default function TopNavbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/jobs/search?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(
+        `/jobs/search?search=${encodeURIComponent(searchQuery.trim())}`,
+      );
     } else {
       router.push("/jobs/search");
     }
@@ -59,9 +61,7 @@ export default function TopNavbar() {
   // Note: candidate_id is not available from /auth/me endpoint
   // Saved jobs endpoint doesn't exist in backend yet anyway
   const savedJobsUrl =
-    currentUser?.role === "candidate"
-      ? "/dashboard/candidate/saved-jobs"
-      : "#";
+    currentUser?.role === "candidate" ? "/dashboard/candidate/saved-jobs" : "#";
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -71,13 +71,13 @@ export default function TopNavbar() {
           href="/"
           className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
         >
-          <img 
-            src="/radar.svg" 
-            alt="Hire Radar" 
-            width={28} 
-            height={28} 
-            className="invert dark:invert-0 border-0 bg-transparent outline-none" 
-            style={{ display: 'block' }}
+          <img
+            src="/radar.svg"
+            alt="Hire Radar"
+            width={28}
+            height={28}
+            className="invert dark:invert-0 border-0 bg-transparent outline-none"
+            style={{ display: "block" }}
           />
           <span className="hidden sm:inline">Hire Radar</span>
         </Link>
@@ -137,7 +137,11 @@ export default function TopNavbar() {
                 >
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={currentUser.image && currentUser.image.trim() !== "" ? currentUser.image : undefined}
+                      src={
+                        currentUser.image && currentUser.image.trim() !== ""
+                          ? currentUser.image
+                          : undefined
+                      }
                       alt={currentUser.full_name}
                     />
                     <AvatarFallback className="bg-foreground text-background text-xs font-semibold">

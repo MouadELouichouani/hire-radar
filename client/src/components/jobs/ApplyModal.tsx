@@ -64,7 +64,9 @@ export default function ApplyModal({
       <DialogContent className="border-border max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Apply for {job.title}</DialogTitle>
-          <DialogDescription>{job.company_name || job.company}</DialogDescription>
+          <DialogDescription>
+            {job.company_name || job.company}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">

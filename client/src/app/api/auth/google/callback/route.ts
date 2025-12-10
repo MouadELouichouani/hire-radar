@@ -6,19 +6,19 @@ export async function GET(req: NextRequest) {
   const code = url.searchParams.get("code");
 
   if (!code) {
-    return NextResponse.redirect(
-      new URL("/login?error=missing_code", req.url)
-    );
+    return NextResponse.redirect(new URL("/login?error=missing_code", req.url));
   }
 
   try {
     // Call the actual backend endpoint (with /api prefix)
-    const response = await apiClient.get(`/api/auth/google/callback?code=${code}`);
-  const data = response.data;
+    const response = await apiClient.get(
+      `/api/auth/google/callback?code=${code}`,
+    );
+    const data = response.data;
 
     if (!data.token) {
       return NextResponse.redirect(
-        new URL("/login?error=auth_failed", req.url)
+        new URL("/login?error=auth_failed", req.url),
       );
     }
 
@@ -32,11 +32,9 @@ export async function GET(req: NextRequest) {
       sameSite: "lax",
     });
 
-  return response2;
-  } catch (error: any) {
+    return response2;
+  } catch (error: unknown) {
     console.error("OAuth callback error:", error);
-    return NextResponse.redirect(
-      new URL("/login?error=oauth_error", req.url)
-    );
+    return NextResponse.redirect(new URL("/login?error=oauth_error", req.url));
   }
 }

@@ -31,7 +31,7 @@ export default function SignupPage() {
               width={25}
               height={25}
               className="invert dark:invert-0 border-0 bg-transparent outline-none"
-              style={{ display: 'block' }}
+              style={{ display: "block" }}
             />
             Hire-radar
           </a>

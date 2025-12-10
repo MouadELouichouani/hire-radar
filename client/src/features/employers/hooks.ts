@@ -34,13 +34,8 @@ export function useEmployer(id: number) {
 export function useUpdateEmployer() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: number;
-      data: Partial<Employer>;
-    }) => employersApi.update(id, data),
+    mutationFn: ({ id, data }: { id: number; data: Partial<Employer> }) =>
+      employersApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["employer", variables.id] });
       queryClient.invalidateQueries({ queryKey: ["employers"] });

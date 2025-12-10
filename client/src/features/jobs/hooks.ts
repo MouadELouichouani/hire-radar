@@ -1,10 +1,10 @@
-import { useQuery, useMutation, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  jobsApi,
-  candidatesApi,
-  aiApi,
-  applicationsApi,
-} from "@/lib/api";
+  useQuery,
+  useMutation,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { jobsApi, candidatesApi, aiApi, applicationsApi } from "@/lib/api";
 import type { Job, JobFilters, SavedJob } from "@/types";
 import { toast } from "sonner";
 
@@ -31,7 +31,7 @@ export function useInfiniteJobs(filters?: JobFilters) {
     getNextPageParam: (lastPage, allPages) => {
       const totalLoaded = allPages.reduce(
         (sum, page) => sum + page.jobs.length,
-        0
+        0,
       );
       // Check if there are more pages to load
       if (totalLoaded < lastPage.total) {
@@ -70,8 +70,12 @@ export function useSaveJob() {
     mutationFn: async (jobId: number) => {
       try {
         await jobsApi.save(jobId);
-      } catch (error: any) {
-        toast.error(error.message || "Save job feature not available yet");
+      } catch (error: unknown) {
+        const message =
+          error && typeof error === "object" && "message" in error
+            ? (error.message as string)
+            : "Save job feature not available yet";
+        toast.error(message);
         throw error;
       }
     },
@@ -91,8 +95,12 @@ export function useUnsaveJob() {
     mutationFn: async (jobId: number) => {
       try {
         await jobsApi.unsave(jobId);
-      } catch (error: any) {
-        toast.error(error.message || "Unsave job feature not available yet");
+      } catch (error: unknown) {
+        const message =
+          error && typeof error === "object" && "message" in error
+            ? (error.message as string)
+            : "Unsave job feature not available yet";
+        toast.error(message);
         throw error;
       }
     },
@@ -118,8 +126,12 @@ export function useApplyJob() {
     }) => {
       try {
         return await jobsApi.apply(jobId, { cover_letter: coverLetter });
-      } catch (error: any) {
-        toast.error(error.message || "Application feature not available yet");
+      } catch (error: unknown) {
+        const message =
+          error && typeof error === "object" && "message" in error
+            ? (error.message as string)
+            : "Application feature not available yet";
+        toast.error(message);
         throw error;
       }
     },

@@ -96,7 +96,10 @@ export default function SavedJobsPage() {
               <p className="text-muted-foreground mb-6">
                 Start exploring opportunities and save jobs that interest you.
               </p>
-              <Button asChild className="bg-foreground text-background hover:bg-foreground/90">
+              <Button
+                asChild
+                className="bg-foreground text-background hover:bg-foreground/90"
+              >
                 <Link href="/jobs/search">
                   <Search className="w-4 h-4 mr-2" />
                   Search Jobs
@@ -120,7 +123,7 @@ export default function SavedJobsPage() {
                   >
                     Remove
                   </Button>
-          </div>
+                </div>
               );
             })}
           </div>

@@ -10,7 +10,7 @@ export default async function middleware(req: NextRequest) {
 
   // Check if the route is protected
   const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   );
 
   if (isProtectedRoute && !token) {

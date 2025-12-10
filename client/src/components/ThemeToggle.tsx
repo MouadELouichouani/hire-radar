@@ -9,6 +9,8 @@ export function ThemeToggle() {
   const { setTheme, theme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
+  // Set mounted flag to avoid hydration mismatch
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   const current = theme === "system" ? resolvedTheme : theme;
@@ -29,4 +31,3 @@ export function ThemeToggle() {
     </Button>
   );
 }
-

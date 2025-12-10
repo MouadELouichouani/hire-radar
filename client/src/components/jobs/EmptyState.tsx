@@ -19,23 +19,23 @@ export default function EmptyState({
         <CardContent className="p-12 text-center">
           <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-xl font-bold text-foreground mb-2">
-          No jobs found
-        </h3>
+            No jobs found
+          </h3>
           <p className="text-muted-foreground mb-6">
-          {hasFilters
-            ? "Try adjusting your filters to see more results."
-            : "We couldn't find any jobs matching your search. Try different keywords or check back later."}
-        </p>
-        {hasFilters && onClearFilters && (
-          <Button
-            onClick={onClearFilters}
-            variant="outline"
+            {hasFilters
+              ? "Try adjusting your filters to see more results."
+              : "We couldn't find any jobs matching your search. Try different keywords or check back later."}
+          </p>
+          {hasFilters && onClearFilters && (
+            <Button
+              onClick={onClearFilters}
+              variant="outline"
               className="border-border"
-          >
+            >
               <FilterX className="w-4 h-4 mr-2" />
-            Clear Filters
-          </Button>
-        )}
+              Clear Filters
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>

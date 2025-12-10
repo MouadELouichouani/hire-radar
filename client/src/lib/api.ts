@@ -22,7 +22,7 @@ export const authApi = {
   login: async (email: string, password: string) => {
     const { data } = await apiClient.post<{ token: string; user: User }>(
       "/api/auth/login",
-      { email, password }
+      { email, password },
     );
     return data;
   },
@@ -43,26 +43,32 @@ export const jobsApi = {
       params.append("salary_min", filters.salary_min.toString());
     if (filters?.skill) params.append("skill", filters.skill);
     // Backend uses page/limit, not offset
-    const page = filters?.offset ? Math.floor(filters.offset / (filters.limit || 10)) + 1 : 1;
+    const page = filters?.offset
+      ? Math.floor(filters.offset / (filters.limit || 10)) + 1
+      : 1;
     const limit = filters?.limit || 10;
     params.append("page", page.toString());
     params.append("limit", limit.toString());
 
     const { data } = await apiClient.get<{
-      jobs: any[];
+      jobs: Array<{
+        id: string;
+        employer_id: string;
+        [key: string]: unknown;
+      }>;
       total: number;
       page: number;
       limit: number;
       total_pages: number;
     }>(`/api/jobs?${params.toString()}`);
-    
+
     // Backend returns string IDs, convert to numbers
     const jobs = data.jobs.map((job) => ({
       ...job,
       id: parseInt(job.id),
       employer_id: parseInt(job.employer_id),
     }));
-    
+
     return {
       jobs,
       total: data.total,
@@ -72,13 +78,17 @@ export const jobsApi = {
   },
 
   getById: async (id: number): Promise<Job> => {
-    const { data } = await apiClient.get<any>(`/api/jobs/${id}`);
+    const { data } = await apiClient.get<{
+      id: string;
+      employer_id: string;
+      [key: string]: unknown;
+    }>(`/api/jobs/${id}`);
     // Backend returns string IDs, convert to numbers
     return {
       ...data,
       id: parseInt(data.id),
       employer_id: parseInt(data.employer_id),
-    };
+    } as Job;
   },
 
   create: async (jobData: Partial<Job>): Promise<Job> => {
@@ -122,11 +132,17 @@ export const candidatesApi = {
     throw new Error("Candidate endpoint not implemented in backend");
   },
 
-  update: async (id: number, candidateData: Partial<Candidate>): Promise<Candidate> => {
+  update: async (
+    id: number,
+    candidateData: Partial<Candidate>,
+  ): Promise<Candidate> => {
     throw new Error("Update candidate endpoint not implemented in backend");
   },
 
-  uploadCV: async (id: number, file: File): Promise<{ cv_file_path: string }> => {
+  uploadCV: async (
+    id: number,
+    file: File,
+  ): Promise<{ cv_file_path: string }> => {
     throw new Error("CV upload endpoint not implemented in backend");
   },
 
@@ -159,7 +175,10 @@ export const employersApi = {
     throw new Error("Employer endpoint not implemented in backend");
   },
 
-  update: async (id: number, employerData: Partial<Employer>): Promise<Employer> => {
+  update: async (
+    id: number,
+    employerData: Partial<Employer>,
+  ): Promise<Employer> => {
     throw new Error("Update employer endpoint not implemented in backend");
   },
 };
@@ -176,7 +195,10 @@ export const applicationsApi = {
     throw new Error("Job applications endpoint not implemented in backend");
   },
 
-  update: async (id: number, status: Application["status"]): Promise<Application> => {
+  update: async (
+    id: number,
+    status: Application["status"],
+  ): Promise<Application> => {
     throw new Error("Update application endpoint not implemented in backend");
   },
 };
@@ -190,7 +212,9 @@ export const aiApi = {
     return [];
   },
 
-  recommendCandidates: async (jobId: number): Promise<RecommendedCandidate[]> => {
+  recommendCandidates: async (
+    jobId: number,
+  ): Promise<RecommendedCandidate[]> => {
     // Return empty array for now since endpoint doesn't exist
     return [];
   },

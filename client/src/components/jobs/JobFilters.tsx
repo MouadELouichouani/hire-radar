@@ -32,23 +32,26 @@ export default function JobFilters({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold">Filters</CardTitle>
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearFilters}
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearFilters}
               className="h-8 text-xs"
-          >
+            >
               <X className="w-3 h-3 mr-1" />
-            Clear
-          </Button>
-        )}
-      </div>
+              Clear
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Location Filter */}
         <div className="space-y-2">
-          <Label htmlFor="location" className="flex items-center gap-2 text-sm font-medium">
+          <Label
+            htmlFor="location"
+            className="flex items-center gap-2 text-sm font-medium"
+          >
             <MapPin className="w-4 h-4" />
             Location
           </Label>
@@ -64,7 +67,10 @@ export default function JobFilters({
 
         {/* Salary Filter */}
         <div className="space-y-2">
-          <Label htmlFor="salary" className="flex items-center gap-2 text-sm font-medium">
+          <Label
+            htmlFor="salary"
+            className="flex items-center gap-2 text-sm font-medium"
+          >
             <DollarSign className="w-4 h-4" />
             Minimum Salary
           </Label>
@@ -81,7 +87,10 @@ export default function JobFilters({
 
         {/* Skill Filter */}
         <div className="space-y-2">
-          <Label htmlFor="skill" className="flex items-center gap-2 text-sm font-medium">
+          <Label
+            htmlFor="skill"
+            className="flex items-center gap-2 text-sm font-medium"
+          >
             <Code className="w-4 h-4" />
             Skill
           </Label>

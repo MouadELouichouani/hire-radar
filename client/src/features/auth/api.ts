@@ -46,10 +46,10 @@ export const me = async (token?: string): Promise<User | null> => {
     if (token) {
       // If token is provided (e.g., from middleware), use it directly
       const { data } = await apiClient.get<User>("/api/auth/me", {
-      headers: {
+        headers: {
           Authorization: `Bearer ${token}`,
-      },
-    });
+        },
+      });
       return data;
     }
     // Otherwise use the centralized API

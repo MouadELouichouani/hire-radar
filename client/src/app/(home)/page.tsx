@@ -25,12 +25,15 @@ export default function Home() {
   const jobFeedPosts = useMemo(() => {
     return jobs.map((job) => {
       // If current user is the employer who posted this job, use their image
-      const isCurrentUserJob = currentUser?.role === "employer" && 
-        currentUser?.id === job.employer_id;
-      const avatarUrl = isCurrentUserJob && currentUser?.image && currentUser.image.trim() !== "" 
-        ? currentUser.image 
-        : undefined;
-      
+      const isCurrentUserJob =
+        currentUser?.role === "employer" && currentUser?.id === job.employer_id;
+      const avatarUrl =
+        isCurrentUserJob &&
+        currentUser?.image &&
+        currentUser.image.trim() !== ""
+          ? currentUser.image
+          : undefined;
+
       return {
         id: job.id,
         author: {
@@ -100,8 +103,8 @@ export default function Home() {
               <Card className="border-border">
                 <CardContent className="p-6">
                   <p className="text-destructive">
-                  Failed to load jobs. Please try again.
-                </p>
+                    Failed to load jobs. Please try again.
+                  </p>
                 </CardContent>
               </Card>
             )}
@@ -125,8 +128,8 @@ export default function Home() {
               <Card className="border-border">
                 <CardContent className="p-12 text-center">
                   <p className="text-muted-foreground text-lg">
-                  No jobs available at the moment. Check back later!
-                </p>
+                    No jobs available at the moment. Check back later!
+                  </p>
                 </CardContent>
               </Card>
             )}

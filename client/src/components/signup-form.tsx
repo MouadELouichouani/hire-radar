@@ -131,7 +131,9 @@ export function SignupForm({
               disabled={loading}
             />
             {errors.full_name && (
-              <p className="text-destructive text-sm mt-1">{errors.full_name}</p>
+              <p className="text-destructive text-sm mt-1">
+                {errors.full_name}
+              </p>
             )}
           </Field>
 
