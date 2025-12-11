@@ -88,60 +88,28 @@ export default function ProfileHeader({
     );
   }
 
-  // Full version for profile page
+  // Full version for profile page - Account Settings header
   return (
-    <Card>
-      <CardContent>
-        <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-          <div className="relative">
-            <Avatar className="h-24 w-24">
-              <AvatarImage
-                src={
-                  user?.image && user.image.trim() !== ""
-                    ? user.image
-                    : undefined
-                }
-                alt={user?.full_name || "Profile"}
-              />
-              <AvatarFallback className="text-2xl">
-                {user ? getInitials(user.full_name) : "JD"}
-              </AvatarFallback>
-            </Avatar>
-            <Button
-              size="icon"
-              variant="outline"
-              className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full"
-            >
-              <Camera />
-            </Button>
-          </div>
-          <div className="flex-1 space-y-2">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center">
-              <h1 className="text-2xl font-bold">
-                {user?.full_name || "User"}
-              </h1>
-              <Badge variant="secondary" className="capitalize">
-                {user?.role || "User"}
-              </Badge>
-            </div>
-            {user?.email && (
-              <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <Mail className="size-4" />
-                  {user.email}
-                </div>
-                {user.created_at && (
-                  <div className="flex items-center gap-1">
-                    <Calendar className="size-4" />
-                    Joined {formatDate(user.created_at)}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-          <Button variant="default">Edit Profile</Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex items-start gap-6">
+      <div className="relative">
+        <Avatar className="h-16 w-16">
+          <AvatarImage
+            src={
+              user?.image && user.image.trim() !== "" ? user.image : undefined
+            }
+            alt={user?.full_name || "Profile"}
+          />
+          <AvatarFallback className="text-xl">
+            {user ? getInitials(user.full_name) : "JD"}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+      <div className="flex-1 space-y-1">
+        <h1 className="text-3xl font-bold">Account Settings</h1>
+        <p className="text-muted-foreground">
+          Manage your account settings and preferences
+        </p>
+      </div>
+    </div>
   );
 }

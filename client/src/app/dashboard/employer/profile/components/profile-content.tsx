@@ -1,5 +1,17 @@
-import { Shield, Key, Trash2 } from "lucide-react";
+"use client";
 
+import { useState, useEffect } from "react";
+import {
+  Shield,
+  Key,
+  Loader2,
+  User as UserIcon,
+  Lock,
+  Bell,
+  Star,
+  Smartphone,
+  Monitor,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,290 +23,384 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { useCurrentUser } from "@/features/auth/hook";
+import {
+  useCandidateProfile,
+  useUpdateCandidateProfile,
+} from "@/features/profile/hooks";
+import {
+  useEmployerProfile,
+  useUpdateEmployerProfile,
+} from "@/features/profile/hooks";
+import type { User } from "@/types";
+import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 
 export default function ProfileContent() {
+  const { data: currentUserData } = useCurrentUser();
+  const currentUser = currentUserData as User | undefined;
+  const userId = useCurrentUserId();
+
+  // Fetch profile data based on role
+  const { data: candidateProfile, isLoading: isLoadingCandidate } =
+    useCandidateProfile(userId);
+  const { data: employerProfile, isLoading: isLoadingEmployer } =
+    useEmployerProfile(userId);
+  const updateCandidate = useUpdateCandidateProfile(userId);
+  const updateEmployer = useUpdateEmployerProfile(userId);
+
+  const isLoading =
+    currentUser?.role === "candidate" ? isLoadingCandidate : isLoadingEmployer;
+  const profile =
+    currentUser?.role === "candidate" ? candidateProfile : employerProfile;
+
+  // Form state
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+  });
+
+  // Connected accounts state
+  const [connectedAccounts, setConnectedAccounts] = useState({
+    github: false,
+    google: false,
+    twitter: false,
+  });
+
+  // Update form data when profile loads
+  // Note: This syncs form state with async profile data - necessary use case
+  useEffect(() => {
+    if (profile && currentUser) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData({
+        firstName: currentUser.full_name?.split(" ")[0] || "",
+        lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+        email: currentUser.email || "",
+        role:
+          currentUser.role === "candidate" ? "Product Designer" : "Employer",
+      });
+    }
+  }, [profile, currentUser]);
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (currentUser?.role === "candidate") {
+      try {
+        await updateCandidate.mutateAsync({
+          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          email: formData.email,
+        });
+        toast.success("Profile updated successfully!");
+      } catch {
+        toast.error("Failed to update profile. Please try again.");
+      }
+    } else if (currentUser?.role === "employer") {
+      try {
+        await updateEmployer.mutateAsync({
+          email: formData.email,
+        });
+        toast.success("Profile updated successfully!");
+      } catch {
+        toast.error("Failed to update profile. Please try again.");
+      }
+    }
+  };
+
+  const handleConnectAccount = (account: "github" | "google" | "twitter") => {
+    setConnectedAccounts((prev) => ({
+      ...prev,
+      [account]: !prev[account],
+    }));
+    toast.success(
+      connectedAccounts[account]
+        ? `${account.charAt(0).toUpperCase() + account.slice(1)} disconnected`
+        : `${account.charAt(0).toUpperCase() + account.slice(1)} connected`,
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
-    <Tabs defaultValue="personal" className="space-y-6">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="personal">Personal</TabsTrigger>
-        <TabsTrigger value="account">Account</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
+    <Tabs defaultValue="profile" className="space-y-6">
+      <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="profile">
+          <UserIcon className="mr-2 h-4 w-4" />
+          Profile
+        </TabsTrigger>
+        <TabsTrigger value="security">
+          <Lock className="mr-2 h-4 w-4" />
+          Security
+        </TabsTrigger>
+        <TabsTrigger value="notifications">
+          <Bell className="mr-2 h-4 w-4" />
+          Notifications
+        </TabsTrigger>
       </TabsList>
 
-      {/* Personal Information */}
-      <TabsContent value="personal" className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>
-              Update your personal details and profile information.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input id="firstName" defaultValue="John" />
+      {/* Profile Tab */}
+      <TabsContent value="profile" className="space-y-6">
+        <form onSubmit={handleSubmit}>
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input
+                    id="firstName"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      handleInputChange("firstName", e.target.value)
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      handleInputChange("lastName", e.target.value)
+                    }
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Input
+                    id="role"
+                    value={formData.role}
+                    onChange={(e) => handleInputChange("role", e.target.value)}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input id="lastName" defaultValue="Doe" />
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  disabled={
+                    updateCandidate.isPending || updateEmployer.isPending
+                  }
+                >
+                  {(updateCandidate.isPending || updateEmployer.isPending) && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Save Changes
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  defaultValue="john.doe@example.com"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" defaultValue="+1 (555) 123-4567" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="jobTitle">Job Title</Label>
-                <Input id="jobTitle" defaultValue="Senior Product Designer" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="company">Company</Label>
-                <Input id="company" defaultValue="Acme Inc." />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
-              <Textarea
-                id="bio"
-                placeholder="Tell us about yourself..."
-                defaultValue="Passionate product designer with 8+ years of experience creating user-centered digital experiences. I love solving complex problems and turning ideas into beautiful, functional products."
-                rows={4}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input id="location" defaultValue="San Francisco, CA" />
-            </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
+            </CardContent>
+          </Card>
+        </form>
 
-      {/* Account Settings */}
-      <TabsContent value="account" className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Account Settings</CardTitle>
-            <CardDescription>
-              Manage your account preferences and subscription.
-            </CardDescription>
+            <CardTitle>Connected Accounts</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label className="text-base">Account Status</Label>
-                <p className="text-muted-foreground text-sm">
-                  Your account is currently active
-                </p>
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="font-semibold">GitHub</div>
+                  <div className="text-sm text-muted-foreground">
+                    {connectedAccounts.github ? "Connected" : "Not Connected"}
+                  </div>
+                </div>
               </div>
-              <Badge
+              <Button
                 variant="outline"
-                className="border-green-200 bg-green-50 text-green-700"
+                onClick={() => handleConnectAccount("github")}
               >
-                Active
-              </Badge>
+                {connectedAccounts.github ? "Disconnect" : "Connect"}
+              </Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label className="text-base">Subscription Plan</Label>
-                <p className="text-muted-foreground text-sm">
-                  Pro Plan - $29/month
-                </p>
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="font-semibold">Google</div>
+                  <div className="text-sm text-muted-foreground">
+                    {connectedAccounts.google ? "Connected" : "Not Connected"}
+                  </div>
+                </div>
               </div>
-              <Button variant="outline">Manage Subscription</Button>
+              <Button
+                variant="outline"
+                onClick={() => handleConnectAccount("google")}
+              >
+                {connectedAccounts.google ? "Disconnect" : "Connect"}
+              </Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label className="text-base">Account Visibility</Label>
-                <p className="text-muted-foreground text-sm">
-                  Make your profile visible to other users
-                </p>
+              <div className="flex items-center gap-3">
+                <Star className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="font-semibold">Twitter</div>
+                  <div className="text-sm text-muted-foreground">
+                    {connectedAccounts.twitter ? "Connected" : "Not Connected"}
+                  </div>
+                </div>
               </div>
-              <Switch defaultChecked />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label className="text-base">Data Export</Label>
-                <p className="text-muted-foreground text-sm">
-                  Download a copy of your data
-                </p>
-              </div>
-              <Button variant="outline">Export Data</Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-destructive/50">
-          <CardHeader>
-            <CardTitle className="text-destructive">Danger Zone</CardTitle>
-            <CardDescription>
-              Irreversible and destructive actions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <Label className="text-base">Delete Account</Label>
-                <p className="text-muted-foreground text-sm">
-                  Permanently delete your account and all data
-                </p>
-              </div>
-              <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete Account
+              <Button
+                variant="outline"
+                onClick={() => handleConnectAccount("twitter")}
+              >
+                {connectedAccounts.twitter ? "Disconnect" : "Connect"}
               </Button>
             </div>
           </CardContent>
         </Card>
       </TabsContent>
 
-      {/* Security Settings */}
+      {/* Security Tab */}
       <TabsContent value="security" className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Security Settings</CardTitle>
-            <CardDescription>
-              Manage your account security and authentication.
-            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Password</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Last changed 3 months ago
-                  </p>
-                </div>
-                <Button variant="outline">
-                  <Key className="mr-2 h-4 w-4" />
-                  Change Password
-                </Button>
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Two-Factor Authentication</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Add an extra layer of security to your account
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant="outline"
-                    className="border-green-200 bg-green-50 text-green-700"
-                  >
-                    Enabled
-                  </Badge>
-                  <Button variant="outline" size="sm">
-                    Configure
-                  </Button>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Two-Factor Authentication</div>
+                <div className="text-sm text-muted-foreground">
+                  Add an extra layer of security to your account
                 </div>
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Login Notifications</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Get notified when someone logs into your account
-                  </p>
+              <Button variant="outline">
+                <Shield className="mr-2 h-4 w-4" />
+                Enable
+              </Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Password</div>
+                <div className="text-sm text-muted-foreground">
+                  Last changed 3 months ago
                 </div>
-                <Switch defaultChecked />
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Active Sessions</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Manage devices that are logged into your account
-                  </p>
+              <Button variant="outline">
+                <Key className="mr-2 h-4 w-4" />
+                Change
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Sessions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Monitor className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold">MacBook Pro</span>
+                    <Badge variant="outline" className="text-xs">
+                      Current
+                    </Badge>
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    San Francisco, CA • Active now
+                  </div>
                 </div>
-                <Button variant="outline">
-                  <Shield className="mr-2 h-4 w-4" />
-                  View Sessions
-                </Button>
               </div>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-5 w-5 text-muted-foreground" />
+                <div>
+                  <div className="font-semibold">iPhone 12</div>
+                  <div className="text-sm text-muted-foreground">
+                    New York, NY • 2 days ago
+                  </div>
+                </div>
+              </div>
+              <Button variant="outline">Revoke</Button>
             </div>
           </CardContent>
         </Card>
       </TabsContent>
 
-      {/* Notification Settings */}
+      {/* Notifications Tab */}
       <TabsContent value="notifications" className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Notification Preferences</CardTitle>
-            <CardDescription>
-              Choose what notifications you want to receive.
-            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Email Notifications</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Receive notifications via email
-                  </p>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Email notifications</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
                 </div>
-                <Switch defaultChecked />
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Push Notifications</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Receive push notifications in your browser
-                  </p>
+              <Button variant="outline">Configure</Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Push notifications</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
                 </div>
-                <Switch />
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Marketing Emails</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Receive emails about new features and updates
-                  </p>
+              <Button variant="outline">Configure</Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Monthly newsletter</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
                 </div>
-                <Switch defaultChecked />
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Weekly Summary</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Get a weekly summary of your activity
-                  </p>
+              <Button variant="outline">Configure</Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Security alerts</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
                 </div>
-                <Switch defaultChecked />
               </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <Label className="text-base">Security Alerts</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Important security notifications (always enabled)
-                  </p>
-                </div>
-                <Switch checked disabled />
-              </div>
+              <Button variant="outline">Configure</Button>
             </div>
           </CardContent>
         </Card>
