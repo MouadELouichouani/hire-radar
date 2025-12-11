@@ -90,26 +90,11 @@ export default function ProfileHeader({
 
   // Full version for profile page - Account Settings header
   return (
-    <div className="flex items-start gap-6">
-      <div className="relative">
-        <Avatar className="h-16 w-16">
-          <AvatarImage
-            src={
-              user?.image && user.image.trim() !== "" ? user.image : undefined
-            }
-            alt={user?.full_name || "Profile"}
-          />
-          <AvatarFallback className="text-xl">
-            {user ? getInitials(user.full_name) : "JD"}
-          </AvatarFallback>
-        </Avatar>
-      </div>
-      <div className="flex-1 space-y-1">
-        <h1 className="text-3xl font-bold">Account Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your account settings and preferences
-        </p>
-      </div>
+    <div className="space-y-1">
+      <h1 className="text-3xl font-bold">Account Settings</h1>
+      <p className="text-muted-foreground">
+        Manage your account settings and preferences
+      </p>
     </div>
   );
 }

@@ -42,7 +42,7 @@
   /* Dark mode: Pure black background, white text */
   --background: oklch(0 0 0); /* Pure black */
   --foreground: oklch(1 0 0); /* Pure white */
-  --card: oklch(0.05 0 0); /* Very dark gray (almost black) */
+  --card: oklch(0.18 0 0); /* Medium gray - more visible */
   --card-foreground: oklch(1 0 0); /* Pure white */
   --popover: oklch(0.05 0 0); /* Very dark gray */
   --popover-foreground: oklch(1 0 0); /* Pure white */
@@ -50,7 +50,7 @@
   --primary-foreground: oklch(0 0 0); /* Pure black */
   --secondary: oklch(0.1 0 0); /* Very dark gray */
   --secondary-foreground: oklch(1 0 0); /* Pure white */
-  --muted: oklch(0.1 0 0); /* Very dark gray */
+  --muted: oklch(0.2 0 0); /* Medium gray - more visible */
   --muted-foreground: oklch(0.7 0 0); /* Light gray */
   --accent: oklch(0.15 0 0); /* Dark gray */
   --accent-foreground: oklch(1 0 0); /* Pure white */

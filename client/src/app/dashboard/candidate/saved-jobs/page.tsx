@@ -5,6 +5,7 @@ import { useSavedJobs, useUnsaveJob } from "@/features/jobs/hooks";
 import JobCard from "@/components/jobs/JobCard";
 import JobCardSkeleton from "@/components/jobs/JobCardSkeleton";
 import TopNavbar from "@/components/TopNavbar";
+import SavedJobsSidebar from "./components/saved-jobs-sidebar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Bookmark, Search } from "lucide-react";
@@ -64,6 +65,10 @@ export default function SavedJobsPage() {
             Your bookmarked job opportunities
           </p>
         </div>
+
+        <div className="flex gap-8">
+          <SavedJobsSidebar savedJobsCount={savedJobs?.length || 0} />
+          <div className="flex-1 min-w-0">
 
         {isLoading ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -128,6 +133,8 @@ export default function SavedJobsPage() {
             })}
           </div>
         )}
+          </div>
+        </div>
       </div>
     </div>
   );

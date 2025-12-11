@@ -38,10 +38,36 @@ import {
 import type { User } from "@/types";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 
-export default function ProfileContent() {
+interface ProfileContentProps {
+  defaultTab?: string;
+}
+
+interface ProfileContentProps {
+  defaultTab?: string;
+}
+
+export default function ProfileContent({ defaultTab = "profile" }: ProfileContentProps) {
   const { data: currentUserData } = useCurrentUser();
   const currentUser = currentUserData as User | undefined;
   const userId = useCurrentUserId();
+  const [activeTab, setActiveTab] = useState(defaultTab);
+
+  // Listen for tab changes from sidebar
+  useEffect(() => {
+    const handleTabChange = (e: CustomEvent) => {
+      setActiveTab(e.detail);
+    };
+
+    window.addEventListener("tab-change", handleTabChange as EventListener);
+    return () => {
+      window.removeEventListener("tab-change", handleTabChange as EventListener);
+    };
+  }, []);
+
+  // Update active tab when defaultTab prop changes
+  useEffect(() => {
+    setActiveTab(defaultTab);
+  }, [defaultTab]);
 
   // Fetch profile data based on role
   const { data: candidateProfile, isLoading: isLoadingCandidate } =
@@ -74,17 +100,36 @@ export default function ProfileContent() {
   // Update form data when profile loads
   // Note: This syncs form state with async profile data - necessary use case
   useEffect(() => {
-    if (profile && currentUser) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData({
-        firstName: currentUser.full_name?.split(" ")[0] || "",
-        lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
-        email: currentUser.email || "",
-        role:
-          currentUser.role === "candidate" ? "Product Designer" : "Employer",
-      });
+    if (currentUser) {
+      if (currentUser.role === "candidate" && candidateProfile) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFormData({
+          firstName: candidateProfile.full_name?.split(" ")[0] || "",
+          lastName: candidateProfile.full_name?.split(" ").slice(1).join(" ") || "",
+          email: candidateProfile.email || currentUser.email || "",
+          role: "Product Designer",
+        });
+      } else if (currentUser.role === "employer" && employerProfile) {
+        // For employers, show company name as first name
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFormData({
+          firstName: employerProfile.company_name || "",
+          lastName: "",
+          email: employerProfile.email || currentUser.email || "",
+          role: "Employer",
+        });
+      } else {
+        // Fallback to currentUser data if profile not loaded yet
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setFormData({
+          firstName: currentUser.full_name?.split(" ")[0] || "",
+          lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+          email: currentUser.email || "",
+          role: currentUser.role === "candidate" ? "Product Designer" : "Employer",
+        });
+      }
     }
-  }, [profile, currentUser]);
+  }, [profile, candidateProfile, employerProfile, currentUser]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -136,7 +181,7 @@ export default function ProfileContent() {
   }
 
   return (
-    <Tabs defaultValue="profile" className="space-y-6">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
       <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="profile">
           <UserIcon className="mr-2 h-4 w-4" />
