@@ -3,6 +3,11 @@ from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
 from config.db import SessionLocal
 from core.models import User, Job, Application, Skill, Category
+from werkzeug.security import generate_password_hash
+import jwt
+import os
+
+SECRET_KEY = os.getenv("JWT_SECRET")
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -276,7 +281,6 @@ def delete_category(category_id):
 # ============================================================
 def update_category(category_id):
     db = SessionLocal()
-    print(category_id)
     category = db.query(Category).filter(Category.id == category_id).first()
 
     if not category:
@@ -295,3 +299,121 @@ def update_category(category_id):
     db.close()
 
     return jsonify({"message": "Category updated successfully"}), 200
+
+
+# ============================================================
+# 14. GET /admin/admins → List all admins
+# ============================================================
+def getAdmins():
+    db = SessionLocal()
+
+    # Extract token manually to get current admin ID
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Token missing"}), 401
+
+    token = auth_header.split(" ")[1]
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+    except jwt.InvalidTokenError:
+        return jsonify({"error": "Invalid token"}), 401
+
+    current_admin_id = payload.get("id")
+
+    # Fetch all admins except the current one
+    admins = (
+        db.query(User)
+        .filter(User.role == "admin", User.id != current_admin_id)
+        .all()
+    )
+
+    data = [
+        {
+            "id": u.id,
+            "full_name": u.full_name,
+            "email": u.email,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+        }
+        for u in admins
+    ]
+
+    db.close()
+    return jsonify(data), 200
+
+
+
+# ============================================================
+# 15. POST /admin/add-admin → Add new admin
+# ============================================================
+def create_admin():
+    data = request.get_json()
+
+    full_name = data.get("full_name")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not full_name or not email or not password:
+        return jsonify({"error": "full_name, email, and password are required"}), 400
+
+    db = SessionLocal()
+
+    try:
+        existing = db.query(User).filter(User.email == email).first()
+        if existing:
+            return jsonify({"error": "Email already exists"}), 409
+
+        new_admin = User(
+            full_name=full_name,
+            email=email,
+            password=generate_password_hash(password),
+            role="admin",
+        )
+
+        db.add(new_admin)
+        db.commit()
+        db.refresh(new_admin)
+
+        return jsonify({
+            "message": "Admin created successfully",
+            "admin": {
+                "id": new_admin.id,
+                "full_name": new_admin.full_name,
+                "email": new_admin.email,
+                "role": new_admin.role,
+            }
+        }), 201
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    
+    finally:
+        db.close()
+
+
+# ============================================================
+# 16. DELETE /admin/<int:admin_id> → Delete an admin
+# ============================================================
+def delete_admin(admin_id, current_user=None):
+    if current_user and current_user.id == admin_id:
+        return jsonify({"error": "You cannot delete your own admin account"}), 400
+
+    db = SessionLocal()
+    try:
+        admin = db.query(User).filter(User.id == admin_id, User.role == "admin").first()
+
+        if not admin:
+            return jsonify({"error": "Admin not found"}), 404
+
+        db.delete(admin)
+        db.commit()
+
+        return jsonify({"message": f"Admin {admin_id} deleted successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        db.close()
