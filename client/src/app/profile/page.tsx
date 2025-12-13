@@ -34,7 +34,10 @@ export default function Page() {
 
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
-      window.removeEventListener("tab-change", handleTabChange as EventListener);
+      window.removeEventListener(
+        "tab-change",
+        handleTabChange as EventListener,
+      );
     };
   }, []);
 

@@ -69,70 +69,70 @@ export default function SavedJobsPage() {
         <div className="flex gap-8">
           <SavedJobsSidebar savedJobsCount={savedJobs?.length || 0} />
           <div className="flex-1 min-w-0">
-
-        {isLoading ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <JobCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : isError ? (
-          <Card className="border-border">
-            <CardContent className="p-6">
-              <p className="text-destructive mb-4">
-                Failed to load saved jobs. Please try again.
-              </p>
-              <Button
-                onClick={() => window.location.reload()}
-                variant="outline"
-                className="border-border"
-              >
-                Reload
-              </Button>
-            </CardContent>
-          </Card>
-        ) : !savedJobs || savedJobs.length === 0 ? (
-          <Card className="border-border bg-card">
-            <CardContent className="p-12 text-center">
-              <Bookmark className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-foreground mb-2">
-                No saved jobs yet
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Start exploring opportunities and save jobs that interest you.
-              </p>
-              <Button
-                asChild
-                className="bg-foreground text-background hover:bg-foreground/90"
-              >
-                <Link href="/jobs/search">
-                  <Search className="w-4 h-4 mr-2" />
-                  Search Jobs
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {savedJobs.map((savedJob) => {
-              if (!savedJob.job) return null;
-              return (
-                <div key={savedJob.id} className="relative">
-                  <JobCard job={savedJob.job} />
+            {isLoading ? (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <JobCardSkeleton key={i} />
+                ))}
+              </div>
+            ) : isError ? (
+              <Card className="border-border">
+                <CardContent className="p-6">
+                  <p className="text-destructive mb-4">
+                    Failed to load saved jobs. Please try again.
+                  </p>
                   <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleUnsave(savedJob.job!.id)}
-                    disabled={unsaveMutation.isPending}
-                    className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm hover:bg-background"
+                    onClick={() => window.location.reload()}
+                    variant="outline"
+                    className="border-border"
                   >
-                    Remove
+                    Reload
                   </Button>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                </CardContent>
+              </Card>
+            ) : !savedJobs || savedJobs.length === 0 ? (
+              <Card className="border-border bg-card">
+                <CardContent className="p-12 text-center">
+                  <Bookmark className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-bold text-foreground mb-2">
+                    No saved jobs yet
+                  </h3>
+                  <p className="text-muted-foreground mb-6">
+                    Start exploring opportunities and save jobs that interest
+                    you.
+                  </p>
+                  <Button
+                    asChild
+                    className="bg-foreground text-background hover:bg-foreground/90"
+                  >
+                    <Link href="/jobs/search">
+                      <Search className="w-4 h-4 mr-2" />
+                      Search Jobs
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {savedJobs.map((savedJob) => {
+                  if (!savedJob.job) return null;
+                  return (
+                    <div key={savedJob.id} className="relative">
+                      <JobCard job={savedJob.job} />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleUnsave(savedJob.job!.id)}
+                        disabled={unsaveMutation.isPending}
+                        className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm hover:bg-background"
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

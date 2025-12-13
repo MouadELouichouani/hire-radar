@@ -124,7 +124,9 @@ export default function SavedJobsSidebar({
             <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-2">
                 <Bookmark className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Saved Jobs</span>
+                <span className="text-sm text-muted-foreground">
+                  Saved Jobs
+                </span>
               </div>
               <Badge variant="outline" className="font-semibold">
                 {savedJobsCount}
@@ -138,7 +140,9 @@ export default function SavedJobsSidebar({
                   Applications
                 </span>
               </div>
-              <Badge variant="outline" className="font-semibold">0</Badge>
+              <Badge variant="outline" className="font-semibold">
+                0
+              </Badge>
             </div>
           </div>
         </div>
