@@ -14,6 +14,7 @@ import OAuth from "./o-auth";
 import { useState } from "react";
 import { toast } from "sonner";
 import { login } from "@/features/auth/api";
+import { useRouter } from "next/navigation";
 
 export function LoginForm({
   className,
@@ -23,19 +24,40 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
     try {
-      const res = await login(email, password);
+      await login(email, password);
       toast.success("Logged in successfully!");
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setError(err.response.data.error || "Something went wrong");
+      router.push("/");
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "response" in err &&
+        err.response &&
+        typeof err.response === "object" &&
+        "data" in err.response &&
+        err.response.data &&
+        typeof err.response.data === "object" &&
+        "error" in err.response.data
+      ) {
+        const errorMsg =
+          (err.response.data.error as string) || "Something went wrong";
+        setError(errorMsg);
+        toast.error(errorMsg);
+      } else if (err && typeof err === "object" && "message" in err) {
+        const errorMsg = (err.message as string) || "Something went wrong";
+        setError(errorMsg);
+        toast.error(errorMsg);
       } else {
-        setError(err.message || "Something went wrong");
+        setError("Something went wrong");
+        toast.error("Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -65,6 +87,8 @@ export function LoginForm({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={loading}
+            className="bg-background border-border"
           />
         </Field>
 
@@ -73,7 +97,7 @@ export function LoginForm({
             <FieldLabel htmlFor="password">Password</FieldLabel>
             <a
               href="#"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
+              className="ml-auto text-sm underline-offset-4 hover:underline text-muted-foreground"
             >
               Forgot your password?
             </a>
@@ -84,12 +108,18 @@ export function LoginForm({
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            className="bg-background border-border"
           />
-          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+          {error && <p className="text-destructive text-sm mt-1">{error}</p>}
         </Field>
 
         <Field>
-          <Button type="submit" disabled={loading} className="cursor-pointer">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-foreground text-background hover:bg-foreground/90"
+          >
             {loading ? "Logging in..." : "Login"}
           </Button>
         </Field>
@@ -100,7 +130,10 @@ export function LoginForm({
           <OAuth />
           <FieldDescription className="text-center">
             Don&apos;t have an account?{" "}
-            <a href="/signup" className="underline underline-offset-4">
+            <a
+              href="/signup"
+              className="underline underline-offset-4 text-foreground hover:text-foreground/80"
+            >
               Sign up
             </a>
           </FieldDescription>
