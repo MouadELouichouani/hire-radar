@@ -76,6 +76,15 @@ def update_employer(employer_id: int):
         # Update fields
         if "full_name" in data:
             user.full_name = data["full_name"]
+        if "email" in data:
+            # Check if email is already taken by another user
+            existing_user = db.query(User).filter(
+                User.email == data["email"],
+                User.id != employer_id
+            ).first()
+            if existing_user:
+                return jsonify({"error": "Email already taken"}), 400
+            user.email = data["email"]
         if "phone" in data:
             user.phone = data.get("phone")
         if "location" in data:

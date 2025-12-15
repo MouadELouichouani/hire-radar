@@ -11,7 +11,7 @@ import {
 export async function getCandidateProfile(
   id: string,
 ): Promise<CandidateProfile> {
-  const { data } = await apiClient.get<CandidateProfile>(`/candidates/${id}`);
+  const { data } = await apiClient.get<CandidateProfile>(`/api/candidates/${id}`);
   return data;
 }
 
@@ -20,7 +20,7 @@ export async function updateCandidateProfile(
   profileData: UpdateCandidateProfileRequest,
 ): Promise<CandidateProfile> {
   const { data } = await apiClient.put<CandidateProfile>(
-    `/candidates/${id}`,
+    `/api/candidates/${id}`,
     profileData,
   );
   return data;
@@ -34,7 +34,7 @@ export async function uploadCandidateCV(
   formData.append("cv", file);
 
   const { data } = await apiClient.post<UploadCVResponse>(
-    `/candidates/${id}/upload-cv`,
+    `/api/candidates/${id}/upload-cv`,
     formData,
     {
       headers: {
@@ -47,7 +47,7 @@ export async function uploadCandidateCV(
 
 // Employer API functions
 export async function getEmployerProfile(id: string): Promise<EmployerProfile> {
-  const { data } = await apiClient.get<EmployerProfile>(`/employers/${id}`);
+  const { data } = await apiClient.get<EmployerProfile>(`/api/employers/${id}`);
   return data;
 }
 
@@ -56,7 +56,7 @@ export async function updateEmployerProfile(
   profileData: UpdateEmployerProfileRequest,
 ): Promise<EmployerProfile> {
   const { data } = await apiClient.put<EmployerProfile>(
-    `/employers/${id}`,
+    `/api/employers/${id}`,
     profileData,
   );
   return data;

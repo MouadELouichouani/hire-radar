@@ -70,7 +70,7 @@ def get_candidate(candidate_id: int):
                     "phone": user.phone,
                     "location": user.location,
                     "bio": user.bio,
-                    "headline": user.headline,
+                    "headline": user.headLine,
                     "resume_url": user.resume_url,
                     "cv_file_path": user.resume_url,
                     "skills": skills,
@@ -113,14 +113,23 @@ def update_candidate(candidate_id: int):
         # Update basic fields
         if "full_name" in data:
             user.full_name = data["full_name"]
+        if "email" in data:
+            # Check if email is already taken by another user
+            existing_user = db.query(User).filter(
+                User.email == data["email"],
+                User.id != candidate_id
+            ).first()
+            if existing_user:
+                return jsonify({"error": "Email already taken"}), 400
+            user.email = data["email"]
         if "phone" in data:
             user.phone = data.get("phone")
         if "location" in data:
             user.location = data.get("location")
         if "bio" in data:
             user.bio = data.get("bio")
-        if "headline" in data:
-            user.headline = data.get("headline")
+        if "headLine" in data or "headline" in data:
+            user.headLine = data.get("headLine") or data.get("headline")
 
         # Update skills if provided
         if "skills" in data:
@@ -226,7 +235,7 @@ def update_candidate(candidate_id: int):
                     "phone": user.phone,
                     "location": user.location,
                     "bio": user.bio,
-                    "headline": user.headline,
+                    "headline": user.headLine,
                     "resume_url": user.resume_url,
                     "cv_file_path": user.resume_url,
                     "skills": skills,
