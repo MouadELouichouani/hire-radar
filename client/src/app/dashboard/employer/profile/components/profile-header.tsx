@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Calendar, Mail, MapPin } from "lucide-react";
+import { getValidImageUrl } from "@/lib/image-utils";
 import type { User } from "@/types";
 
 interface ProfileHeaderProps {
@@ -40,11 +41,7 @@ export default function ProfileHeader({
             <div className="relative">
               <Avatar className="h-16 w-16">
                 <AvatarImage
-                  src={
-                    user?.image && user.image.trim() !== "" && user.image !== "null" && user.image !== "undefined"
-                      ? user.image
-                      : undefined
-                  }
+                  src={getValidImageUrl(user?.image)}
                   alt={user?.full_name || "Profile"}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';

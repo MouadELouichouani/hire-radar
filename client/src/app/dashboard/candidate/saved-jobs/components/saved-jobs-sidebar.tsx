@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useCurrentUser } from "@/features/auth/hook";
+import { getValidImageUrl } from "@/lib/image-utils";
 import type { User } from "@/types";
 
 interface SavedJobsSidebarProps {
@@ -92,11 +93,7 @@ export default function SavedJobsSidebar({
             <div className="relative">
               <Avatar className="h-20 w-20">
                 <AvatarImage
-                  src={
-                    currentUser?.image && currentUser.image.trim() !== "" && currentUser.image !== "null" && currentUser.image !== "undefined"
-                      ? currentUser.image
-                      : undefined
-                  }
+                  src={getValidImageUrl(currentUser?.image)}
                   alt={currentUser?.full_name || "Profile"}
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
