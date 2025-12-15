@@ -1,5 +1,5 @@
 from flask import Blueprint
-from controllers.job import (
+from api.controllers.job import (
     search_jobs,
     get_job_by_id,
     create_job,

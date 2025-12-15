@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
+from api.config.db import SessionLocal
 from config.db import SessionLocal
 from core.models import Job, User
 from typing import Optional, List

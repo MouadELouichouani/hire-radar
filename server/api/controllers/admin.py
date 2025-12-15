@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from sqlalchemy.exc import IntegrityError
-from config.db import SessionLocal
-from core.models import User, Job, Application, Skill, Category
+from api.config.db import SessionLocal
+from api.core.models import User, Job, Application, Skill, Category
 from werkzeug.security import generate_password_hash
 import jwt
 import os
