@@ -28,7 +28,7 @@ def apply_for_job(job_id: int):
         application, error = candidate_apply_for_job(
             job_id=job_id,
             user_id=user_id,
-            cover_letter=cover_letter,
+            cover_letter=cover_letter, 
             resume_url=resume_url,
         )
 
