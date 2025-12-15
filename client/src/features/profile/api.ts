@@ -11,7 +11,9 @@ import {
 export async function getCandidateProfile(
   id: string,
 ): Promise<CandidateProfile> {
-  const { data } = await apiClient.get<CandidateProfile>(`/api/candidates/${id}`);
+  const { data } = await apiClient.get<CandidateProfile>(
+    `/api/candidates/${id}`,
+  );
   return data;
 }
 
