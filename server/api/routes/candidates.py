@@ -6,6 +6,7 @@ from controllers.candidates import (
     get_saved_jobs,
     add_skill,
     remove_skill,
+    upload_profile_image,
 )
 
 candidates = Blueprint("candidates", __name__)
@@ -31,4 +32,12 @@ candidates.add_url_rule(
     "remove_skill",
     remove_skill,
     methods=["DELETE"],
+)
+
+# Profile image upload
+candidates.add_url_rule(
+    "/<int:candidate_id>/upload-image",
+    "upload_profile_image",
+    upload_profile_image,
+    methods=["POST"],
 )

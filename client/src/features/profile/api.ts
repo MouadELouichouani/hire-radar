@@ -47,6 +47,23 @@ export async function uploadCandidateCV(
   return data;
 }
 
+export async function uploadCandidateImage(
+  id: string,
+  file: File,
+): Promise<{ image: string }> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const { data } = await apiClient.post<{ image: string }>(
+    `/api/candidates/${id}/upload-image`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
+  );
+  return data;
+}
+
 // Employer API functions
 export async function getEmployerProfile(id: string): Promise<EmployerProfile> {
   const { data } = await apiClient.get<EmployerProfile>(`/api/employers/${id}`);
@@ -60,6 +77,23 @@ export async function updateEmployerProfile(
   const { data } = await apiClient.put<EmployerProfile>(
     `/api/employers/${id}`,
     profileData,
+  );
+  return data;
+}
+
+export async function uploadEmployerImage(
+  id: string,
+  file: File,
+): Promise<{ image: string }> {
+  const formData = new FormData();
+  formData.append("image", file);
+
+  const { data } = await apiClient.post<{ image: string }>(
+    `/api/employers/${id}/upload-image`,
+    formData,
+    {
+      headers: { "Content-Type": "multipart/form-data" },
+    },
   );
   return data;
 }

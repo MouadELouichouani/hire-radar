@@ -322,6 +322,54 @@ def upload_cv(candidate_id: int):
         db.close()
 
 
+def upload_profile_image(candidate_id: int):
+    """Upload profile image for candidate"""
+    db: Session = next(get_db())
+
+    try:
+        user = (
+            db.query(User)
+            .filter(User.id == candidate_id, User.role == "candidate")
+            .first()
+        )
+
+        if not user:
+            return jsonify({"error": "Candidate not found"}), 404
+
+        if "image" not in request.files:
+            return jsonify({"error": "No file uploaded"}), 400
+
+        file = request.files["image"]
+        if file.filename == "":
+            return jsonify({"error": "No file selected"}), 400
+
+        filename = secure_filename(file.filename)
+        ext = filename.rsplit(".", 1)[-1].lower()
+        if ext not in ["png", "jpg", "jpeg", "webp"]:
+            return jsonify({"error": "Invalid file type"}), 400
+
+        upload_dir = os.path.join(os.getcwd(), "uploads", "profile")
+        os.makedirs(upload_dir, exist_ok=True)
+
+        timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S%f")
+        saved_name = f"user_{candidate_id}_{timestamp}.{ext}"
+        save_path = os.path.join(upload_dir, saved_name)
+        file.save(save_path)
+
+        image_url = f"/uploads/profile/{saved_name}"
+        user.image = image_url
+        db.commit()
+        db.refresh(user)
+
+        return jsonify({"image": image_url}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
 def get_saved_jobs(candidate_id: int):
     """Get all saved jobs for a candidate"""
     db: Session = next(get_db())

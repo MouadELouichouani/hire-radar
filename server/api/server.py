@@ -11,7 +11,12 @@ from routes.candidates import candidates
 from routes.employers import employers
 from routes.applications import applications
 import os
+from pathlib import Path
 
+# Get the project root directory (where uploads folder is located)
+# This file is in server/api/, so we go up 2 levels to get to project root
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+UPLOADS_DIR = PROJECT_ROOT / "uploads"
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -49,7 +54,7 @@ def home():
 # Serve uploaded files
 @app.route("/uploads/<path:filename>")
 def serve_upload(filename):
-    return send_from_directory("uploads", filename)
+    return send_from_directory(str(UPLOADS_DIR), filename)
 
 
 # Handle incorrect OAuth redirect URI (without /api prefix)

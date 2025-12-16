@@ -1,11 +1,14 @@
 "use client";
 
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera, Calendar, Mail, MapPin } from "lucide-react";
 import { getValidImageUrl } from "@/lib/image-utils";
+import { useUploadEmployerImage } from "@/features/profile/hooks";
+import { toast } from "sonner";
 import type { User } from "@/types";
 
 interface ProfileHeaderProps {
@@ -17,6 +20,9 @@ export default function ProfileHeader({
   user,
   compact = false,
 }: ProfileHeaderProps) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const uploadImage = useUploadEmployerImage(user?.id?.toString() || "");
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -55,9 +61,30 @@ export default function ProfileHeader({
                 size="icon"
                 variant="outline"
                 className="absolute -right-1 -bottom-1 h-6 w-6 rounded-full"
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadImage.isPending}
               >
                 <Camera className="h-3 w-3" />
               </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/webp"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  try {
+                    await uploadImage.mutateAsync(file);
+                    toast.success("Profile photo updated");
+                  } catch {
+                    toast.error("Failed to update photo");
+                  } finally {
+                    e.target.value = "";
+                  }
+                }}
+              />
             </div>
             <div className="flex flex-col items-center gap-1 w-full">
               <h3 className="font-semibold text-sm truncate w-full text-center">
