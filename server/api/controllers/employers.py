@@ -39,8 +39,9 @@ def get_employer(employer_id: int):
                     "phone": user.phone,
                     "location": user.location,
                     "bio": user.bio,
-                    "company_name": user.company_name,
-                    "website": user.website,
+                    # Expose as snake_case to match frontend types, but store using DB field names
+                    "company_name": user.companyName,
+                    "website": user.webSite,
                     "image": user.image,
                     "user": {
                         "id": user.id,
@@ -74,7 +75,8 @@ def update_employer(employer_id: int):
         if not user:
             return jsonify({"error": "Employer not found"}), 404
 
-        data = request.get_json()
+        # Gracefully handle missing or empty JSON body
+        data = request.get_json(silent=True) or {}
 
         # Update fields
         if "full_name" in data:
@@ -96,9 +98,9 @@ def update_employer(employer_id: int):
         if "bio" in data:
             user.bio = data.get("bio")
         if "company_name" in data:
-            user.company_name = data.get("company_name")
+            user.companyName = data.get("company_name")
         if "website" in data:
-            user.website = data.get("website")
+            user.webSite = data.get("website")
 
         db.commit()
         db.refresh(user)
@@ -113,8 +115,8 @@ def update_employer(employer_id: int):
                     "phone": user.phone,
                     "location": user.location,
                     "bio": user.bio,
-                    "company_name": user.company_name,
-                    "website": user.website,
+                    "company_name": user.companyName,
+                    "website": user.webSite,
                     "image": user.image,
                 }
             ),
