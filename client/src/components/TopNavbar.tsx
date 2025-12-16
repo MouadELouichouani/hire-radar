@@ -17,11 +17,13 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { getToken } from "@/lib";
 
 export default function TopNavbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { data: currentUser } = useCurrentUser();
+  const { data: currentUser } = useCurrentUser(getToken()!);
+  
   const [searchQuery, setSearchQuery] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
@@ -40,8 +42,8 @@ export default function TopNavbar() {
     router.push("/login");
   };
 
-  const getInitials = (name: string) => {
-    return name
+  const getInitials = (full_name: string) => {
+    return full_name
       .split(" ")
       .map((n) => n[0])
       .join("")

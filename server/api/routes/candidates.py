@@ -1,5 +1,5 @@
 from flask import Blueprint
-from api.controllers.candidates import (
+from controllers.candidates import (
     list_candidates,
     get_candidate,
     update_candidate,

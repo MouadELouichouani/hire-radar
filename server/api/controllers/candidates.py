@@ -1,5 +1,5 @@
 from flask import jsonify, request, send_from_directory
-from api.services.candidates_service import (
+from services.candidates_service import (
     get_all_candidates,
     get_candidate_by_id,
     update_candidate_info,

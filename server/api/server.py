@@ -3,8 +3,11 @@ from flask_cors import CORS
 from config.db import Base, engine
 from routes.auth import auth
 from routes.admin import admin_bp
+from routes.candidates import candidates
 import os
 from dotenv import load_dotenv
+import os
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
 load_dotenv()
 
