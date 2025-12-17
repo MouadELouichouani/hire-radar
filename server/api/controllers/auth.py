@@ -13,9 +13,14 @@ load_dotenv()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
+GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
+GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
 JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
 GOOGLE_REDIRECT_URI = os.getenv(
     "GOOGLE_REDIRECT_URI", "http://localhost:3000/api/auth/google/callback"
+)
+GITHUB_REDIRECT_URI = os.getenv(
+    "GITHUB_REDIRECT_URI", "http://localhost:5000/api/oauth/github/callback"
 )
 
 
@@ -269,5 +274,155 @@ def login():
                 },
             }
         )
+    finally:
+        db.close()
+
+
+def github_connect():
+    """Initiate GitHub OAuth flow for account linking"""
+    auth = request.headers.get("Authorization")
+    if not auth or not auth.startswith("Bearer "):
+        return jsonify({"error": "Authentication required"}), 401
+
+    token = auth.split(" ")[1]
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        user_id = decoded["id"]
+    except:
+        return jsonify({"error": "Invalid token"}), 401
+
+    # Store user_id in session for callback
+    session["github_link_user_id"] = user_id
+
+    # GitHub OAuth authorization URL
+    redirect_uri = GITHUB_REDIRECT_URI
+    state = jwt.encode(
+        {"user_id": user_id, "exp": datetime.utcnow() + timedelta(minutes=10)},
+        JWT_SECRET,
+        algorithm="HS256",
+    )
+    session["github_state"] = state
+
+    auth_url = (
+        f"https://github.com/login/oauth/authorize"
+        f"?client_id={GITHUB_CLIENT_ID}"
+        f"&redirect_uri={redirect_uri}"
+        f"&scope=user:email"
+        f"&state={state}"
+    )
+
+    return jsonify({"auth_url": auth_url})
+
+
+def github_callback():
+    """Handle GitHub OAuth callback and link account"""
+    code = request.args.get("code")
+    state = request.args.get("state")
+    error = request.args.get("error")
+
+    if error:
+        return redirect(f"http://localhost:3000/profile?error={error}")
+
+    if not code or not state:
+        return redirect("http://localhost:3000/profile?error=missing_params")
+
+    # Verify state
+    try:
+        decoded_state = jwt.decode(state, JWT_SECRET, algorithms=["HS256"])
+        user_id = decoded_state["user_id"]
+    except:
+        return redirect("http://localhost:3000/profile?error=invalid_state")
+
+    # Exchange code for access token
+    token_url = "https://github.com/login/oauth/access_token"
+    token_data = {
+        "client_id": GITHUB_CLIENT_ID,
+        "client_secret": GITHUB_CLIENT_SECRET,
+        "code": code,
+        "redirect_uri": GITHUB_REDIRECT_URI,
+    }
+    token_headers = {"Accept": "application/json"}
+
+    token_res = requests.post(token_url, data=token_data, headers=token_headers).json()
+    access_token = token_res.get("access_token")
+
+    if not access_token:
+        return redirect("http://localhost:3000/profile?error=token_failed")
+
+    # Get GitHub user info
+    user_info = requests.get(
+        "https://api.github.com/user",
+        headers={"Authorization": f"Bearer {access_token}"},
+    ).json()
+
+    github_id = str(user_info.get("id"))
+    github_username = user_info.get("login")
+
+    if not github_id:
+        return redirect("http://localhost:3000/profile?error=no_github_id")
+
+    # Link GitHub account to user
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return redirect("http://localhost:3000/profile?error=user_not_found")
+
+        # Check if GitHub account is already linked to another user
+        existing_user = db.query(User).filter(User.github_id == github_id).first()
+        if existing_user and existing_user.id != user_id:
+            return redirect("http://localhost:3000/profile?error=github_already_linked")
+
+        # Link GitHub account
+        user.github_id = github_id
+        user.github_username = github_username
+        db.commit()
+
+        return redirect("http://localhost:3000/profile?github_linked=success")
+    except Exception as e:
+        db.rollback()
+        return redirect(f"http://localhost:3000/profile?error={str(e)}")
+    finally:
+        db.close()
+
+
+def get_connected_accounts():
+    """Get connected accounts for the current user"""
+    auth = request.headers.get("Authorization")
+    if not auth or not auth.startswith("Bearer "):
+        return jsonify({"error": "Authentication required"}), 401
+
+    token = auth.split(" ")[1]
+    db = SessionLocal()
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        user = db.query(User).get(decoded["id"])
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+
+        connected_accounts = {
+            "github": bool(user.github_id),
+            "google": bool(user.email and not user.password),  # Google users don't have passwords
+        }
+
+        accounts = []
+        if connected_accounts["github"]:
+            accounts.append({
+                "provider": "github",
+                "username": user.github_username,
+                "connected": True,
+            })
+        if connected_accounts["google"]:
+            accounts.append({
+                "provider": "google",
+                "connected": True,
+            })
+
+        return jsonify({"connected_accounts": accounts})
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expired"}), 401
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     finally:
         db.close()

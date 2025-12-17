@@ -10,6 +10,7 @@ from routes.job import job
 from routes.candidates import candidates
 from routes.employers import employers
 from routes.applications import applications
+from controllers.auth import github_connect, github_callback
 import os
 from pathlib import Path
 
@@ -44,6 +45,20 @@ app.register_blueprint(job, url_prefix="/api/jobs")
 app.register_blueprint(candidates, url_prefix="/api/candidates")
 app.register_blueprint(employers, url_prefix="/api/employers")
 app.register_blueprint(applications, url_prefix="/api/applications")
+
+# OAuth routes
+app.add_url_rule(
+    "/api/oauth/github/connect",
+    "github_connect",
+    github_connect,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/oauth/github/callback",
+    "github_callback",
+    github_callback,
+    methods=["GET"],
+)
 
 
 @app.route("/")

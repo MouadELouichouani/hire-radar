@@ -58,3 +58,21 @@ export const me = async (token?: string): Promise<User | null> => {
     return null;
   }
 };
+
+export const githubConnect = async () => {
+  const { data } = await apiClient.get<{ auth_url: string }>(
+    "/api/oauth/github/connect",
+  );
+  return data;
+};
+
+export const getConnectedAccounts = async () => {
+  const { data } = await apiClient.get<{
+    connected_accounts: Array<{
+      provider: string;
+      username?: string;
+      connected: boolean;
+    }>;
+  }>("/api/auth/me/connected-accounts");
+  return data;
+};

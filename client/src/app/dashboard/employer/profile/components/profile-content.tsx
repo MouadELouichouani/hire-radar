@@ -36,8 +36,10 @@ import {
   useEmployerProfile,
   useUpdateEmployerProfile,
 } from "@/features/profile/hooks";
+import { githubConnect, getConnectedAccounts } from "@/features/auth/api";
 import type { User } from "@/types";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface ProfileContentProps {
   defaultTab?: string;
@@ -97,12 +99,43 @@ export default function ProfileContent({
     website: "",
   });
 
-  // Connected accounts state
-  const [connectedAccounts, setConnectedAccounts] = useState({
-    github: false,
-    google: false,
-    twitter: false,
+  const queryClient = useQueryClient();
+
+  // Fetch connected accounts from backend
+  const { data: connectedAccountsData } = useQuery({
+    queryKey: ["connected-accounts"],
+    queryFn: getConnectedAccounts,
+    retry: false,
   });
+
+  // Map connected accounts to state
+  const connectedAccounts = {
+    github: connectedAccountsData?.connected_accounts?.some(
+      (acc) => acc.provider === "github" && acc.connected,
+    ) || false,
+    google: connectedAccountsData?.connected_accounts?.some(
+      (acc) => acc.provider === "google" && acc.connected,
+    ) || false,
+    twitter: false, // Not implemented yet
+  };
+
+  // Check URL params for OAuth callback results
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("github_linked") === "success") {
+        toast.success("GitHub account connected successfully!");
+        queryClient.invalidateQueries({ queryKey: ["connected-accounts"] });
+        // Clean URL
+        window.history.replaceState({}, "", window.location.pathname);
+      } else if (params.get("error")) {
+        const error = params.get("error");
+        toast.error(`Failed to connect GitHub: ${error}`);
+        // Clean URL
+        window.history.replaceState({}, "", window.location.pathname);
+      }
+    }
+  }, [queryClient]);
 
   // Update form data when profile loads
   // Note: This syncs form state with async profile data - necessary use case
@@ -194,16 +227,21 @@ export default function ProfileContent({
     }
   };
 
-  const handleConnectAccount = (account: "github" | "google" | "twitter") => {
-    setConnectedAccounts((prev) => ({
-      ...prev,
-      [account]: !prev[account],
-    }));
-    toast.success(
-      connectedAccounts[account]
-        ? `${account.charAt(0).toUpperCase() + account.slice(1)} disconnected`
-        : `${account.charAt(0).toUpperCase() + account.slice(1)} connected`,
-    );
+  const handleConnectAccount = async (account: "github" | "google" | "twitter") => {
+    if (account === "github") {
+      try {
+        const { auth_url } = await githubConnect();
+        // Redirect to GitHub OAuth
+        window.location.href = auth_url;
+      } catch (error) {
+        toast.error("Failed to initiate GitHub connection");
+      }
+    } else if (account === "google") {
+      // Google OAuth is handled separately for login, not account linking
+      toast.info("Google account is linked via login");
+    } else {
+      toast.info("Twitter connection not yet implemented");
+    }
   };
 
   if (isLoading) {
