@@ -1,5 +1,5 @@
-from api.config.db import SessionLocal
-from api.core.models import User
+from config.db import SessionLocal
+from core.models import User
 import os
 
 
