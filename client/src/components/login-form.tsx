@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldDescription,
+  FieldError,
   FieldGroup,
   FieldLabel,
   FieldSeparator,
@@ -25,6 +26,16 @@ export function LoginForm({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (error) setError(""); // Clear error when user types
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (error) setError(""); // Clear error when user types
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,9 +97,13 @@ export function LoginForm({
             placeholder="m@example.com"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
             disabled={loading}
-            className="bg-background border-border"
+            aria-invalid={error ? "true" : "false"}
+            className={cn(
+              "bg-background",
+              error && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20 dark:border-destructive"
+            )}
           />
         </Field>
 
@@ -107,11 +122,19 @@ export function LoginForm({
             type="password"
             required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={handlePasswordChange}
             disabled={loading}
-            className="bg-background border-border"
+            aria-invalid={error ? "true" : "false"}
+            className={cn(
+              "bg-background",
+              error && "border-destructive focus-visible:border-destructive focus-visible:ring-destructive/20 dark:border-destructive"
+            )}
           />
-          {error && <p className="text-destructive text-sm mt-1">{error}</p>}
+          {error && (
+            <FieldError className="mt-1.5 text-sm text-destructive">
+              {error}
+            </FieldError>
+          )}
         </Field>
 
         <Field>
