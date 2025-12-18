@@ -388,9 +388,7 @@ def get_connected_accounts():
 
         connected_accounts = {
             "github": bool(user.github_id),
-            "google": bool(
-                user.email and not user.password
-            ),  
+            "google": bool(user.email and not user.password),
         }
 
         accounts = []
