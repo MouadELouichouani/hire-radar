@@ -100,6 +100,8 @@ class User(Base):
     companyName = Column(Text)
     webSite = Column(String(150))
     resume_url = Column(Text)
+    github_id = Column(String(100))  # GitHub user ID
+    github_username = Column(String(100))  # GitHub username
 
     created_at = Column(DateTime, server_default=func.now())
 
@@ -212,10 +214,6 @@ class Application(Base):
         server_default="pending",
     )
     applied_at = Column(DateTime, server_default=func.now())
-
-    # Relationships
-    job = relationship("Job", backref="applications")
-    user = relationship("User", backref="applications")
 
 
 # ============================================================

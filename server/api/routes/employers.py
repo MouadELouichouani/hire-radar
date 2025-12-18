@@ -1,13 +1,24 @@
 from flask import Blueprint
-from api.controllers.employers import (
-    list_employers_controller,
-    get_employer_controller,
-    update_employer_controller,
+from controllers.employers import (
+    get_employer,
+    update_employer,
+    upload_profile_image,
 )
 
 employers = Blueprint("employers", __name__)
 
-# Endpoints
-employers.get("/")(list_employers_controller)  # GET /api/employers
-employers.get("/<int:id>")(get_employer_controller)  # GET /api/employers/<id>
-employers.put("/<int:id>")(update_employer_controller)  # PUT /api/employers/<id>
+# Employer routes
+employers.add_url_rule(
+    "/<int:employer_id>", "get_employer", get_employer, methods=["GET"]
+)
+employers.add_url_rule(
+    "/<int:employer_id>", "update_employer", update_employer, methods=["PUT"]
+)
+
+# Profile image upload
+employers.add_url_rule(
+    "/<int:employer_id>/upload-image",
+    "upload_profile_image",
+    upload_profile_image,
+    methods=["POST"],
+)

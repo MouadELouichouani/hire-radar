@@ -1,123 +1,127 @@
-from flask import jsonify, request
-from api.services.applications_service import (
-    candidate_apply_for_job,
-    get_all_applications,
-    get_candidate_applications,
-    get_job_applicants,
-    update_application_status,
-    get_application_by_id,
-    delete_application,
-)
+from flask import request, jsonify, send_from_directory
+from werkzeug.utils import secure_filename
+from sqlalchemy.orm import Session
+from config.db import SessionLocal
+from core.models import Application, Job, User
+from typing import Optional
+import os
+from datetime import datetime
 
 
-def apply_for_job(job_id: int):
-    """
-    POST /jobs/{job_id}/apply
-    Candidate applies for a job
-    """
+def get_db():
+    db = SessionLocal()
     try:
-        data = request.get_json()
+        yield db
+    finally:
+        db.close()
 
-        if not data or "user_id" not in data:
-            return jsonify({"error": "Missing required field: user_id"}), 400
 
-        user_id = data.get("user_id")
-        cover_letter = data.get("cover_letter")
-        resume_url = data.get("resume_url")
+def get_all_applications():
+    """Get all applications (for employers)"""
+    db: Session = next(get_db())
 
-        application, error = candidate_apply_for_job(
-            job_id=job_id,
-            user_id=user_id,
-            cover_letter=cover_letter, 
-            resume_url=resume_url,
-        )
+    try:
+        job_id = request.args.get("job_id")
 
-        if error:
-            return jsonify({"error": error}), 400
+        query = db.query(Application)
 
-        return (
-            jsonify(
+        if job_id:
+            query = query.filter(Application.job_id == job_id)
+
+        applications = query.order_by(Application.applied_at.desc()).all()
+
+        applications_data = []
+        for app in applications:
+            job = app.job
+            user = app.user
+
+            applications_data.append(
                 {
-                    "message": "Application submitted successfully",
-                    "application": application,
+                    "id": app.id,
+                    "job_id": app.job_id,
+                    "candidate_id": app.user_id,
+                    "user_id": app.user_id,
+                    "cover_letter": app.cover_letter,
+                    "cv_file_path": app.cv_file_path,
+                    "resume_url": app.cv_file_path,
+                    "status": app.status,
+                    "applied_at": (
+                        app.applied_at.isoformat() if app.applied_at else None
+                    ),
+                    "job": (
+                        {
+                            "id": job.id,
+                            "title": job.title,
+                            "company_name": job.company_name,
+                        }
+                        if job
+                        else None
+                    ),
+                    "candidate": (
+                        {
+                            "id": user.id,
+                            "full_name": user.full_name,
+                            "email": user.email,
+                        }
+                        if user
+                        else None
+                    ),
                 }
-            ),
-            201,
-        )
+            )
+
+        return jsonify(applications_data), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
 
 
-def list_all_applications():
-    """
-    GET /applications
-    List all applications (admin/employer view)
-    """
+def get_application(application_id: int):
+    """Get a single application by ID"""
+    db: Session = next(get_db())
+
     try:
-        applications = get_all_applications()
-        return jsonify({"applications": applications, "count": len(applications)}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        app = db.query(Application).filter(Application.id == application_id).first()
 
+        if not app:
+            return jsonify({"error": "Application not found"}), 404
 
-def list_candidate_applications(id: int):
-    """
-    GET /candidates/{candidate_id}/applications
-    Get all applications for a candidate
-    """
-    try:
-        applications, error = get_candidate_applications(id)
-
-        if error:
-            return jsonify({"error": error}), 404
-
-        return jsonify({"applications": applications, "count": len(applications)}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-def list_job_applicants(job_id: int):
-    """
-    GET /jobs/{job_id}/applicants
-    Get all applicants for a job
-    """
-    try:
-        applications, error = get_job_applicants(job_id)
-
-        if error:
-            return jsonify({"error": error}), 404
-
-        return jsonify({"applicants": applications, "count": len(applications)}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-def update_application(application_id: int):
-    """
-    PUT /applications/{application_id}
-    Update application status
-    """
-    try:
-        data = request.get_json()
-
-        if not data or "status" not in data:
-            return jsonify({"error": "Missing required field: status"}), 400
-
-        status = data.get("status")
-
-        application, error = update_application_status(application_id, status)
-
-        if error:
-            return jsonify({"error": error}), 400
+        job = app.job
+        user = app.user
 
         return (
             jsonify(
                 {
-                    "message": "Application updated successfully",
-                    "application": application,
+                    "id": app.id,
+                    "job_id": app.job_id,
+                    "candidate_id": app.user_id,
+                    "user_id": app.user_id,
+                    "cover_letter": app.cover_letter,
+                    "cv_file_path": app.cv_file_path,
+                    "resume_url": app.cv_file_path,
+                    "status": app.status,
+                    "applied_at": (
+                        app.applied_at.isoformat() if app.applied_at else None
+                    ),
+                    "job": (
+                        {
+                            "id": job.id,
+                            "title": job.title,
+                            "company_name": job.company_name,
+                        }
+                        if job
+                        else None
+                    ),
+                    "candidate": (
+                        {
+                            "id": user.id,
+                            "full_name": user.full_name,
+                            "email": user.email,
+                        }
+                        if user
+                        else None
+                    ),
                 }
             ),
             200,
@@ -125,37 +129,57 @@ def update_application(application_id: int):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
 
 
-def get_application(application_id: int):
-    """
-    GET /applications/{application_id}
-    Get a specific application
-    """
+def update_application(application_id: int):
+    """Update application status"""
+    db: Session = next(get_db())
+
     try:
-        application, error = get_application_by_id(application_id)
+        app = db.query(Application).filter(Application.id == application_id).first()
 
-        if error:
-            return jsonify({"error": error}), 404
+        if not app:
+            return jsonify({"error": "Application not found"}), 404
 
-        return jsonify({"application": application}), 200
+        data = request.get_json()
+
+        if "status" in data:
+            valid_statuses = ["pending", "reviewed", "accepted", "rejected"]
+            if data["status"] in valid_statuses:
+                app.status = data["status"]
+            else:
+                return (
+                    jsonify(
+                        {"error": f"Invalid status. Must be one of: {valid_statuses}"}
+                    ),
+                    400,
+                )
+
+        db.commit()
+        db.refresh(app)
+
+        return (
+            jsonify(
+                {
+                    "id": app.id,
+                    "job_id": app.job_id,
+                    "candidate_id": app.user_id,
+                    "user_id": app.user_id,
+                    "cover_letter": app.cover_letter,
+                    "cv_file_path": app.cv_file_path,
+                    "status": app.status,
+                    "applied_at": (
+                        app.applied_at.isoformat() if app.applied_at else None
+                    ),
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
+        db.rollback()
         return jsonify({"error": str(e)}), 500
-
-
-def remove_application(application_id: int):
-    """
-    DELETE /applications/{application_id}
-    Delete an application
-    """
-    try:
-        success, error = delete_application(application_id)
-
-        if error:
-            return jsonify({"error": error}), 404
-
-        return jsonify({"message": "Application deleted successfully"}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
