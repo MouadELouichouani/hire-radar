@@ -20,7 +20,6 @@ import { toast } from "sonner";
 import { useCurrentUser } from "@/features/auth/hook";
 import {
   useCandidateProfile,
-  useUpdateCandidateProfile,
 } from "@/features/profile/hooks";
 import {
   useEmployerProfile,
@@ -42,6 +41,19 @@ interface PasswordUpdatePayload {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
+}
+
+type UserProfile = {
+  firstName: string,
+  lastName: string,
+  companyName: string,
+  email: string,
+  headLine: string,
+  github_url?: string,
+  phone: string,
+  location: string,
+  bio: string,
+  website: string,
 }
 
 export default function ProfileContent({
@@ -145,13 +157,12 @@ export default function ProfileContent({
     currentUser?.role === "candidate" ? candidateProfile : employerProfile;
 
   // Form state
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UserProfile>({
     firstName: "",
     lastName: "",
     companyName: "",
     email: "",
     headLine: "",
-    role: "",
     github_url:"",
     phone: "",
     location: "",
@@ -184,36 +195,32 @@ export default function ProfileContent({
   // Note: This syncs form state with async profile data - necessary use case
   useEffect(() => {
     if (currentUser) {
-      if (currentUser.role === "candidate" && candidateProfile) {
+      if (currentUser.role === "candidate") {
         setFormData({
-          firstName: candidateProfile.full_name?.split(" ")[0] || "",
+          firstName: currentUser.full_name?.split(" ")[0] || "",
           lastName:
-            candidateProfile.full_name?.split(" ").slice(1).join(" ") || "",
-          email: candidateProfile.email || currentUser.email || "",
-          role: "Product Designer",
+            currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+          email: currentUser.email || currentUser.email || "",
           companyName: currentUser.companyName || '',
           headLine: currentUser.headLine || '',
           github_url:currentUser.github_url || '',
-          phone: candidateProfile.phone || "",
-          location: candidateProfile.location || "",
-          bio: candidateProfile.bio || "",
+          phone: currentUser.phone || "",
+          location: currentUser.location || "",
+          bio: currentUser.bio || "",
           website: currentUser.website,
         });
       } else if (currentUser.role === "employer" && employerProfile) {
-        // For employers, show company name as first name
         setFormData({
-          firstName: employerProfile.full_name?.split(" ")[0] || "",
+          firstName: currentUser.full_name?.split(" ")[0] || "",
           lastName:
-            employerProfile.full_name?.split(" ").slice(1).join(" ") || "",
-          companyName: employerProfile.company_name || "",
-          headLine:"",
-          github_url:"",
-          email: employerProfile.email || currentUser.email || "",
-          role: "Employer",
-          phone: employerProfile.phone || "",
-          location: employerProfile.location || "",
-          bio: employerProfile.bio || "",
-          website: employerProfile.website || "",
+            currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+          email: currentUser.email || currentUser.email || "",
+          companyName: currentUser?.companyName || '',
+          headLine: currentUser?.headLine || '',
+          phone: currentUser?.phone || "",
+          location: currentUser?.location || "",
+          bio: currentUser?.bio || "",
+          website: currentUser?.website,
         });
       } else {
         // Fallback to currentUser data if profile not loaded yet
@@ -221,8 +228,6 @@ export default function ProfileContent({
           firstName: currentUser.full_name?.split(" ")[0] || "",
           lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
           email: currentUser.email || "",
-          role:
-            currentUser.role === "candidate" ? "Product Designer" : "Employer",
           companyName: "",
           github_url:"",
           headLine:"",
@@ -260,18 +265,20 @@ export default function ProfileContent({
       }
     } else if (currentUser?.role === "employer") {
       try {
-        await updateEmployer.mutateAsync({
-          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: formData.email,
-          website: formData.website,
-          headLine: formData.headLine,
-          phone: formData.phone || undefined,
-          location: formData.location || undefined,
-          bio: formData.bio || undefined,
-        });
+        setUpdateEmployerLoading(true)
+        const response = await apiClient.put(`/api/employers/update-profile`,formData,{
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        })
+        if(response.status === 200){
+          toast.success("Profile updated successfully!");
+        }
         toast.success("Profile updated successfully!");
       } catch {
         toast.error("Failed to update profile. Please try again.");
+      } finally{
+        setUpdateEmployerLoading(false)
       }
     }
   };

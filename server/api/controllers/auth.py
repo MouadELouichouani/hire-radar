@@ -176,6 +176,9 @@ def get_current_user():
                 "headLine": user.headLine,
                 "github_url": user.github_url,
                 "website": user.webSite,
+                "bio": user.bio,
+                "phone": user.phone,
+                "location": user.location,
                 "companyName": user.companyName
             }
         )
