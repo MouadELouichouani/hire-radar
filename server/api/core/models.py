@@ -272,6 +272,7 @@ class Notification(Base):
         backref="received_notifications",
     )
 
+
 # ============================================================
 # CONNECTION REQUEST MODEL
 # ============================================================
