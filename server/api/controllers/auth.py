@@ -447,28 +447,36 @@ def get_connected_accounts():
 
 @is_auth
 def update_password():
-    db = SessionLocal()
+    db = SessionLocal()  #
     
-    data = request.get_json()
-    current_password = data.get("currentPassword")
-    new_password = data.get("newPassword")
-    confirm_password = data.get("confirmPassword")
+    try:
+        data = request.get_json()
+        current_password = data.get("currentPassword")
+        new_password = data.get("newPassword")
+        confirm_password = data.get("confirmPassword")
 
-    if not current_password or not new_password or not confirm_password:
-        return jsonify({"message": "All fields are required."}), 400
+        if not current_password or not new_password or not confirm_password:
+            return jsonify({"message": "All fields are required."}), 400
 
-    if new_password != confirm_password:
-        return jsonify({"message": "New password and confirm password do not match."}), 400
+        if new_password != confirm_password:
+            return jsonify({"message": "New password and confirm password do not match."}), 400
 
-    user_id = request.user_id
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({"message": "User not found."}), 404
+        user_id = request.user_id  
 
-    if not check_password_hash(user.password, current_password):
-        return jsonify({"message": "Current password is incorrect."}), 400
+        user = db.get(User, user_id) 
+        if not user:
+            return jsonify({"message": "User not found."}), 404
 
-    user.password = generate_password_hash(new_password)
-    db.session.commit()
+        if not check_password_hash(user.password, current_password):
+            return jsonify({"message": "Current password is incorrect."}), 400
 
-    return jsonify({"message": "Password updated successfully!"}), 200
+        user.password = generate_password_hash(new_password)
+        db.commit()
+
+        return jsonify({"message": "Password updated successfully!"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"message": str(e)}), 500
+    finally:
+        db.close()

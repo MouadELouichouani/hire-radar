@@ -79,6 +79,11 @@ export default function ProfileContent({
       return;
     }
 
+    if(newPassword.trim().length < 8 || confirmPassword.trim().length < 8){
+      setError("Password must be at least 8 charachters");
+      return;
+    }
+
     const payload: PasswordUpdatePayload = {
       currentPassword,
       newPassword,
@@ -93,7 +98,7 @@ export default function ProfileContent({
         }
       });
 
-      if (response.status === 200) {
+      if (response.status !== 200) {
         setError(response.data.message || "Failed to update password.");
       } else {
         setSuccess("Password updated successfully!");
