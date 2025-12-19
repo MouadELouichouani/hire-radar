@@ -6,8 +6,7 @@ from controllers.auth import (
     logout,
     signup,
     login,
-    github_connect,
-    github_callback,
+    update_password,
     get_connected_accounts,
 )
 
@@ -20,6 +19,7 @@ auth.add_url_rule(
 )
 auth.add_url_rule("/me", "get_current_user", get_current_user, methods=["GET"])
 auth.add_url_rule("/logout", "logout", logout, methods=["POST"])
+auth.add_url_rule("/update-password", "update-password", update_password, methods=["PUT"])
 auth.add_url_rule("/signup", "signup", signup, methods=["POST"])
 auth.add_url_rule("/login", "login", login, methods=["POST"])
 auth.add_url_rule(

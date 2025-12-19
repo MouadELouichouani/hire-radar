@@ -8,8 +8,10 @@ from core.models import User
 from google_auth_oauthlib.flow import Flow
 import os
 import requests
+from middlewares.auth import is_auth
 
 load_dotenv()
+SECRET_KEY = os.getenv("JWT_SECRET")
 
 # Allow insecure transport for local development (HTTP instead of HTTPS)
 # Only enable in development environment, never in production
@@ -441,3 +443,32 @@ def get_connected_accounts():
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
+
+
+@is_auth
+def update_password():
+    db = SessionLocal()
+    
+    data = request.get_json()
+    current_password = data.get("currentPassword")
+    new_password = data.get("newPassword")
+    confirm_password = data.get("confirmPassword")
+
+    if not current_password or not new_password or not confirm_password:
+        return jsonify({"message": "All fields are required."}), 400
+
+    if new_password != confirm_password:
+        return jsonify({"message": "New password and confirm password do not match."}), 400
+
+    user_id = request.user_id
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({"message": "User not found."}), 404
+
+    if not check_password_hash(user.password, current_password):
+        return jsonify({"message": "Current password is incorrect."}), 400
+
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({"message": "Password updated successfully!"}), 200

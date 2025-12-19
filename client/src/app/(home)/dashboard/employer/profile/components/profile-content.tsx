@@ -11,6 +11,7 @@ import {
   Star,
   Smartphone,
   Monitor,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,9 +35,18 @@ import { githubConnect, getConnectedAccounts } from "@/features/auth/api";
 import type { User } from "@/types";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import apiClient from "@/lib/apiClient";
+import { getToken } from "@/lib";
 
 interface ProfileContentProps {
   defaultTab?: string;
+}
+
+
+interface PasswordUpdatePayload {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
 }
 
 export default function ProfileContent({
@@ -47,6 +57,60 @@ export default function ProfileContent({
   const userId = useCurrentUserId();
   const [activeTab, setActiveTab] = useState(defaultTab);
 
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleUpdatePassword = async () => {
+    setError(null);
+    setSuccess(null);
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError("New password and confirm password do not match.");
+      return;
+    }
+
+    const payload: PasswordUpdatePayload = {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    };
+
+    setLoading(true);
+    try {
+      const response = await apiClient.put("/api/auth/update-password",payload, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      });
+
+      if (response.status === 200) {
+        setError(response.data.message || "Failed to update password.");
+      } else {
+        setSuccess("Password updated successfully!");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (err:any) {
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || "Something went wrong");
+      } else {
+        setError(err.message || "Something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
   // Listen for tab changes from sidebar
   useEffect(() => {
     const handleTabChange = (e: CustomEvent) => {
@@ -278,6 +342,7 @@ export default function ProfileContent({
                     <Label htmlFor="firstName">First name</Label>
                     <Input
                       id="firstName"
+                      placeholder="Jhon"
                       value={formData.firstName}
                       onChange={(e) =>
                         handleInputChange("firstName", e.target.value)
@@ -289,6 +354,7 @@ export default function ProfileContent({
                     <Label htmlFor="lastName">Last name</Label>
                     <Input
                       id="lastName"
+                      placeholder="doe"
                       value={formData.lastName}
                       onChange={(e) =>
                         handleInputChange("lastName", e.target.value)
@@ -300,17 +366,18 @@ export default function ProfileContent({
                     <Label htmlFor="companyName">Company name</Label>
                     <Input
                       id="companyName"
+                      placeholder="Oracle"
                       value={formData.companyName}
                       onChange={(e) =>
                         handleInputChange("companyName", e.target.value)
                       }
-                      required
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
+                      placeholder="m@example.com"
                       type="email"
                       value={formData.email}
                       onChange={(e) =>
@@ -323,6 +390,7 @@ export default function ProfileContent({
                     <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
+                      placeholder="+212627096056"
                       value={formData.phone}
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
@@ -333,6 +401,7 @@ export default function ProfileContent({
                     <Label htmlFor="location">Location</Label>
                     <Input
                       id="location"
+                      placeholder="213 LOT LOUBANE HAMA"
                       value={formData.location}
                       onChange={(e) =>
                         handleInputChange("location", e.target.value)
@@ -343,6 +412,7 @@ export default function ProfileContent({
                     <Label htmlFor="website">Website</Label>
                     <Input
                       id="website"
+                      placeholder="www.oracle.com"
                       value={formData.website}
                       onChange={(e) =>
                         handleInputChange("website", e.target.value)
@@ -352,6 +422,7 @@ export default function ProfileContent({
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="bio">Bio</Label>
                     <Textarea
+                      placeholder="tell us about you..."
                       id="bio"
                       value={formData.bio}
                       onChange={(e) => handleInputChange("bio", e.target.value)}
@@ -504,20 +575,20 @@ export default function ProfileContent({
               </div>
               <Button variant="outline">
                 <Shield className="mr-2 h-4 w-4" />
-                Enable
+                Enabled
               </Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="font-semibold">Password</div>
+                <div className="font-semibold">Delete your account</div>
                 <div className="text-sm text-muted-foreground">
-                  Last changed 3 months ago
+                  Permanently removing a user account and all its associated data from a platform or service
                 </div>
               </div>
               <Button variant="outline">
-                <Key className="mr-2 h-4 w-4" />
-                Change
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
               </Button>
             </div>
           </CardContent>
@@ -525,40 +596,58 @@ export default function ProfileContent({
 
         <Card>
           <CardHeader>
-            <CardTitle>Active Sessions</CardTitle>
+            <CardTitle>Change your password</CardTitle>
           </CardHeader>
+
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Monitor className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">MacBook Pro</span>
-                    <Badge variant="outline" className="text-xs">
-                      Current
-                    </Badge>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    San Francisco, CA • Active now
-                  </div>
-                </div>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="currentPassword">Current Password</Label>
+                <Input
+                  id="currentPassword"
+                  type="password"
+                  placeholder="Current password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
               </div>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Smartphone className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="font-semibold">iPhone 12</div>
-                  <div className="text-sm text-muted-foreground">
-                    New York, NY • 2 days ago
-                  </div>
-                </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  placeholder="New password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
               </div>
-              <Button variant="outline">Revoke</Button>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+
+              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {success && <p className="text-green-500 text-sm">{success}</p>}
+
+              <Button
+                className="w-full"
+                onClick={handleUpdatePassword}
+                disabled={loading}
+              >
+                {loading ? "Updating..." : "Update Password"}
+              </Button>
             </div>
           </CardContent>
         </Card>
+
       </TabsContent>
 
       {/* Notifications Tab */}
