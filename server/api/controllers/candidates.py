@@ -1,12 +1,11 @@
-from flask import request, jsonify, send_from_directory
+from flask import request, jsonify
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import Session
 from config.db import SessionLocal
-from core.models import User, SavedJob, Job, Skill, Education, Experience, user_skills
-from typing import Optional
+from core.models import User, SavedJob
 import os
 from datetime import datetime
-
+from middlewares.auth import is_auth 
 
 def get_db():
     db = SessionLocal()
@@ -94,14 +93,15 @@ def get_candidate(candidate_id: int):
         db.close()
 
 
-def update_candidate(candidate_id: int):
+@is_auth
+def update_candidate():
     """Update candidate profile"""
     db: Session = next(get_db())
 
     try:
         user = (
             db.query(User)
-            .filter(User.id == candidate_id, User.role == "candidate")
+            .filter(User.id == request.user_id, User.role == "candidate")
             .first()
         )
 
@@ -117,7 +117,7 @@ def update_candidate(candidate_id: int):
             # Check if email is already taken by another user
             existing_user = (
                 db.query(User)
-                .filter(User.email == data["email"], User.id != candidate_id)
+                .filter(User.email == data["email"], User.id != request.user_id)
                 .first()
             )
             if existing_user:
@@ -131,100 +131,18 @@ def update_candidate(candidate_id: int):
             user.bio = data.get("bio")
         if "headLine" in data or "headline" in data:
             user.headLine = data.get("headLine") or data.get("headline")
+        if "github_url" in data:
+            user.github_url = data.get("github_url")
+        if "website" in data:
+            user.webSite = data.get("website") 
+        if "companyName" in data:
+            user.companyName = data.get("companyName")        
+        
+        print(data.get("github_url"))
 
-        # Update skills if provided
-        if "skills" in data:
-            skill_ids = [
-                s.get("id") if isinstance(s, dict) else s for s in data["skills"]
-            ]
-            skills = db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
-            user.skills = skills
-
-        # Update education if provided
-        if "educations" in data:
-            # Delete existing educations
-            db.query(Education).filter(Education.user_id == candidate_id).delete()
-            # Add new educations
-            for edu_data in data["educations"]:
-                education = Education(
-                    user_id=candidate_id,
-                    school_name=edu_data.get("school_name"),
-                    degree=edu_data.get("degree"),
-                    field_of_study=edu_data.get("field_of_study"),
-                    start_date=(
-                        datetime.fromisoformat(
-                            edu_data["start_date"].replace("Z", "+00:00")
-                        )
-                        if edu_data.get("start_date")
-                        else None
-                    ),
-                    end_date=(
-                        datetime.fromisoformat(
-                            edu_data["end_date"].replace("Z", "+00:00")
-                        )
-                        if edu_data.get("end_date")
-                        else None
-                    ),
-                    description=edu_data.get("description"),
-                )
-                db.add(education)
-
-        # Update experience if provided
-        if "experiences" in data:
-            # Delete existing experiences
-            db.query(Experience).filter(Experience.user_id == candidate_id).delete()
-            # Add new experiences
-            for exp_data in data["experiences"]:
-                experience = Experience(
-                    user_id=candidate_id,
-                    job_title=exp_data.get("job_title"),
-                    company=exp_data.get("company"),
-                    start_date=(
-                        datetime.fromisoformat(
-                            exp_data["start_date"].replace("Z", "+00:00")
-                        )
-                        if exp_data.get("start_date")
-                        else None
-                    ),
-                    end_date=(
-                        datetime.fromisoformat(
-                            exp_data["end_date"].replace("Z", "+00:00")
-                        )
-                        if exp_data.get("end_date")
-                        else None
-                    ),
-                    description=exp_data.get("description"),
-                )
-                db.add(experience)
 
         db.commit()
         db.refresh(user)
-
-        # Return updated profile
-        skills = [{"id": skill.id, "name": skill.name} for skill in user.skills]
-        educations = [
-            {
-                "id": edu.id,
-                "school_name": edu.school_name,
-                "degree": edu.degree,
-                "field_of_study": edu.field_of_study,
-                "start_date": edu.start_date.isoformat() if edu.start_date else None,
-                "end_date": edu.end_date.isoformat() if edu.end_date else None,
-                "description": edu.description,
-            }
-            for edu in user.educations
-        ]
-        experiences = [
-            {
-                "id": exp.id,
-                "job_title": exp.job_title,
-                "company": exp.company,
-                "start_date": exp.start_date.isoformat() if exp.start_date else None,
-                "end_date": exp.end_date.isoformat() if exp.end_date else None,
-                "description": exp.description,
-            }
-            for exp in user.experiences
-        ]
 
         return (
             jsonify(
@@ -239,9 +157,6 @@ def update_candidate(candidate_id: int):
                     "headline": user.headLine,
                     "resume_url": user.resume_url,
                     "cv_file_path": user.resume_url,
-                    "skills": skills,
-                    "educations": educations,
-                    "experiences": experiences,
                 }
             ),
             200,

@@ -3,15 +3,11 @@
 import { useState, useEffect } from "react";
 import {
   Shield,
-  Key,
   Loader2,
   User as UserIcon,
   Lock,
   Bell,
-  Star,
-  Smartphone,
-  Monitor,
-  Trash2,
+  GraduationCap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +26,6 @@ import {
   useEmployerProfile,
   useUpdateEmployerProfile,
 } from "@/features/profile/hooks";
-import { githubConnect, getConnectedAccounts } from "@/features/auth/api";
 import type { User } from "@/types";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -64,7 +59,8 @@ export default function ProfileContent({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-
+  const [updateCandidateLoading,setUpdateCandidateLoading] = useState(false)
+  const [updateEmployerLoading,setUpdateEmployerLoading] = useState(false)
   const handleUpdatePassword = async () => {
     setError(null);
     setSuccess(null);
@@ -141,7 +137,6 @@ export default function ProfileContent({
     useCandidateProfile(userId);
   const { data: employerProfile, isLoading: isLoadingEmployer } =
     useEmployerProfile(userId);
-  const updateCandidate = useUpdateCandidateProfile(userId);
   const updateEmployer = useUpdateEmployerProfile(userId);
 
   const isLoading =
@@ -155,7 +150,9 @@ export default function ProfileContent({
     lastName: "",
     companyName: "",
     email: "",
+    headLine: "",
     role: "",
+    github_url:"",
     phone: "",
     location: "",
     bio: "",
@@ -164,25 +161,6 @@ export default function ProfileContent({
 
   const queryClient = useQueryClient();
 
-  // Fetch connected accounts from backend
-  const { data: connectedAccountsData } = useQuery({
-    queryKey: ["connected-accounts"],
-    queryFn: getConnectedAccounts,
-    retry: false,
-  });
-
-  // Map connected accounts to state
-  const connectedAccounts = {
-    github:
-      connectedAccountsData?.connected_accounts?.some(
-        (acc) => acc.provider === "github" && acc.connected,
-      ) || false,
-    google:
-      connectedAccountsData?.connected_accounts?.some(
-        (acc) => acc.provider === "google" && acc.connected,
-      ) || false,
-    twitter: false, // Not implemented yet
-  };
 
   // Check URL params for OAuth callback results
   useEffect(() => {
@@ -213,11 +191,13 @@ export default function ProfileContent({
             candidateProfile.full_name?.split(" ").slice(1).join(" ") || "",
           email: candidateProfile.email || currentUser.email || "",
           role: "Product Designer",
-          companyName: "",
+          companyName: currentUser.companyName || '',
+          headLine: currentUser.headLine || '',
+          github_url:currentUser.github_url || '',
           phone: candidateProfile.phone || "",
           location: candidateProfile.location || "",
           bio: candidateProfile.bio || "",
-          website: "",
+          website: currentUser.website,
         });
       } else if (currentUser.role === "employer" && employerProfile) {
         // For employers, show company name as first name
@@ -226,6 +206,8 @@ export default function ProfileContent({
           lastName:
             employerProfile.full_name?.split(" ").slice(1).join(" ") || "",
           companyName: employerProfile.company_name || "",
+          headLine:"",
+          github_url:"",
           email: employerProfile.email || currentUser.email || "",
           role: "Employer",
           phone: employerProfile.phone || "",
@@ -242,6 +224,8 @@ export default function ProfileContent({
           role:
             currentUser.role === "candidate" ? "Product Designer" : "Employer",
           companyName: "",
+          github_url:"",
+          headLine:"",
           phone: currentUser.phone || "",
           location: currentUser.location || "",
           bio: currentUser.bio || "",
@@ -260,27 +244,30 @@ export default function ProfileContent({
 
     if (currentUser?.role === "candidate") {
       try {
-        await updateCandidate.mutateAsync({
-          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          email: formData.email,
-          phone: formData.phone || undefined,
-          location: formData.location || undefined,
-          bio: formData.bio || undefined,
-        });
-        toast.success("Profile updated successfully!");
+        setUpdateCandidateLoading(true)
+        const response = await apiClient.put(`/api/candidates/update-profile`,formData,{
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        })
+        if(response.status === 200){
+          toast.success("Profile updated successfully!");
+        }
       } catch {
         toast.error("Failed to update profile. Please try again.");
+      } finally{
+        setUpdateCandidateLoading(false)
       }
     } else if (currentUser?.role === "employer") {
       try {
         await updateEmployer.mutateAsync({
-          email: formData.email,
           full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          company_name: formData.companyName || undefined,
+          email: formData.email,
+          website: formData.website,
+          headLine: formData.headLine,
           phone: formData.phone || undefined,
           location: formData.location || undefined,
           bio: formData.bio || undefined,
-          website: formData.website || undefined,
         });
         toast.success("Profile updated successfully!");
       } catch {
@@ -288,25 +275,7 @@ export default function ProfileContent({
       }
     }
   };
-
-  const handleConnectAccount = async (
-    account: "github" | "google" | "twitter",
-  ) => {
-    if (account === "github") {
-      try {
-        const { auth_url } = await githubConnect();
-        // Redirect to GitHub OAuth
-        window.location.href = auth_url;
-      } catch (error) {
-        toast.error("Failed to initiate GitHub connection");
-      }
-    } else if (account === "google") {
-      // Google OAuth is handled separately for login, not account linking
-      toast.info("Google account is linked via login");
-    } else {
-      toast.info("Twitter connection not yet implemented");
-    }
-  };
+  
 
   if (isLoading) {
     return (
@@ -318,7 +287,7 @@ export default function ProfileContent({
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-      <TabsList className="grid w-full grid-cols-3">
+      <TabsList className={`grid w-full ${currentUser?.role === "candidate" ? 'grid-cols-4': 'grid-cols-3'}`}>
         <TabsTrigger value="profile">
           <UserIcon className="mr-2 h-4 w-4" />
           Profile
@@ -331,6 +300,13 @@ export default function ProfileContent({
           <Bell className="mr-2 h-4 w-4" />
           Notifications
         </TabsTrigger>
+          {
+            currentUser?.role === "candidate" && <TabsTrigger value="career">
+                <GraduationCap className="mr-2 h-4 w-4" />
+                Career
+              </TabsTrigger>
+          }
+         
       </TabsList>
 
       {/* Profile Tab */}
@@ -341,7 +317,7 @@ export default function ProfileContent({
               <CardTitle>Profile Details</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {currentUser?.role === "employer" ? (
+              {currentUser?.role === "employer" || currentUser?.role === 'candidate' ? (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First name</Label>
@@ -403,26 +379,51 @@ export default function ProfileContent({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="phone">HeadLine</Label>
                     <Input
-                      id="location"
-                      placeholder="213 LOT LOUBANE HAMA"
-                      value={formData.location}
+                      id="headLine"
+                      placeholder="Full stack engineer"
+                      value={formData.headLine}
                       onChange={(e) =>
-                        handleInputChange("location", e.target.value)
+                        handleInputChange("headLine", e.target.value)
                       }
                     />
                   </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input
-                      id="website"
-                      placeholder="www.oracle.com"
-                      value={formData.website}
-                      onChange={(e) =>
-                        handleInputChange("website", e.target.value)
-                      }
-                    />
+                  
+                  <div className="flex md:col-span-2 justify-between">
+                    <div className="space-y-2 w-[33%]">
+                      <Label htmlFor="website">Website</Label>
+                      <Input
+                        id="website"
+                        placeholder="www.oracle.com"
+                        value={formData.website}
+                        onChange={(e) =>
+                          handleInputChange("website", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2 w-[33%]">
+                      <Label htmlFor="location">Location</Label>
+                      <Input
+                        id="location"
+                        placeholder="213 LOT LOUBANE HAMA"
+                        value={formData.location}
+                        onChange={(e) =>
+                          handleInputChange("location", e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2 w-[33%]">
+                      <Label htmlFor="github_url">Github url</Label>
+                      <Input
+                        id="github_url"
+                        placeholder="www.github.com/username"
+                        value={formData.github_url}
+                        onChange={(e) =>
+                          handleInputChange("github_url", e.target.value)
+                        }
+                      />
+                    </div>
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="bio">Bio</Label>
@@ -489,10 +490,10 @@ export default function ProfileContent({
                 <Button
                   type="submit"
                   disabled={
-                    updateCandidate.isPending || updateEmployer.isPending
+                    updateCandidateLoading || updateEmployer.isPending
                   }
                 >
-                  {(updateCandidate.isPending || updateEmployer.isPending) && (
+                  {(updateCandidateLoading || updateEmployer.isPending) && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Save Changes
@@ -501,67 +502,6 @@ export default function ProfileContent({
             </CardContent>
           </Card>
         </form>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Connected Accounts</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Star className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="font-semibold">GitHub</div>
-                  <div className="text-sm text-muted-foreground">
-                    {connectedAccounts.github ? "Connected" : "Not Connected"}
-                  </div>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => handleConnectAccount("github")}
-              >
-                {connectedAccounts.github ? "Disconnect" : "Connect"}
-              </Button>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Star className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="font-semibold">Google</div>
-                  <div className="text-sm text-muted-foreground">
-                    {connectedAccounts.google ? "Connected" : "Not Connected"}
-                  </div>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => handleConnectAccount("google")}
-              >
-                {connectedAccounts.google ? "Disconnect" : "Connect"}
-              </Button>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Star className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <div className="font-semibold">Twitter</div>
-                  <div className="text-sm text-muted-foreground">
-                    {connectedAccounts.twitter ? "Connected" : "Not Connected"}
-                  </div>
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => handleConnectAccount("twitter")}
-              >
-                {connectedAccounts.twitter ? "Disconnect" : "Connect"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </TabsContent>
 
       {/* Security Tab */}
@@ -653,6 +593,57 @@ export default function ProfileContent({
       </TabsContent>
 
       {/* Notifications Tab */}
+      <TabsContent value="notifications" className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Notification Preferences</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Email notifications</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
+                </div>
+              </div>
+              <Button variant="outline">Configure</Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Push notifications</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
+                </div>
+              </div>
+              <Button variant="outline">Configure</Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Monthly newsletter</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
+                </div>
+              </div>
+              <Button variant="outline">Configure</Button>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="font-semibold">Security alerts</div>
+                <div className="text-sm text-muted-foreground">
+                  Receive notifications about account activity
+                </div>
+              </div>
+              <Button variant="outline">Configure</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+
+
       <TabsContent value="notifications" className="space-y-6">
         <Card>
           <CardHeader>

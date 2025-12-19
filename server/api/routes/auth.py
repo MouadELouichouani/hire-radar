@@ -7,7 +7,6 @@ from controllers.auth import (
     signup,
     login,
     update_password,
-    get_connected_accounts,
     delete_account_request
 )
 
@@ -24,9 +23,3 @@ auth.add_url_rule("/update-password", "update-password", update_password, method
 auth.add_url_rule("/delete-account", "delete-account", delete_account_request, methods=["POST"])
 auth.add_url_rule("/signup", "signup", signup, methods=["POST"])
 auth.add_url_rule("/login", "login", login, methods=["POST"])
-auth.add_url_rule(
-    "/me/connected-accounts",
-    "get_connected_accounts",
-    get_connected_accounts,
-    methods=["GET"],
-)

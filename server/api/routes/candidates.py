@@ -16,7 +16,7 @@ candidates.add_url_rule(
     "/<int:candidate_id>", "get_candidate", get_candidate, methods=["GET"]
 )
 candidates.add_url_rule(
-    "/<int:candidate_id>", "update_candidate", update_candidate, methods=["PUT"]
+    "/update-profile", "update_candidate", update_candidate, methods=["PUT"]
 )
 candidates.add_url_rule(
     "/<int:candidate_id>/upload-cv", "upload_cv", upload_cv, methods=["POST"]
