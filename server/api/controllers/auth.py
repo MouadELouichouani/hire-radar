@@ -238,7 +238,6 @@ def login():
     data = request.json
     email = data.get("email")
     password = data.get("password")
-
     db = SessionLocal()
     try:
         user = db.query(User).filter_by(email=email).first()
@@ -285,43 +284,44 @@ def login():
 
 def github_connect():
     """Initiate GitHub OAuth flow for account linking"""
+
     auth = request.headers.get("Authorization")
     if not auth or not auth.startswith("Bearer "):
         return jsonify({"error": "Authentication required"}), 401
 
     token = auth.split(" ")[1]
+
     try:
         decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         user_id = decoded["id"]
-    except:
+    except jwt.InvalidTokenError:
         return jsonify({"error": "Invalid token"}), 401
 
-    # Store user_id in session for callback
+    # Store user id in session
     session["github_link_user_id"] = user_id
 
-    # GitHub OAuth authorization URL
-    redirect_uri = GITHUB_REDIRECT_URI
+    # Create state token (CSRF protection)
     state = jwt.encode(
-        {"user_id": user_id, "exp": datetime.utcnow() + timedelta(minutes=10)},
+        {
+            "user_id": user_id,
+            "exp": datetime.utcnow() + timedelta(minutes=10),
+        },
         JWT_SECRET,
         algorithm="HS256",
     )
+
     session["github_state"] = state
 
+    # GitHub OAuth authorization URL
     auth_url = (
-        f"https://github.com/login/oauth/authorize"
+        "https://github.com/login/oauth/authorize"
         f"?client_id={GITHUB_CLIENT_ID}"
-        f"&redirect_uri={redirect_uri}"
+        f"&redirect_uri={GITHUB_REDIRECT_URI}"
         f"&scope=user:email"
         f"&state={state}"
     )
 
-    authorization_url, state = flow.authorization_url(
-        access_type="offline", include_granted_scopes="true"
-    )
-
-    session["state"] = state
-    return jsonify({"auth_url":authorization_url})
+    return jsonify({"auth_url": auth_url}), 200
 
 
 def github_callback():
@@ -394,7 +394,7 @@ def github_callback():
         return redirect(f"http://localhost:3000/profile?error={str(e)}")
     finally:
         db.close()
-        
+
 def get_connected_accounts():
     """Get connected accounts for the current user"""
     auth = request.headers.get("Authorization")

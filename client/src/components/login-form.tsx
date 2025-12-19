@@ -29,12 +29,12 @@ export function LoginForm({
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    if (error) setError(""); // Clear error when user types
+    if (error) setError(""); 
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
-    if (error) setError(""); // Clear error when user types
+    if (error) setError(""); 
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -83,7 +83,7 @@ export function LoginForm({
             placeholder="m@example.com"
             required
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
           />
         </Field>
 
@@ -99,7 +99,11 @@ export function LoginForm({
           </div>
           <Input
             disabled={loading}
+            type="password"
             aria-invalid={error ? "true" : "false"}
+            required
+            value={password}
+            onChange={handlePasswordChange}
             className={cn(
               "bg-background",
               error &&
