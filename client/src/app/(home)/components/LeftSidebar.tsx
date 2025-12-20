@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { useCurrentUser } from "@/features/auth/hook";
 import type { User } from "@/types";
-<<<<<<< HEAD
 import { getValidImageUrl } from "@/lib/image-utils";
 import Link from "next/link";
 import {
@@ -32,9 +31,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useConnectionRequests } from "@/features/connections/hooks";
 import { getToken } from "@/lib";
-=======
-import ProfileHeader from "@/app/(home)/profile/components/profile-header";
->>>>>>> origin/main
 
 function LeftSidebarContent() {
   const { data } = useCurrentUser(getToken()!);

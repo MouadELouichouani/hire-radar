@@ -1,58 +1,62 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { CalendarIcon } from "lucide-react"
+import * as React from "react";
+import { CalendarIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 function formatDate(date: Date | undefined) {
-  if (!date) return ""
+  if (!date) return "";
   return date.toLocaleDateString("en-US", {
     day: "2-digit",
     month: "long",
     year: "numeric",
-  })
+  });
 }
 
 function isValidDate(date: Date | undefined) {
-  return date instanceof Date && !isNaN(date.getTime())
+  return date instanceof Date && !isNaN(date.getTime());
 }
 
 interface Calendar28Props {
-  value?: string
-  onChange?: (value: string) => void
+  value?: string;
+  onChange?: (value: string) => void;
 }
 
 export function Calendar28({ value, onChange }: Calendar28Props) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(
-    value ? new Date(value) : undefined
-  )
-  const [month, setMonth] = React.useState<Date | undefined>(date)
-  const [internalValue, setInternalValue] = React.useState(formatDate(date))
+    value ? new Date(value) : undefined,
+  );
+  const [month, setMonth] = React.useState<Date | undefined>(date);
+  const [internalValue, setInternalValue] = React.useState(formatDate(date));
 
   // Sync internal state when parent changes value
   React.useEffect(() => {
     if (value) {
-      const newDate = new Date(value)
-      setDate(newDate)
-      setMonth(newDate)
-      setInternalValue(formatDate(newDate))
+      const newDate = new Date(value);
+      setDate(newDate);
+      setMonth(newDate);
+      setInternalValue(formatDate(newDate));
     }
-  }, [value])
+  }, [value]);
 
   const handleChange = (val: string) => {
-    setInternalValue(val)
-    const newDate = new Date(val)
+    setInternalValue(val);
+    const newDate = new Date(val);
     if (isValidDate(newDate)) {
-      setDate(newDate)
-      setMonth(newDate)
-      onChange && onChange(formatDate(newDate))
+      setDate(newDate);
+      setMonth(newDate);
+      onChange?.(formatDate(newDate));
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-3 mt-2">
@@ -65,8 +69,8 @@ export function Calendar28({ value, onChange }: Calendar28Props) {
           onChange={(e) => handleChange(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
-              e.preventDefault()
-              setOpen(true)
+              e.preventDefault();
+              setOpen(true);
             }
           }}
         />
@@ -94,16 +98,16 @@ export function Calendar28({ value, onChange }: Calendar28Props) {
               month={month}
               onMonthChange={setMonth}
               onSelect={(selectedDate) => {
-                setDate(selectedDate)
-                const formatted = formatDate(selectedDate)
-                setInternalValue(formatted)
-                onChange && onChange(formatted)
-                setOpen(false)
+                setDate(selectedDate);
+                const formatted = formatDate(selectedDate);
+                setInternalValue(formatted);
+                onChange?.(formatted);
+                setOpen(false);
               }}
             />
           </PopoverContent>
         </Popover>
       </div>
     </div>
-  )
+  );
 }

@@ -14,14 +14,15 @@ interface UploadCVProps {
 }
 
 export default function UploadCV({
-  profile,
   onUpload,
   isUploading = false,
 }: UploadCVProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const { data: currentUser } = useCurrentUser()
-  
+  const { data: currentUser } = useCurrentUser();
+
+  if (!currentUser) return null;
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -81,7 +82,9 @@ export default function UploadCV({
             <div className="flex-1">
               <p className="font-semibold text-foreground">CV Uploaded</p>
               <a
-                href={process.env.NEXT_PUBLIC_API_BASE_URL + currentUser.resume_url}
+                href={
+                  process.env.NEXT_PUBLIC_API_BASE_URL + currentUser.resume_url
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"

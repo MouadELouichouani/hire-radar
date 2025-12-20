@@ -10,6 +10,7 @@ import {
   X,
   Clock,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/auth/hook";
@@ -28,7 +29,6 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getToken } from "@/lib";
-<<<<<<< HEAD
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -40,22 +40,16 @@ import {
 } from "@/features/connections/hooks";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-=======
->>>>>>> origin/main
 
 export default function TopNavbar() {
   const router = useRouter();
   const { data: currentUser } = useCurrentUser(getToken()!);
-<<<<<<< HEAD
   const { data: notifications } = useNotifications();
   const { data: connectionRequests } = useConnectionRequests();
   const markRead = useMarkNotificationRead();
   const acceptConnection = useAcceptConnection();
   const rejectConnection = useRejectConnection();
 
-=======
-  
->>>>>>> origin/main
   const [searchQuery, setSearchQuery] = useState("");
 
   const unreadCount = notifications?.filter((n) => n.is_read === 0).length || 0;
@@ -129,13 +123,12 @@ export default function TopNavbar() {
           href="/"
           className="flex items-center gap-2 font-bold text-xl tracking-tight hover:opacity-80 transition-opacity"
         >
-          <img
+          <Image
             src="/radar.svg"
             alt="Hire Radar"
             width={28}
             height={28}
-            className="invert dark:invert-0 border-0 bg-transparent outline-none"
-            style={{ display: "block" }}
+            className="invert dark:invert-0 border-0 bg-transparent outline-none block"
           />
           <span className="hidden sm:inline">Hire Radar</span>
         </Link>

@@ -1,11 +1,5 @@
-<<<<<<< HEAD
 import { LoginForm } from "@/components/login-form";
 import Image from "next/image";
-=======
-
-import { LoginForm } from "@/components/login-form"
-import Image from "next/image"
->>>>>>> origin/main
 
 export default function LoginPage() {
   return (
@@ -14,16 +8,12 @@ export default function LoginPage() {
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="#" className="flex items-center gap-2 font-medium">
             <div className=" size-6 items-center justify-center rounded-md">
-<<<<<<< HEAD
               <Image
                 src={"/radar.svg"}
                 alt="hire-radar"
                 width={25}
                 height={25}
               />
-=======
-              <Image src={'/radar.svg'} alt="hire-radar" width={25} height={25}/>
->>>>>>> origin/main
             </div>
             Hire-radar
           </a>
@@ -35,5 +25,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

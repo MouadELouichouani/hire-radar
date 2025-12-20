@@ -4,10 +4,7 @@
 export type User = {
   id: number;
   full_name: string;
-<<<<<<< HEAD
   email: string;
-=======
->>>>>>> origin/main
   role: "candidate" | "employer" | "admin";
   image?: string | null;
   phone?: string | null;
@@ -16,16 +13,11 @@ export type User = {
   headLine?: string | null; // Used in some places
   created_at?: string;
 
-  companyName: string,
-  email: string,
-  headLine: string,
-  github_url?: string,
-  phone: string,
-  location: string,
-  bio: string,
-  website: string,
-  
-  resume_url: string,
+  companyName: string;
+  github_url?: string;
+  website: string;
+
+  resume_url: string;
 
   // These are not returned by /auth/me - will need to be fetched separately or derived
   candidate_id?: number;

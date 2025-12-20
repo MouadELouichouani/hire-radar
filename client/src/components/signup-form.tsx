@@ -24,10 +24,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
 import type { ISignupRequest } from "@/types/authResponseTypes";
-=======
->>>>>>> origin/main
 
 export function SignupForm({
   className,
@@ -41,13 +38,9 @@ export function SignupForm({
     confirmPassword: "",
   });
 
-  const [errors, setErrors] = useState<any>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
-<<<<<<< HEAD
   const router = useRouter();
-=======
-  const router = useRouter()
->>>>>>> origin/main
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.id]: e.target.value });
@@ -55,7 +48,7 @@ export function SignupForm({
   }
 
   function validate() {
-    let errs: any = {};
+    const errs: Record<string, string> = {};
 
     if (!form.full_name.trim()) errs.full_name = "Full name is required.";
     if (!form.role) errs.role = "Please select a role.";
@@ -88,7 +81,6 @@ export function SignupForm({
     }
 
     try {
-<<<<<<< HEAD
       await signup(form);
       router.push(`/login`);
       toast.success("Account created successfully!");
@@ -99,14 +91,6 @@ export function SignupForm({
       };
       if (error.response?.data?.error) {
         setErrors({ email: error.response.data.error });
-=======
-      const res = await signup(form);
-      router.push(`/login`)
-      toast.success("Account created successfully!");
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setErrors({ email: err.response.data.error });
->>>>>>> origin/main
       } else {
         setErrors({ password: "Something went wrong" });
       }

@@ -53,7 +53,7 @@ interface HandleExperienceProps {
 export const HandleEducation: React.FC<HandleEducationProps> = ({
   education,
   add,
-  update
+  update,
 }) => {
   const [formData, setFormData] = useState<EducationData>({
     school_name: "",
@@ -80,32 +80,36 @@ export const HandleEducation: React.FC<HandleEducationProps> = ({
       if (education?.id) {
         const res = await apiClient.put(
           `/api/candidates/educations/${education.id}`,
-          formData
+          formData,
         );
-        if(res.status === 200){
-            toast.success("Education updated successfully")
-            update!(formData)
-        }else{
-            toast.success("Something went wrong, Try again")
+        if (res.status === 200) {
+          toast.success("Education updated successfully");
+          update!(formData);
+        } else {
+          toast.success("Something went wrong, Try again");
         }
       } else {
-        const res = await apiClient.post("/api/candidates/educations", formData,{
+        const res = await apiClient.post(
+          "/api/candidates/educations",
+          formData,
+          {
             headers: {
-                Authorization: `Bearer ${getToken()}`
-            }
-        });
-        
-        if(res.status === 200){
-            toast.success("Education Added successfully")
-            add!(res.data.education)
-        }else{
-            toast.success("Something went wrong, Try again")
+              Authorization: `Bearer ${getToken()}`,
+            },
+          },
+        );
+
+        if (res.status === 200) {
+          toast.success("Education Added successfully");
+          add!(res.data.education);
+        } else {
+          toast.success("Something went wrong, Try again");
         }
       }
-      
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
       setError(
-        err.response?.data?.message || "Something went wrong. Try again."
+        error.response?.data?.message || "Something went wrong. Try again.",
       );
     } finally {
       setLoading(false);
@@ -114,20 +118,23 @@ export const HandleEducation: React.FC<HandleEducationProps> = ({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>          
-          {education ? 
-            <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4" />
-            </Button> : (
-            <Button className="w-full mt-2" variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Education
-            </Button>
-          )}
+      <DialogTrigger asChild>
+        {education ? (
+          <Button variant="outline" size="sm">
+            <Pencil className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button className="w-full mt-2" variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Education
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{education ? "Update Education" : "Add Education"}</DialogTitle>
+          <DialogTitle>
+            {education ? "Update Education" : "Add Education"}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-5">
           <div className="space-y-1">
@@ -203,16 +210,10 @@ export const HandleEducation: React.FC<HandleEducationProps> = ({
   );
 };
 
-
-
-
-
-
-
 export const HandleExperience: React.FC<HandleExperienceProps> = ({
   experience,
   add,
-  update
+  update,
 }) => {
   const [formData, setFormData] = useState<ExperienceData>({
     job_title: "",
@@ -238,32 +239,36 @@ export const HandleExperience: React.FC<HandleExperienceProps> = ({
       if (experience?.id) {
         const res = await apiClient.put(
           `/api/candidates/experiences/${experience.id}`,
-          formData
+          formData,
         );
-        if(res.status === 200){
-            toast.success("Experience updated successfully")
-            update!(formData)
-        }else{
-            toast.success("Something went wrong, Try again")
+        if (res.status === 200) {
+          toast.success("Experience updated successfully");
+          update!(formData);
+        } else {
+          toast.success("Something went wrong, Try again");
         }
       } else {
-        const res = await apiClient.post("/api/candidates/experiences", formData,{
+        const res = await apiClient.post(
+          "/api/candidates/experiences",
+          formData,
+          {
             headers: {
-                Authorization: `Bearer ${getToken()}`
-            }
-        });
-        
-        if(res.status === 200){
-            toast.success("Experience Added successfully")
-            add!(res.data.experience)
-        }else{
-            toast.success("Something went wrong, Try again")
+              Authorization: `Bearer ${getToken()}`,
+            },
+          },
+        );
+
+        if (res.status === 200) {
+          toast.success("Experience Added successfully");
+          add!(res.data.experience);
+        } else {
+          toast.success("Something went wrong, Try again");
         }
       }
-      
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
       setError(
-        err.response?.data?.message || "Something went wrong. Try again."
+        error.response?.data?.message || "Something went wrong. Try again.",
       );
     } finally {
       setLoading(false);
@@ -272,20 +277,23 @@ export const HandleExperience: React.FC<HandleExperienceProps> = ({
 
   return (
     <Dialog>
-      <DialogTrigger asChild>          
-          {experience ? 
-            <Button variant="outline" size="sm">
-                <Pencil className="h-4 w-4" />
-            </Button> : (
-            <Button className="w-full mt-2" variant="outline">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Experience
-            </Button>
-          )}
+      <DialogTrigger asChild>
+        {experience ? (
+          <Button variant="outline" size="sm">
+            <Pencil className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button className="w-full mt-2" variant="outline">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Experience
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{experience ? "Update Experience" : "Add Experience"}</DialogTitle>
+          <DialogTitle>
+            {experience ? "Update Experience" : "Add Experience"}
+          </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-5">
           <div className="space-y-1">
@@ -351,4 +359,3 @@ export const HandleExperience: React.FC<HandleExperienceProps> = ({
     </Dialog>
   );
 };
-

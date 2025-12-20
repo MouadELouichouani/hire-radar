@@ -1,13 +1,10 @@
 import { getToken, removeToken, setToken } from "@/lib";
 import apiClient from "@/lib/apiClient";
-<<<<<<< HEAD
 import type {
   ISignupRequest,
   ISignupResponse,
   LoginResponse,
 } from "@/types/authResponseTypes";
-=======
->>>>>>> origin/main
 
 export async function login(email: string, password: string) {
   const { data } = await apiClient.post<LoginResponse>("/api/auth/login", {
@@ -41,11 +38,7 @@ export const me = async (token?: string) => {
       },
     });
     return response.data;
-<<<<<<< HEAD
   } catch {
-=======
-  } catch (err) {
->>>>>>> origin/main
     return null;
   }
 };
