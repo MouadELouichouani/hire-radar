@@ -54,10 +54,9 @@ export const getAvailableSkills = async (): Promise<Skill[]> => {
  * Create a new skill or get existing one by name
  */
 export const createOrGetSkill = async (skillName: string): Promise<Skill> => {
-  const { data } = await apiClient.post<Skill>(
-    "/api/jobs/skills",
-    { name: skillName },
-  );
+  const { data } = await apiClient.post<Skill>("/api/jobs/skills", {
+    name: skillName,
+  });
   return data;
 };
 
@@ -84,19 +83,17 @@ export const getEmployerJobs = async (
 /**
  * Create a new job
  */
-export const createJob = async (
-  jobData: {
-    title: string;
-    description: string;
-    company?: string;
-    location: string;
-    salary_range?: string;
-    emp_type?: string;
-    responsibilities?: string[];
-    skill_ids?: number[];
-    skill_names?: string[];
-  },
-): Promise<EmployerJob> => {
+export const createJob = async (jobData: {
+  title: string;
+  description: string;
+  company?: string;
+  location: string;
+  salary_range?: string;
+  emp_type?: string;
+  responsibilities?: string[];
+  skill_ids?: number[];
+  skill_names?: string[];
+}): Promise<EmployerJob> => {
   const { data } = await apiClient.post<EmployerJob>("/api/jobs", jobData);
   return data;
 };

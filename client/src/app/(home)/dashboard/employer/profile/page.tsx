@@ -35,7 +35,5 @@ export default function Page() {
     };
   }, []);
 
-  return (
-    <ProfileContent defaultTab={activeTab} />
-  );
+  return <ProfileContent defaultTab={activeTab} />;
 }

@@ -118,56 +118,65 @@ def create_job():
 
         # Verify user is an employer
         if employer.role != "employer":
-            return jsonify({
-                "error": "Only employers can post jobs",
-                "current_role": employer.role
-            }), 403
+            return (
+                jsonify(
+                    {
+                        "error": "Only employers can post jobs",
+                        "current_role": employer.role,
+                    }
+                ),
+                403,
+            )
 
         data = request.get_json()
 
-<<<<<<< HEAD
-        required_fields = ["title", "description", "company_name", "employer_id"]
-=======
         # Validate required fields
         required_fields = ["title", "description", "location"]
->>>>>>> origin/main
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
 
-<<<<<<< HEAD
-=======
         # Validate and retrieve skills from database by IDs
         skill_ids = data.get("skill_ids", [])
         skill_names = data.get("skill_names", [])
         job_skills = []
-        
+
         # Handle skill_ids (existing skills by ID)
         if skill_ids:
             # Validate skill_ids are integers
             try:
                 skill_ids = [int(id) for id in skill_ids]
             except (ValueError, TypeError):
-                return jsonify({
-                    "error": "Invalid skill_ids format. Expected array of integers",
-                    "example": "skill_ids: [1, 2, 3]"
-                }), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Invalid skill_ids format. Expected array of integers",
+                            "example": "skill_ids: [1, 2, 3]",
+                        }
+                    ),
+                    400,
+                )
+
             # Query existing skills
             existing_skills = db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
             existing_skill_ids = {s.id for s in existing_skills}
-            
+
             # Check for missing skill IDs
             missing_skill_ids = set(skill_ids) - existing_skill_ids
             if missing_skill_ids:
-                return jsonify({
-                    "error": "Some skill IDs don't exist in the database",
-                    "missing_skill_ids": list(missing_skill_ids),
-                    "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills"
-                }), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Some skill IDs don't exist in the database",
+                            "missing_skill_ids": list(missing_skill_ids),
+                            "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills",
+                        }
+                    ),
+                    400,
+                )
+
             job_skills.extend(existing_skills)
-        
+
         # Handle skill_names (create new skills if they don't exist)
         if skill_names:
             for skill_name in skill_names:
@@ -177,7 +186,6 @@ def create_job():
                         job_skills.append(skill)
 
         # Create new job
->>>>>>> origin/main
         job = Job(
             title=data["title"],
             description=data["description"],
@@ -190,10 +198,10 @@ def create_job():
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
-        
+
         # Set the relationship with employer
         job.employer = employer
-        
+
         # Set the many-to-many relationship with skills
         if job_skills:
             job.skills = job_skills
@@ -229,9 +237,7 @@ def update_job(job_id: int):
 
         # Verify user is the employer who posted the job
         if job.employer_id != user_id:
-            return jsonify({
-                "error": "You can only update jobs you posted"
-            }), 403
+            return jsonify({"error": "You can only update jobs you posted"}), 403
 
         data = request.get_json()
 
@@ -249,37 +255,47 @@ def update_job(job_id: int):
             job.emp_type = data["emp_type"]
         if "responsibilities" in data:
             job.responsibilities = data["responsibilities"]
-        
+
         # Handle skills update with validation
         if "skill_ids" in data:
             skill_ids = data.get("skill_ids", [])
             job_skills = []
-            
+
             # Validate skill_ids are integers
             try:
                 skill_ids = [int(id) for id in skill_ids]
             except (ValueError, TypeError):
-                return jsonify({
-                    "error": "Invalid skill_ids format. Expected array of integers",
-                    "example": "skill_ids: [1, 2, 3]"
-                }), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Invalid skill_ids format. Expected array of integers",
+                            "example": "skill_ids: [1, 2, 3]",
+                        }
+                    ),
+                    400,
+                )
+
             if skill_ids:
                 # Query existing skills
                 existing_skills = db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
                 existing_skill_ids = {s.id for s in existing_skills}
-                
+
                 # Check for missing skill IDs
                 missing_skill_ids = set(skill_ids) - existing_skill_ids
                 if missing_skill_ids:
-                    return jsonify({
-                        "error": "Some skill IDs don't exist in the database",
-                        "missing_skill_ids": list(missing_skill_ids),
-                        "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills"
-                    }), 400
-                
+                    return (
+                        jsonify(
+                            {
+                                "error": "Some skill IDs don't exist in the database",
+                                "missing_skill_ids": list(missing_skill_ids),
+                                "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills",
+                            }
+                        ),
+                        400,
+                    )
+
                 job_skills = existing_skills
-            
+
             job.skills = job_skills
 
         job.updated_at = datetime.utcnow()
@@ -313,9 +329,7 @@ def delete_job(job_id: int):
 
         # Verify user is the employer who posted the job
         if job.employer_id != user_id:
-            return jsonify({
-                "error": "You can only delete jobs you posted"
-            }), 403
+            return jsonify({"error": "You can only delete jobs you posted"}), 403
 
         db.delete(job)
         db.commit()
@@ -499,7 +513,10 @@ def get_employer_jobs():
             return jsonify({"error": "User not found"}), 404
 
         if user.role != "employer":
-            return jsonify({"error": "Only employers can access their job listings"}), 403
+            return (
+                jsonify({"error": "Only employers can access their job listings"}),
+                403,
+            )
 
         # Get pagination parameters
         page = int(request.args.get("page", 1))
@@ -564,7 +581,9 @@ def job_to_dict(job: Job) -> dict:
         "salary_range": job.salary_range,
         "emp_type": job.emp_type,
         "responsibilities": job.responsibilities,
-        "skills": [{"id": skill.id, "name": skill.name} for skill in (job.skills or [])],
+        "skills": [
+            {"id": skill.id, "name": skill.name} for skill in (job.skills or [])
+        ],
         "created_at": job.created_at.isoformat() if job.created_at else None,
         "updated_at": job.updated_at.isoformat() if job.updated_at else None,
     }
@@ -576,10 +595,8 @@ def get_skills():
 
     try:
         skills = db.query(Skill).order_by(Skill.name).all()
-        
-        return jsonify({
-            "skills": [{"id": s.id, "name": s.name} for s in skills]
-        }), 200
+
+        return jsonify({"skills": [{"id": s.id, "name": s.name} for s in skills]}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -590,19 +607,19 @@ def get_skills():
 def create_skill_if_not_exists(skill_name: str, db: Session) -> Skill:
     """Create a skill if it doesn't exist, return the existing or new skill"""
     # Check if skill exists (case-insensitive)
-    existing_skill = db.query(Skill).filter(
-        Skill.name.ilike(skill_name.strip())
-    ).first()
-    
+    existing_skill = (
+        db.query(Skill).filter(Skill.name.ilike(skill_name.strip())).first()
+    )
+
     if existing_skill:
         return existing_skill
-    
+
     # Create new skill
     new_skill = Skill(name=skill_name.strip())
     db.add(new_skill)
     db.commit()
     db.refresh(new_skill)
-    
+
     return new_skill
 
 
@@ -618,12 +635,17 @@ def create_or_get_skill():
             return jsonify({"error": "Skill name is required"}), 400
 
         skill = create_skill_if_not_exists(skill_name, db)
-        
-        return jsonify({
-            "id": skill.id,
-            "name": skill.name,
-            "message": "Skill created" if skill.id else "Skill already exists"
-        }), 201
+
+        return (
+            jsonify(
+                {
+                    "id": skill.id,
+                    "name": skill.name,
+                    "message": "Skill created" if skill.id else "Skill already exists",
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
         db.rollback()

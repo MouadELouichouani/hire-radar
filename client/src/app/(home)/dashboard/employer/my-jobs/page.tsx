@@ -64,7 +64,7 @@ export default function MyJobsPage() {
     } catch (error) {
       console.error("Failed to delete job:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete job"
+        error instanceof Error ? error.message : "Failed to delete job",
       );
     } finally {
       setDeletingJobId(null);
@@ -86,10 +86,7 @@ export default function MyJobsPage() {
             Manage and monitor your job postings
           </p>
         </div>
-        <Button 
-          className="gap-2"
-          onClick={() => setAddJobModalOpen(true)}
-        >
+        <Button className="gap-2" onClick={() => setAddJobModalOpen(true)}>
           <Plus className="h-4 w-4" />
           Post a New Job
         </Button>

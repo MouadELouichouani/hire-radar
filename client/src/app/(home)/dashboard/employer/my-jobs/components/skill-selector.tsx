@@ -61,11 +61,11 @@ export function SkillSelector({
       setIsCreatingSkill(true);
       const newSkill = await createOrGetSkill(searchTerm.trim());
 
-  // Add to newly created skills list so it appears in dropdown
-  setNewlyCreatedSkills([...newlyCreatedSkills, newSkill]);
+      // Add to newly created skills list so it appears in dropdown
+      setNewlyCreatedSkills([...newlyCreatedSkills, newSkill]);
 
-  // Add the new skill to selected skills
-  onSkillsChange([...selectedSkillIds, newSkill.id]);
+      // Add the new skill to selected skills
+      onSkillsChange([...selectedSkillIds, newSkill.id]);
 
       toast.success(`Skill "${newSkill.name}" added successfully`);
       setSearchTerm("");
@@ -165,14 +165,11 @@ export function SkillSelector({
           )}
 
         {/* No results message */}
-        {isOpen &&
-          searchTerm &&
-          filteredSkills.length === 0 &&
-          skillExists && (
-            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
-              <p className="text-sm text-gray-500">Skill already selected</p>
-            </div>
-          )}
+        {isOpen && searchTerm && filteredSkills.length === 0 && skillExists && (
+          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg p-3">
+            <p className="text-sm text-gray-500">Skill already selected</p>
+          </div>
+        )}
       </div>
 
       {/* Helper text */}

@@ -55,9 +55,7 @@ export default function EmployerLayout({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
+        <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>
   );

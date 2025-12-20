@@ -94,7 +94,8 @@ export function AddJobModal({
           formData.responsibilities.length > 0
             ? formData.responsibilities
             : undefined,
-        skill_ids: formData.skill_ids.length > 0 ? formData.skill_ids : undefined,
+        skill_ids:
+          formData.skill_ids.length > 0 ? formData.skill_ids : undefined,
       });
 
       toast.success("Job posted successfully");
@@ -116,7 +117,7 @@ export function AddJobModal({
     } catch (error) {
       console.error("Failed to create job:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to post job"
+        error instanceof Error ? error.message : "Failed to post job",
       );
     } finally {
       setIsLoading(false);
@@ -279,9 +280,7 @@ export function AddJobModal({
               rows={4}
               disabled={isLoading}
             />
-            <p className="text-xs text-gray-500">
-              One responsibility per line
-            </p>
+            <p className="text-xs text-gray-500">One responsibility per line</p>
           </div>
 
           <DialogFooter>

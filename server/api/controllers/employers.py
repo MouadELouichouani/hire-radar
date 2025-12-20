@@ -7,7 +7,6 @@ from api.config.db import SessionLocal
 from api.core.models import User
 
 
-
 def get_db():
     db = SessionLocal()
     try:
