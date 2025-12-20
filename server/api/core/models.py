@@ -5,6 +5,7 @@ from sqlalchemy import (
     String,
     Text,
     DateTime,
+    Date,
     Enum,
     ForeignKey,
     Table,
@@ -100,8 +101,7 @@ class User(Base):
     companyName = Column(Text)
     webSite = Column(String(150))
     resume_url = Column(Text)
-    github_id = Column(String(100))  # GitHub user ID
-    github_username = Column(String(100))  # GitHub username
+    github_url = Column(String(100))
 
     created_at = Column(DateTime, server_default=func.now())
 
@@ -128,8 +128,8 @@ class Education(Base):
     school_name = Column(String(150))
     degree = Column(String(150))
     field_of_study = Column(String(150))
-    start_date = Column(DateTime)
-    end_date = Column(DateTime)
+    start_date = Column(Date)
+    end_date = Column(Date)
     description = Column(Text)
 
 
@@ -146,8 +146,8 @@ class Experience(Base):
 
     job_title = Column(String(150), nullable=False)
     company = Column(String(150))
-    start_date = Column(DateTime)
-    end_date = Column(DateTime)
+    start_date = Column(Date)
+    end_date = Column(Date)
     description = Column(Text)
 
 
@@ -302,6 +302,18 @@ class ConnectionRequest(Base):
     receiver = relationship(
         "User", foreign_keys=[receiver_id], backref="received_requests"
     )
+
+
+class DeleteRequest(Base):
+    __tablename__ = "delete_requests"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    reason = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    # Relationship to user
+    user = relationship("User", backref="delete_requests")
 
 Base.metadata.create_all(engine)
 print("Tables created successfully!")

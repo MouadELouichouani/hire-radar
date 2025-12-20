@@ -48,20 +48,6 @@ app.register_blueprint(candidates, url_prefix="/api/candidates")
 app.register_blueprint(employers, url_prefix="/api/employers")
 app.register_blueprint(applications, url_prefix="/api/applications")
 
-# OAuth routes
-app.add_url_rule(
-    "/api/oauth/github/connect",
-    "github_connect",
-    github_connect,
-    methods=["GET"],
-)
-app.add_url_rule(
-    "/api/oauth/github/callback",
-    "github_callback",
-    github_callback,
-    methods=["GET"],
-)
-
 
 @app.route("/")
 def home():

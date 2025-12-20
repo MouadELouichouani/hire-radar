@@ -22,18 +22,6 @@ export function useCandidateProfile(id: string) {
   });
 }
 
-export function useUpdateCandidateProfile(id: string) {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: UpdateCandidateProfileRequest) =>
-      updateCandidateProfile(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["candidate-profile", id] });
-    },
-  });
-}
-
 export function useUploadCandidateCV(id: string) {
   const queryClient = useQueryClient();
 
