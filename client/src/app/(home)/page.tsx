@@ -29,8 +29,8 @@ export default function Home() {
         currentUser?.role === "employer" && currentUser?.id === job.employer_id;
       const avatarUrl =
         isCurrentUserJob &&
-        currentUser?.image &&
-        currentUser.image.trim() !== ""
+          currentUser?.image &&
+          currentUser.image.trim() !== ""
           ? currentUser.image
           : undefined;
 
@@ -83,7 +83,7 @@ export default function Home() {
         <LeftSidebar />
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 px-8 py-8 ml-64 mr-96">
+        <main className="flex-1 min-w-0 px-8 py-8">
           <div className="space-y-6 max-w-4xl">
             <PostCreator />
 
