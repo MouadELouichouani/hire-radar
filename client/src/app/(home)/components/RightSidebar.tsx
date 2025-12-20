@@ -65,7 +65,6 @@ function RightSidebarContent() {
                     <Button className="bg-foreground text-background hover:bg-foreground/90 w-full">
                         Try free
                     </Button>
-                    <Calendar className="absolute bottom-2 right-2 w-12 h-12 text-muted-foreground opacity-20" />
                 </div>
             </SidebarHeader>
 
