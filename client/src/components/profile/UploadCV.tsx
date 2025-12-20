@@ -5,6 +5,7 @@ import { Upload, FileText, X, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CandidateProfile } from "@/types/profile";
+import { useCurrentUser } from "@/features/auth/hook";
 
 interface UploadCVProps {
   profile: CandidateProfile;
@@ -19,7 +20,8 @@ export default function UploadCV({
 }: UploadCVProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
-
+  const { data: currentUser } = useCurrentUser()
+  
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -73,13 +75,13 @@ export default function UploadCV({
         <CardTitle>Resume / CV</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {profile.cv_url ? (
+        {currentUser.resume_url ? (
           <div className="flex items-center gap-3 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
             <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
             <div className="flex-1">
               <p className="font-semibold text-foreground">CV Uploaded</p>
               <a
-                href={profile.cv_url}
+                href={process.env.NEXT_PUBLIC_API_BASE_URL + currentUser.resume_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline flex items-center gap-1 mt-1"

@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy.orm import Session
 from config.db import SessionLocal
 from core.models import User
-
+from middlewares.auth import is_auth
 
 def get_db():
     db = SessionLocal()
@@ -60,15 +60,15 @@ def get_employer(employer_id: int):
     finally:
         db.close()
 
-
-def update_employer(employer_id: int):
+@is_auth
+def update_employer():
     """Update employer profile"""
     db: Session = next(get_db())
 
     try:
         user = (
             db.query(User)
-            .filter(User.id == employer_id, User.role == "employer")
+            .filter(User.id == request.user_id, User.role == "employer")
             .first()
         )
 
@@ -85,7 +85,7 @@ def update_employer(employer_id: int):
             # Check if email is already taken by another user
             existing_user = (
                 db.query(User)
-                .filter(User.email == data["email"], User.id != employer_id)
+                .filter(User.email == data["email"], User.id != request.user_id)
                 .first()
             )
             if existing_user:
@@ -95,10 +95,12 @@ def update_employer(employer_id: int):
             user.phone = data.get("phone")
         if "location" in data:
             user.location = data.get("location")
+        if "headLine" in data or "headline" in data:
+            user.headLine = data.get("headLine") or data.get("headline")
         if "bio" in data:
             user.bio = data.get("bio")
-        if "company_name" in data:
-            user.companyName = data.get("company_name")
+        if "companyName" in data:
+            user.companyName = data.get("companyName")
         if "website" in data:
             user.webSite = data.get("website")
 
