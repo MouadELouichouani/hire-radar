@@ -11,7 +11,14 @@ import {
   Star,
   Smartphone,
   Monitor,
+  Clock,
+  Check,
+  X,
 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+import { useNotifications, useMarkNotificationRead } from "@/features/notifications/hooks";
+import { useAcceptConnection, useRejectConnection, useConnectionRequests } from "@/features/connections/hooks";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -93,6 +100,24 @@ export default function ProfileContent({
     website: "",
   });
 
+  const { data: notifications } = useNotifications();
+  const { data: connectionRequests } = useConnectionRequests();
+  const markRead = useMarkNotificationRead();
+  const acceptConnection = useAcceptConnection();
+  const rejectConnection = useRejectConnection();
+
+  const formatTime = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return date.toLocaleDateString();
+  };
+
   const queryClient = useQueryClient();
 
   // Fetch connected accounts from backend
@@ -151,11 +176,11 @@ export default function ProfileContent({
           website: "",
         });
       } else if (currentUser.role === "employer" && employerProfile) {
-        // For employers, show company name as first name
+        // For employers, show company name
         setFormData({
-          firstName: employerProfile.full_name?.split(" ")[0] || "",
+          firstName: currentUser.full_name?.split(" ")[0] || "",
           lastName:
-            employerProfile.full_name?.split(" ").slice(1).join(" ") || "",
+            currentUser.full_name?.split(" ").slice(1).join(" ") || "",
           companyName: employerProfile.company_name || "",
           email: employerProfile.email || currentUser.email || "",
           role: "Employer",
@@ -173,9 +198,9 @@ export default function ProfileContent({
           role:
             currentUser.role === "candidate" ? "Product Designer" : "Employer",
           companyName: "",
-          phone: currentUser.phone || "",
-          location: currentUser.location || "",
-          bio: currentUser.bio || "",
+          phone: (currentUser as any).phone || "",
+          location: (currentUser as any).location || "",
+          bio: (currentUser as any).bio || "",
           website: "",
         });
       }
@@ -206,7 +231,6 @@ export default function ProfileContent({
       try {
         await updateEmployer.mutateAsync({
           email: formData.email,
-          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
           company_name: formData.companyName || undefined,
           phone: formData.phone || undefined,
           location: formData.location || undefined,
@@ -561,8 +585,94 @@ export default function ProfileContent({
         </Card>
       </TabsContent>
 
-      {/* Notifications Tab */}
       <TabsContent value="notifications" className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle>Notifications</CardTitle>
+              {notifications?.some(n => n.is_read === 0) && (
+                <Badge variant="secondary">
+                  {notifications.filter(n => n.is_read === 0).length} New
+                </Badge>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-0 p-0">
+            {notifications && notifications.length > 0 ? (
+              <div className="divide-y divide-border">
+                {notifications.map((notif) => {
+                  const senderId = notif.sender_id || notif.sender?.id;
+                  const relatedReq = notif.type === "connection_request" && senderId
+                    ? connectionRequests?.received.find(r => Number(r.sender?.id) === Number(senderId) && r.status === "pending")
+                    : null;
+
+                  return (
+                    <div
+                      key={notif.id}
+                      className={cn(
+                        "p-4 transition-colors",
+                        notif.is_read === 0 ? "bg-accent/30" : "opacity-80"
+                      )}
+                      onMouseEnter={() => notif.is_read === 0 && markRead.mutate(notif.id)}
+                    >
+                      <div className="flex gap-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={notif.sender?.image || undefined} />
+                          <AvatarFallback>{notif.sender?.full_name?.charAt(0) || "N"}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <p className="font-semibold text-sm">{notif.title}</p>
+                            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {formatTime(notif.created_at)}
+                            </div>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {notif.message}
+                          </p>
+
+                          {relatedReq && (
+                            <div className="flex gap-2 mt-3">
+                              <Button
+                                size="sm"
+                                className="h-8 px-4"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  acceptConnection.mutate(relatedReq.id);
+                                }}
+                              >
+                                <Check className="h-4 w-4 mr-2" />
+                                Accept Request
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-4"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  rejectConnection.mutate(relatedReq.id);
+                                }}
+                              >
+                                <X className="h-4 w-4 mr-2" />
+                                Decline
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-muted-foreground italic">
+                No notifications yet.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Notification Preferences</CardTitle>
@@ -570,42 +680,22 @@ export default function ProfileContent({
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="font-semibold">Email notifications</div>
+                <div className="font-semibold text-sm">Email notifications</div>
                 <div className="text-sm text-muted-foreground">
-                  Receive notifications about account activity
+                  Receive notifications about account activity via email
                 </div>
               </div>
-              <Button variant="outline">Configure</Button>
+              <Button variant="outline" size="sm">Configure</Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <div className="font-semibold">Push notifications</div>
+                <div className="font-semibold text-sm">Push notifications</div>
                 <div className="text-sm text-muted-foreground">
-                  Receive notifications about account activity
+                  Receive real-time deskop notifications
                 </div>
               </div>
-              <Button variant="outline">Configure</Button>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="font-semibold">Monthly newsletter</div>
-                <div className="text-sm text-muted-foreground">
-                  Receive notifications about account activity
-                </div>
-              </div>
-              <Button variant="outline">Configure</Button>
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <div className="font-semibold">Security alerts</div>
-                <div className="text-sm text-muted-foreground">
-                  Receive notifications about account activity
-                </div>
-              </div>
-              <Button variant="outline">Configure</Button>
+              <Button variant="outline" size="sm">Configure</Button>
             </div>
           </CardContent>
         </Card>
