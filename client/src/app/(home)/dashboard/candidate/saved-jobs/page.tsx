@@ -38,7 +38,6 @@ export default function SavedJobsPage() {
   if (!currentUser || currentUser.role !== "candidate") {
     return (
       <div className="min-h-screen bg-background">
-
         <div className="mx-auto max-w-7xl px-4">
           <Card className="border-border">
             <CardContent className="p-12 text-center">
@@ -57,7 +56,6 @@ export default function SavedJobsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-
       <div className="container mx-auto px-4 md:px-6 py-8 max-w-7xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 tracking-tight">Saved Jobs</h1>

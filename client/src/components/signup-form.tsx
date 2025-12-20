@@ -39,7 +39,7 @@ export function SignupForm({
 
   const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
-  const router = useRouter()
+  const router = useRouter();
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     setForm({ ...form, [e.target.id]: e.target.value });
@@ -81,7 +81,7 @@ export function SignupForm({
 
     try {
       const res = await signup(form);
-      router.push(`/login`)
+      router.push(`/login`);
       toast.success("Account created successfully!");
     } catch (err: any) {
       if (err.response && err.response.data) {

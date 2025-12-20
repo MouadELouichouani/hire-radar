@@ -1,6 +1,15 @@
 "use client";
 
-import { Search, Bell, User, LogOut, Bookmark, Check, X, Clock } from "lucide-react";
+import {
+  Search,
+  Bell,
+  User,
+  LogOut,
+  Bookmark,
+  Check,
+  X,
+  Clock,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/auth/hook";
@@ -19,8 +28,15 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getToken } from "@/lib";
-import { useNotifications, useMarkNotificationRead } from "@/features/notifications/hooks";
-import { useAcceptConnection, useRejectConnection, useConnectionRequests } from "@/features/connections/hooks";
+import {
+  useNotifications,
+  useMarkNotificationRead,
+} from "@/features/notifications/hooks";
+import {
+  useAcceptConnection,
+  useRejectConnection,
+  useConnectionRequests,
+} from "@/features/connections/hooks";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +51,7 @@ export default function TopNavbar() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  const unreadCount = notifications?.filter(n => n.is_read === 0).length || 0;
+  const unreadCount = notifications?.filter((n) => n.is_read === 0).length || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,20 +90,22 @@ export default function TopNavbar() {
     return date.toLocaleDateString();
   };
 
-  const displayNotifications = notifications?.filter(notif => {
-    // Keep all unread notifications
-    if (notif.is_read === 0) return true;
+  const displayNotifications =
+    notifications?.filter((notif) => {
+      // Keep all unread notifications
+      if (notif.is_read === 0) return true;
 
-    // For read notifications, only keep pending connection requests
-    if (notif.type === "connection_request") {
-      const senderId = notif.sender_id || notif.sender?.id;
-      return connectionRequests?.received.some(r =>
-        Number(r.sender?.id) === Number(senderId) && r.status === "pending"
-      );
-    }
+      // For read notifications, only keep pending connection requests
+      if (notif.type === "connection_request") {
+        const senderId = notif.sender_id || notif.sender?.id;
+        return connectionRequests?.received.some(
+          (r) =>
+            Number(r.sender?.id) === Number(senderId) && r.status === "pending",
+        );
+      }
 
-    return false;
-  }) || [];
+      return false;
+    }) || [];
 
   const profileUrl =
     currentUser?.role === "candidate"
@@ -169,7 +187,10 @@ export default function TopNavbar() {
                 )}
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 max-h-[500px] overflow-y-auto">
+            <DropdownMenuContent
+              align="end"
+              className="w-80 max-h-[500px] overflow-y-auto"
+            >
               <DropdownMenuLabel className="flex items-center justify-between">
                 <span>Notifications</span>
                 {unreadCount > 0 && (
@@ -183,26 +204,37 @@ export default function TopNavbar() {
                 displayNotifications.slice(0, 10).map((notif) => {
                   // Find related request if it's a connection request
                   const senderId = notif.sender_id || notif.sender?.id;
-                  const relatedReq = notif.type === "connection_request" && senderId
-                    ? connectionRequests?.received.find(r => Number(r.sender?.id) === Number(senderId) && r.status === "pending")
-                    : null;
+                  const relatedReq =
+                    notif.type === "connection_request" && senderId
+                      ? connectionRequests?.received.find(
+                          (r) =>
+                            Number(r.sender?.id) === Number(senderId) &&
+                            r.status === "pending",
+                        )
+                      : null;
 
                   return (
                     <div
                       key={notif.id}
                       className={cn(
                         "p-3 text-sm transition-colors",
-                        notif.is_read === 0 ? "bg-accent/40" : "opacity-75"
+                        notif.is_read === 0 ? "bg-accent/40" : "opacity-75",
                       )}
-                      onMouseEnter={() => notif.is_read === 0 && markRead.mutate(notif.id)}
+                      onMouseEnter={() =>
+                        notif.is_read === 0 && markRead.mutate(notif.id)
+                      }
                     >
                       <div className="flex gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={notif.sender?.image || undefined} />
-                          <AvatarFallback>{notif.sender?.full_name?.charAt(0) || "N"}</AvatarFallback>
+                          <AvatarFallback>
+                            {notif.sender?.full_name?.charAt(0) || "N"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 space-y-1">
-                          <p className="font-medium leading-none">{notif.title}</p>
+                          <p className="font-medium leading-none">
+                            {notif.title}
+                          </p>
                           <p className="text-xs text-muted-foreground leading-snug">
                             {notif.message}
                           </p>

@@ -514,7 +514,7 @@ def get_random_candidates():
 
     token = auth_header.split(" ")[1]
     JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
-    
+
     db: Session = next(get_db())
 
     try:
@@ -522,11 +522,13 @@ def get_random_candidates():
         current_user_id = decoded["id"]
 
         # Subquery for existing connections/requests
-        subquery = db.query(ConnectionRequest.receiver_id).filter(
-            ConnectionRequest.sender_id == current_user_id
-        ).union(
-            db.query(ConnectionRequest.sender_id).filter(
-                ConnectionRequest.receiver_id == current_user_id
+        subquery = (
+            db.query(ConnectionRequest.receiver_id)
+            .filter(ConnectionRequest.sender_id == current_user_id)
+            .union(
+                db.query(ConnectionRequest.sender_id).filter(
+                    ConnectionRequest.receiver_id == current_user_id
+                )
             )
         )
 
@@ -536,22 +538,28 @@ def get_random_candidates():
             .filter(
                 User.role == "candidate",
                 User.id != current_user_id,
-                ~User.id.in_(subquery)
+                ~User.id.in_(subquery),
             )
             .order_by(func.random())
             .limit(5)
             .all()
         )
 
-        return jsonify([
-            {
-                "id": cand.id,
-                "full_name": cand.full_name,
-                "headline": cand.headLine,
-                "image": cand.image,
-                "role": cand.role
-            } for cand in candidates
-        ]), 200
+        return (
+            jsonify(
+                [
+                    {
+                        "id": cand.id,
+                        "full_name": cand.full_name,
+                        "headline": cand.headLine,
+                        "image": cand.image,
+                        "role": cand.role,
+                    }
+                    for cand in candidates
+                ]
+            ),
+            200,
+        )
 
     except jwt.ExpiredSignatureError:
         return jsonify({"error": "Token expired"}), 401

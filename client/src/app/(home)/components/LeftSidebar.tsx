@@ -39,8 +39,9 @@ function LeftSidebarContent() {
   const { data: connectionData } = useConnectionRequests();
 
   const connectionsCount = currentUser
-    ? (connectionData?.received?.filter(r => r.status === 'accepted').length || 0) +
-    (connectionData?.sent?.filter(r => r.status === 'accepted').length || 0)
+    ? (connectionData?.received?.filter((r) => r.status === "accepted")
+        .length || 0) +
+      (connectionData?.sent?.filter((r) => r.status === "accepted").length || 0)
     : 0;
 
   const hashtags = [
@@ -60,8 +61,19 @@ function LeftSidebarContent() {
       <SidebarHeader className="border-b border-border p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-accent hover:text-accent-foreground">
-              <Link href={currentUser?.role === 'employer' ? '/dashboard/employer/profile' : '/dashboard/candidate/profile'} className="flex items-center gap-3 w-full">
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="hover:bg-accent hover:text-accent-foreground"
+            >
+              <Link
+                href={
+                  currentUser?.role === "employer"
+                    ? "/dashboard/employer/profile"
+                    : "/dashboard/candidate/profile"
+                }
+                className="flex items-center gap-3 w-full"
+              >
                 <Avatar className="h-10 w-10">
                   <AvatarImage src={getValidImageUrl(currentUser?.image)} />
                   <AvatarFallback className="bg-muted text-foreground font-semibold">
@@ -117,7 +129,11 @@ function LeftSidebarContent() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={true} className="bg-sidebar-accent text-sidebar-accent-foreground">
+                <SidebarMenuButton
+                  asChild
+                  isActive={true}
+                  className="bg-sidebar-accent text-sidebar-accent-foreground"
+                >
                   <a href="/dashboard/candidate/saved-jobs">
                     <Bookmark />
                     <span>Bookmarks</span>
@@ -131,7 +147,9 @@ function LeftSidebarContent() {
                     <span>Gaming</span>
                   </a>
                 </SidebarMenuButton>
-                <SidebarMenuBadge className="bg-secondary text-secondary-foreground text-xs rounded-full px-1.5 py-0.5">New</SidebarMenuBadge>
+                <SidebarMenuBadge className="bg-secondary text-secondary-foreground text-xs rounded-full px-1.5 py-0.5">
+                  New
+                </SidebarMenuBadge>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>

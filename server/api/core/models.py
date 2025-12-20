@@ -227,6 +227,7 @@ class SavedJob(Base):
     job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"))
     saved_at = Column(DateTime, server_default=func.now())
 
+
 # ============================================================
 # NOTIFICATION MODEL
 # ============================================================
@@ -296,12 +297,11 @@ class ConnectionRequest(Base):
     created_at = Column(DateTime, server_default=func.now())
 
     # Relationships
-    sender = relationship(
-        "User", foreign_keys=[sender_id], backref="sent_requests"
-    )
+    sender = relationship("User", foreign_keys=[sender_id], backref="sent_requests")
     receiver = relationship(
         "User", foreign_keys=[receiver_id], backref="received_requests"
     )
+
 
 Base.metadata.create_all(engine)
 print("Tables created successfully!")

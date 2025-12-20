@@ -206,7 +206,10 @@ export const connectionsApi = {
     });
   },
 
-  getAll: async (): Promise<{ received: ConnectionRequest[]; sent: ConnectionRequest[] }> => {
+  getAll: async (): Promise<{
+    received: ConnectionRequest[];
+    sent: ConnectionRequest[];
+  }> => {
     const { data } = await apiClient.get<{
       received: ConnectionRequest[];
       sent: ConnectionRequest[];

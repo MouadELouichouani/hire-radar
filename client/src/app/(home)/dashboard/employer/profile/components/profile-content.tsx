@@ -17,8 +17,15 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { useNotifications, useMarkNotificationRead } from "@/features/notifications/hooks";
-import { useAcceptConnection, useRejectConnection, useConnectionRequests } from "@/features/connections/hooks";
+import {
+  useNotifications,
+  useMarkNotificationRead,
+} from "@/features/notifications/hooks";
+import {
+  useAcceptConnection,
+  useRejectConnection,
+  useConnectionRequests,
+} from "@/features/connections/hooks";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -179,8 +186,7 @@ export default function ProfileContent({
         // For employers, show company name
         setFormData({
           firstName: currentUser.full_name?.split(" ")[0] || "",
-          lastName:
-            currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+          lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
           companyName: employerProfile.company_name || "",
           email: employerProfile.email || currentUser.email || "",
           role: "Employer",
@@ -590,9 +596,9 @@ export default function ProfileContent({
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>Notifications</CardTitle>
-              {notifications?.some(n => n.is_read === 0) && (
+              {notifications?.some((n) => n.is_read === 0) && (
                 <Badge variant="secondary">
-                  {notifications.filter(n => n.is_read === 0).length} New
+                  {notifications.filter((n) => n.is_read === 0).length} New
                 </Badge>
               )}
             </div>
@@ -602,27 +608,38 @@ export default function ProfileContent({
               <div className="divide-y divide-border">
                 {notifications.map((notif) => {
                   const senderId = notif.sender_id || notif.sender?.id;
-                  const relatedReq = notif.type === "connection_request" && senderId
-                    ? connectionRequests?.received.find(r => Number(r.sender?.id) === Number(senderId) && r.status === "pending")
-                    : null;
+                  const relatedReq =
+                    notif.type === "connection_request" && senderId
+                      ? connectionRequests?.received.find(
+                          (r) =>
+                            Number(r.sender?.id) === Number(senderId) &&
+                            r.status === "pending",
+                        )
+                      : null;
 
                   return (
                     <div
                       key={notif.id}
                       className={cn(
                         "p-4 transition-colors",
-                        notif.is_read === 0 ? "bg-accent/30" : "opacity-80"
+                        notif.is_read === 0 ? "bg-accent/30" : "opacity-80",
                       )}
-                      onMouseEnter={() => notif.is_read === 0 && markRead.mutate(notif.id)}
+                      onMouseEnter={() =>
+                        notif.is_read === 0 && markRead.mutate(notif.id)
+                      }
                     >
                       <div className="flex gap-4">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={notif.sender?.image || undefined} />
-                          <AvatarFallback>{notif.sender?.full_name?.charAt(0) || "N"}</AvatarFallback>
+                          <AvatarFallback>
+                            {notif.sender?.full_name?.charAt(0) || "N"}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center justify-between">
-                            <p className="font-semibold text-sm">{notif.title}</p>
+                            <p className="font-semibold text-sm">
+                              {notif.title}
+                            </p>
                             <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                               <Clock className="h-3 w-3" />
                               {formatTime(notif.created_at)}
@@ -685,7 +702,9 @@ export default function ProfileContent({
                   Receive notifications about account activity via email
                 </div>
               </div>
-              <Button variant="outline" size="sm">Configure</Button>
+              <Button variant="outline" size="sm">
+                Configure
+              </Button>
             </div>
             <Separator />
             <div className="flex items-center justify-between">
@@ -695,7 +714,9 @@ export default function ProfileContent({
                   Receive real-time deskop notifications
                 </div>
               </div>
-              <Button variant="outline" size="sm">Configure</Button>
+              <Button variant="outline" size="sm">
+                Configure
+              </Button>
             </div>
           </CardContent>
         </Card>

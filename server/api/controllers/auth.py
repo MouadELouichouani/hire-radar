@@ -395,6 +395,7 @@ def github_callback():
     finally:
         db.close()
 
+
 def get_connected_accounts():
     """Get connected accounts for the current user"""
     auth = request.headers.get("Authorization")
