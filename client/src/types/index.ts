@@ -17,6 +17,8 @@ export type User = {
   bio: string,
   website: string,
   
+  resume_url: string,
+
   // These are not returned by /auth/me - will need to be fetched separately or derived
   candidate_id?: number;
   employer_id?: number;

@@ -178,6 +178,7 @@ def get_current_user():
                 "website": user.webSite,
                 "bio": user.bio,
                 "phone": user.phone,
+                "resume_url": user.resume_url,
                 "location": user.location,
                 "companyName": user.companyName
             }
