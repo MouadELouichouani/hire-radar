@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getToken } from "@/lib";
+<<<<<<< HEAD
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -39,16 +40,22 @@ import {
 } from "@/features/connections/hooks";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+=======
+>>>>>>> origin/main
 
 export default function TopNavbar() {
   const router = useRouter();
   const { data: currentUser } = useCurrentUser(getToken()!);
+<<<<<<< HEAD
   const { data: notifications } = useNotifications();
   const { data: connectionRequests } = useConnectionRequests();
   const markRead = useMarkNotificationRead();
   const acceptConnection = useAcceptConnection();
   const rejectConnection = useRejectConnection();
 
+=======
+  
+>>>>>>> origin/main
   const [searchQuery, setSearchQuery] = useState("");
 
   const unreadCount = notifications?.filter((n) => n.is_read === 0).length || 0;

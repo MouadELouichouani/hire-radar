@@ -7,8 +7,13 @@ export default function RootLayout({
 }>) {
   return (
     <div>
+<<<<<<< HEAD
       <TopNavbar />
       {children}
+=======
+        <TopNavbar />
+        {children}
+>>>>>>> origin/main
     </div>
   );
 }

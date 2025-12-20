@@ -5,11 +5,14 @@ import jwt
 from dotenv import load_dotenv
 from config.db import SessionLocal
 from core.models import User
+from core.models import DeleteRequest
 from google_auth_oauthlib.flow import Flow
 import os
 import requests
+from middlewares.auth import is_auth
 
 load_dotenv()
+SECRET_KEY = os.getenv("JWT_SECRET")
 
 # Allow insecure transport for local development (HTTP instead of HTTPS)
 # Only enable in development environment, never in production
@@ -170,6 +173,14 @@ def get_current_user():
                 "email": user.email,
                 "role": user.role,
                 "image": user.image,
+                "headLine": user.headLine,
+                "github_url": user.github_url,
+                "website": user.webSite,
+                "bio": user.bio,
+                "phone": user.phone,
+                "resume_url": user.resume_url,
+                "location": user.location,
+                "companyName": user.companyName
             }
         )
 
@@ -376,69 +387,46 @@ def github_callback():
     try:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
-            return redirect("http://localhost:3000/profile?error=user_not_found")
+            return jsonify({"message": "User not found."}), 404
 
-        # Check if GitHub account is already linked to another user
-        existing_user = db.query(User).filter(User.github_id == github_id).first()
-        if existing_user and existing_user.id != user_id:
-            return redirect("http://localhost:3000/profile?error=github_already_linked")
+        if not check_password_hash(user.password, current_password):
+            return jsonify({"message": "Current password is incorrect."}), 400
 
-        # Link GitHub account
-        user.github_id = github_id
-        user.github_username = github_username
+        user.password = generate_password_hash(new_password)
         db.commit()
 
-        return redirect("http://localhost:3000/profile?github_linked=success")
+        return jsonify({"message": "Password updated successfully!"}), 200
+
     except Exception as e:
         db.rollback()
-        return redirect(f"http://localhost:3000/profile?error={str(e)}")
+        return jsonify({"message": str(e)}), 500
     finally:
         db.close()
 
 
-def get_connected_accounts():
-    """Get connected accounts for the current user"""
-    auth = request.headers.get("Authorization")
-    if not auth or not auth.startswith("Bearer "):
-        return jsonify({"error": "Authentication required"}), 401
-
-    token = auth.split(" ")[1]
+@is_auth
+def delete_account_request():
+    """
+    Receives a delete account request with a reason.
+    """
     db = SessionLocal()
-
     try:
-        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user = db.query(User).get(decoded["id"])
-        if not user:
-            return jsonify({"error": "User not found"}), 404
+        data = request.get_json()
+        reason = data.get("reason")
 
-        connected_accounts = {
-            "github": bool(user.github_id),
-            "google": bool(
-                user.email and not user.password
-            ),  # Google users don't have passwords
-        }
+        if not reason or not reason.strip():
+            return jsonify({"message": "Reason is required."}), 400
 
-        accounts = []
-        if connected_accounts["github"]:
-            accounts.append(
-                {
-                    "provider": "github",
-                    "username": user.github_username,
-                    "connected": True,
-                }
-            )
-        if connected_accounts["google"]:
-            accounts.append(
-                {
-                    "provider": "google",
-                    "connected": True,
-                }
-            )
+        user_id = request.user_id
 
-        return jsonify({"connected_accounts": accounts})
-    except jwt.ExpiredSignatureError:
-        return jsonify({"error": "Token expired"}), 401
+        delete_request = DeleteRequest(user_id=user_id, reason=reason.strip())
+        db.add(delete_request)
+        db.commit()
+
+        return jsonify({"message": "Delete request submitted successfully!"}), 200
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        db.rollback()
+        return jsonify({"message": str(e)}), 500
     finally:
         db.close()

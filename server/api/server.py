@@ -10,7 +10,6 @@ from routes.job import job
 from routes.candidates import candidates
 from routes.employers import employers
 from routes.applications import applications
-from controllers.auth import github_connect, github_callback
 import os
 from pathlib import Path
 
@@ -32,6 +31,7 @@ def init_db():
         print(f"Warning: Could not create database tables: {e}")
         print("Make sure PostgreSQL is running and the database is accessible.")
 
+print(UPLOADS_DIR)
 
 print(UPLOADS_DIR)
 

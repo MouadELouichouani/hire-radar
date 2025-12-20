@@ -1,11 +1,29 @@
 "use client";
 
+<<<<<<< HEAD
+<<<<<<<< HEAD:client/src/app/(home)/dashboard/employer/profile/page.tsx
 import ProfileHeader from "./components/profile-header";
 import ProfileContent from "./components/profile-content";
+========
+>>>>>>>> origin/main:client/src/app/(home)/dashboard/candidate/profile/page.tsx
+=======
+<<<<<<<< HEAD:client/src/app/(home)/dashboard/candidate/profile/page.tsx
+import ProfileHeader from "./components/profile-header";
+import ProfileContent from "./components/profile-content";
+========
+import ProfileHeader from "../../components/profile-header";
+import ProfileContent from "../../components/profile-content";
+>>>>>>>> origin/main:client/src/app/(home)/dashboard/employer/profile/page.tsx
+>>>>>>> origin/main
 import ProfileSidebar from "@/app/(home)/profile/components/profile-sidebar";
 import { useCurrentUser } from "@/features/auth/hook";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
+<<<<<<< HEAD
+import ProfileContent from "../../components/profile-content";
+import ProfileHeader from "../../components/profile-header";
+=======
+>>>>>>> origin/main
 
 export default function Page() {
   const { data } = useCurrentUser();
