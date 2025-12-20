@@ -253,3 +253,104 @@ def reject_request(request_id: int):
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
+
+
+def get_connections():
+    """Get all established connections (accepted requests) for the current user"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 401
+
+    token = auth_header.split(" ")[1]
+    JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
+
+    db: Session = next(get_db())
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        current_user_id = decoded["id"]
+
+        connections = (
+            db.query(ConnectionRequest)
+            .filter(
+                (
+                    (ConnectionRequest.sender_id == current_user_id)
+                    | (ConnectionRequest.receiver_id == current_user_id)
+                )
+                & (ConnectionRequest.status == "accepted")
+            )
+            .all()
+        )
+
+        connection_list = []
+        for conn in connections:
+            other_user = conn.receiver if conn.sender_id == current_user_id else conn.sender
+            if not other_user:
+                continue
+
+            connection_list.append(
+                {
+                    "id": conn.id,
+                    "user": {
+                        "id": other_user.id,
+                        "full_name": other_user.full_name,
+                        "image": other_user.image,
+                        "headline": getattr(other_user, "headLine", None) or getattr(other_user, "role", "Professional"),
+                        "role": other_user.role,
+                        "bio": other_user.bio,
+                    },
+                    "created_at": conn.created_at.isoformat() if conn.created_at else None,
+                }
+            )
+
+        return jsonify(connection_list), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expired"}), 401
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+def remove_connection(connection_id: int):
+    """Remove an established connection"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 401
+
+    token = auth_header.split(" ")[1]
+    JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
+
+    db: Session = next(get_db())
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        current_user_id = decoded["id"]
+
+        conn = (
+            db.query(ConnectionRequest)
+            .filter(
+                ConnectionRequest.id == connection_id,
+                (
+                    (ConnectionRequest.sender_id == current_user_id)
+                    | (ConnectionRequest.receiver_id == current_user_id)
+                ),
+            )
+            .first()
+        )
+
+        if not conn:
+            return jsonify({"error": "Connection not found"}), 404
+
+        db.delete(conn)
+        db.commit()
+        return jsonify({"message": "Connection removed successfully"}), 200
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expired"}), 401
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()

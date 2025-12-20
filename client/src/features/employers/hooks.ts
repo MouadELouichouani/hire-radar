@@ -20,7 +20,7 @@ export function useEmployer(id: number) {
     queryFn: async () => {
       try {
         return await employersApi.getById(id);
-      } catch (error) {
+      } catch {
         // Endpoint doesn't exist, return null
         return null;
       }

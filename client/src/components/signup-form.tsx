@@ -81,7 +81,7 @@ export function SignupForm({
     }
 
     try {
-      const res = await signup(form);
+      await signup(form);
       router.push(`/login`);
       toast.success("Account created successfully!");
     } catch (err: unknown) {

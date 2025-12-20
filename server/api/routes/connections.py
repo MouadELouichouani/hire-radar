@@ -4,9 +4,25 @@ from controllers.connections import (
     get_requests,
     accept_request,
     reject_request,
+    get_connections,
+    remove_connection,
 )
 
 connections = Blueprint("connections", __name__)
+
+connections.add_url_rule(
+    "/",
+    "get_connections",
+    get_connections,
+    methods=["GET"],
+)
+
+connections.add_url_rule(
+    "/<int:connection_id>",
+    "remove_connection",
+    remove_connection,
+    methods=["DELETE"],
+)
 
 connections.add_url_rule(
     "/request",

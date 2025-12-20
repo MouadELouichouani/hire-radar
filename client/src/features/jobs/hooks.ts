@@ -4,8 +4,8 @@ import {
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { jobsApi, candidatesApi, aiApi, applicationsApi } from "@/lib/api";
-import type { Job, JobFilters, SavedJob } from "@/types";
+import { jobsApi, candidatesApi, aiApi } from "@/lib/api";
+import type { JobFilters } from "@/types";
 import { toast } from "sonner";
 
 // Get all jobs with filters
@@ -154,7 +154,7 @@ export function useSavedJobs(candidateId: number) {
     queryFn: async () => {
       try {
         return await candidatesApi.getSavedJobs(candidateId);
-      } catch (error) {
+      } catch {
         // Endpoint doesn't exist, return empty array
         return [];
       }

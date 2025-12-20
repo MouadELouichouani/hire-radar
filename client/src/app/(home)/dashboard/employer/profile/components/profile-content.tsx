@@ -247,7 +247,7 @@ export default function ProfileContent({
       try {
         const { auth_url } = await githubConnect();
         window.location.href = auth_url;
-      } catch (error) {
+      } catch {
         toast.error("Failed to initiate GitHub connection");
       }
     } else if (account === "google") {
@@ -599,10 +599,10 @@ export default function ProfileContent({
                   const relatedReq =
                     notif.type === "connection_request" && senderId
                       ? connectionRequests?.received.find(
-                          (r) =>
-                            Number(r.sender?.id) === Number(senderId) &&
-                            r.status === "pending",
-                        )
+                        (r) =>
+                          Number(r.sender?.id) === Number(senderId) &&
+                          r.status === "pending",
+                      )
                       : null;
 
                   return (

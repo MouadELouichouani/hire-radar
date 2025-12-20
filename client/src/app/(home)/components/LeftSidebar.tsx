@@ -9,7 +9,6 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { useCurrentUser } from "@/features/auth/hook";
 import type { User } from "@/types";
 import { getValidImageUrl } from "@/lib/image-utils";
@@ -40,8 +39,8 @@ function LeftSidebarContent() {
 
   const connectionsCount = currentUser
     ? (connectionData?.received?.filter((r) => r.status === "accepted")
-        .length || 0) +
-      (connectionData?.sent?.filter((r) => r.status === "accepted").length || 0)
+      .length || 0) +
+    (connectionData?.sent?.filter((r) => r.status === "accepted").length || 0)
     : 0;
 
   const hashtags = [
@@ -101,10 +100,10 @@ function LeftSidebarContent() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href="#">
+                  <Link href="/connections">
                     <Users />
                     <span>Connections</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
                 {connectionsCount > 0 && (
                   <SidebarMenuBadge className="bg-secondary text-secondary-foreground text-xs rounded-full px-1.5 py-0.5">

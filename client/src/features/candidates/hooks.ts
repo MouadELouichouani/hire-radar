@@ -20,7 +20,7 @@ export function useCandidate(id: number) {
     queryFn: async () => {
       try {
         return await candidatesApi.getById(id);
-      } catch (error) {
+      } catch {
         // Endpoint doesn't exist, return null
         return null;
       }

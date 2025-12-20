@@ -54,3 +54,22 @@ export function useRejectConnection() {
     onError: () => toast.error("Failed to reject connection"),
   });
 }
+
+export function useConnections() {
+  return useQuery({
+    queryKey: ["connections"],
+    queryFn: () => connectionsApi.getConnections(),
+  });
+}
+
+export function useRemoveConnection() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (connectionId: number) => connectionsApi.removeConnection(connectionId),
+    onSuccess: () => {
+      toast.success("Connection removed");
+      queryClient.invalidateQueries({ queryKey: ["connections"] });
+    },
+    onError: () => toast.error("Failed to remove connection"),
+  });
+}

@@ -18,6 +18,7 @@ import type {
   ConnectionRequest,
   Notification,
   SuggestedPerson,
+  Connection,
 } from "@/types";
 
 // Auth API
@@ -108,15 +109,15 @@ export const jobsApi = {
 
   // Note: These endpoints don't exist in the backend yet
   // Stubbing them out for now - they will return errors
-  apply: async (jobId: number, applicationData?: { cover_letter?: string }) => {
+  apply: async (_jobId: number, _applicationData?: { cover_letter?: string }) => {
     throw new Error("Job application endpoint not implemented in backend");
   },
 
-  save: async (jobId: number): Promise<void> => {
+  save: async (_jobId: number): Promise<void> => {
     throw new Error("Save job endpoint not implemented in backend");
   },
 
-  unsave: async (jobId: number): Promise<void> => {
+  unsave: async (_jobId: number): Promise<void> => {
     throw new Error("Unsave job endpoint not implemented in backend");
   },
 };
@@ -129,37 +130,37 @@ export const candidatesApi = {
     throw new Error("Candidates endpoint not implemented in backend");
   },
 
-  getById: async (id: number): Promise<Candidate> => {
+  getById: async (_id: number): Promise<Candidate> => {
     throw new Error("Candidate endpoint not implemented in backend");
   },
 
   update: async (
-    id: number,
-    candidateData: Partial<Candidate>,
+    _id: number,
+    _candidateData: Partial<Candidate>,
   ): Promise<Candidate> => {
     throw new Error("Update candidate endpoint not implemented in backend");
   },
 
   uploadCV: async (
-    id: number,
-    file: File,
+    _id: number,
+    _file: File,
   ): Promise<{ cv_file_path: string }> => {
     throw new Error("CV upload endpoint not implemented in backend");
   },
 
-  getSavedJobs: async (id: number): Promise<SavedJob[]> => {
+  getSavedJobs: async (_id: number): Promise<SavedJob[]> => {
     throw new Error("Saved jobs endpoint not implemented in backend");
   },
 
-  getApplications: async (id: number): Promise<Application[]> => {
+  getApplications: async (_id: number): Promise<Application[]> => {
     throw new Error("Applications endpoint not implemented in backend");
   },
 
-  addSkill: async (id: number, skillId: number): Promise<void> => {
+  addSkill: async (_id: number, _skillId: number): Promise<void> => {
     throw new Error("Add skill endpoint not implemented in backend");
   },
 
-  removeSkill: async (id: number, skillId: number): Promise<void> => {
+  removeSkill: async (_id: number, _skillId: number): Promise<void> => {
     throw new Error("Remove skill endpoint not implemented in backend");
   },
 
@@ -229,6 +230,15 @@ export const connectionsApi = {
   reject: async (requestId: number): Promise<void> => {
     await apiClient.put(`/api/connections/requests/${requestId}/reject`);
   },
+
+  getConnections: async (): Promise<Connection[]> => {
+    const { data } = await apiClient.get<Connection[]>("/api/connections/");
+    return data;
+  },
+
+  removeConnection: async (connectionId: number): Promise<void> => {
+    await apiClient.delete(`/api/connections/${connectionId}`);
+  },
 };
 
 // Notifications API
@@ -251,13 +261,13 @@ export const applicationsApi = {
     throw new Error("Applications endpoint not implemented in backend");
   },
 
-  getByJobId: async (jobId: number): Promise<Application[]> => {
+  getByJobId: async (_jobId: number): Promise<Application[]> => {
     throw new Error("Job applications endpoint not implemented in backend");
   },
 
   update: async (
-    id: number,
-    status: Application["status"],
+    _id: number,
+    _status: Application["status"],
   ): Promise<Application> => {
     throw new Error("Update application endpoint not implemented in backend");
   },
@@ -267,13 +277,13 @@ export const applicationsApi = {
 // Note: These endpoints don't exist in the backend yet
 // Stubbing them out for now
 export const aiApi = {
-  recommendJobs: async (candidateId: number): Promise<RecommendedJob[]> => {
+  recommendJobs: async (_candidateId: number): Promise<RecommendedJob[]> => {
     // Return empty array for now since endpoint doesn't exist
     return [];
   },
 
   recommendCandidates: async (
-    jobId: number,
+    _jobId: number,
   ): Promise<RecommendedCandidate[]> => {
     // Return empty array for now since endpoint doesn't exist
     return [];

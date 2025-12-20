@@ -148,17 +148,23 @@ export type ConnectionRequest = {
   receiver?: User;
 };
 
+export type Connection = {
+  id: number;
+  user: User;
+  created_at: string;
+};
+
 // Notification types
 export type Notification = {
   id: number;
   sender_id: number;
   receiver_id: number;
   type:
-    | "connection_request"
-    | "connection_accepted"
-    | "job_application"
-    | "application_status"
-    | "job_posted";
+  | "connection_request"
+  | "connection_accepted"
+  | "job_application"
+  | "application_status"
+  | "job_posted";
   title: string;
   message: string;
   is_read: number;
