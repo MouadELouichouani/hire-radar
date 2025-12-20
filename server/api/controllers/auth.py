@@ -3,9 +3,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import jwt
 from dotenv import load_dotenv
-from config.db import SessionLocal
-from core.models import User
-from core.models import DeleteRequest
+from api.config.db import SessionLocal
+from api.core.models import User
 from google_auth_oauthlib.flow import Flow
 import os
 import requests
