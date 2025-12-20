@@ -1,6 +1,6 @@
 from flask import Blueprint
-from controllers.candidates import (
-    get_candidate_career,
+from api.controllers.candidates import (
+    get_candidate,
     update_candidate,
     upload_cv,
     get_saved_jobs,
