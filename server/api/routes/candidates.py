@@ -1,19 +1,26 @@
 from flask import Blueprint
 from controllers.candidates import (
-    get_candidate,
+    get_candidate_career,
     update_candidate,
     upload_cv,
     get_saved_jobs,
     add_skill,
-    remove_skill,
     upload_profile_image,
+    add_education,
+    update_education,
+    delete_education,
+    add_experience,
+    update_experience,
+    delete_experience,
+    delete_skill
 )
+
 
 candidates = Blueprint("candidates", __name__)
 
 # Candidate routes
 candidates.add_url_rule(
-    "/<int:candidate_id>", "get_candidate", get_candidate, methods=["GET"]
+    "/career", "get_candidate-career", get_candidate_career, methods=["GET"]
 )
 candidates.add_url_rule(
     "/update-profile", "update_candidate", update_candidate, methods=["PUT"]
@@ -24,15 +31,6 @@ candidates.add_url_rule(
 candidates.add_url_rule(
     "/<int:candidate_id>/saved-jobs", "get_saved_jobs", get_saved_jobs, methods=["GET"]
 )
-candidates.add_url_rule(
-    "/<int:candidate_id>/skills", "add_skill", add_skill, methods=["POST"]
-)
-candidates.add_url_rule(
-    "/<int:candidate_id>/skills/<int:skill_id>",
-    "remove_skill",
-    remove_skill,
-    methods=["DELETE"],
-)
 
 # Profile image upload
 candidates.add_url_rule(
@@ -40,4 +38,36 @@ candidates.add_url_rule(
     "upload_profile_image",
     upload_profile_image,
     methods=["POST"],
+)
+
+
+
+# EDUCATION ROUTES
+candidates.add_url_rule(
+    "/educations", "add_education", add_education, methods=["POST"]
+)
+candidates.add_url_rule(
+    "/educations/<int:education_id>", "update_education", update_education, methods=["PUT"]
+)
+candidates.add_url_rule(
+    "/educations/<int:education_id>", "delete_education", delete_education, methods=["DELETE"]
+)
+
+# EXPERIENCE ROUTES
+candidates.add_url_rule(
+    "/experiences", "add_experience", add_experience, methods=["POST"]
+)
+candidates.add_url_rule(
+    "/experiences/<int:experience_id>", "update_experience", update_experience, methods=["PUT"]
+)
+candidates.add_url_rule(
+    "/experiences/<int:experience_id>", "delete_experience", delete_experience, methods=["DELETE"]
+)
+
+# SKILL ROUTES
+candidates.add_url_rule(
+    "/skills", "add_skill", add_skill, methods=["POST"]
+)
+candidates.add_url_rule(
+    "/skills/<int:skill_id>", "delete_skill", delete_skill, methods=["DELETE"]
 )

@@ -95,6 +95,8 @@ def update_employer():
             user.phone = data.get("phone")
         if "location" in data:
             user.location = data.get("location")
+        if "headLine" in data or "headline" in data:
+            user.headLine = data.get("headLine") or data.get("headline")
         if "bio" in data:
             user.bio = data.get("bio")
         if "companyName" in data:

@@ -5,6 +5,7 @@ from sqlalchemy import (
     String,
     Text,
     DateTime,
+    Date,
     Enum,
     ForeignKey,
     Table,
@@ -127,8 +128,8 @@ class Education(Base):
     school_name = Column(String(150))
     degree = Column(String(150))
     field_of_study = Column(String(150))
-    start_date = Column(DateTime)
-    end_date = Column(DateTime)
+    start_date = Column(Date)
+    end_date = Column(Date)
     description = Column(Text)
 
 
@@ -145,8 +146,8 @@ class Experience(Base):
 
     job_title = Column(String(150), nullable=False)
     company = Column(String(150))
-    start_date = Column(DateTime)
-    end_date = Column(DateTime)
+    start_date = Column(Date)
+    end_date = Column(Date)
     description = Column(Text)
 
 

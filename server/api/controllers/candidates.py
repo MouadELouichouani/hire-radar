@@ -2,7 +2,7 @@ from flask import request, jsonify
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import Session
 from config.db import SessionLocal
-from core.models import User, SavedJob
+from core.models import User, SavedJob, Education, Experience, Skill
 import os
 from datetime import datetime
 from middlewares.auth import is_auth 
@@ -15,14 +15,14 @@ def get_db():
         db.close()
 
 
-def get_candidate(candidate_id: int):
-    """Get candidate profile with skills, education, and experience"""
-    db: Session = next(get_db())
+@is_auth
+def get_candidate_career():
+    db = next(get_db())
 
     try:
         user = (
             db.query(User)
-            .filter(User.id == candidate_id, User.role == "candidate")
+            .filter(User.id == request.user_id, User.role == "candidate")
             .first()
         )
 
@@ -62,26 +62,9 @@ def get_candidate(candidate_id: int):
         return (
             jsonify(
                 {
-                    "id": user.id,
-                    "user_id": user.id,
-                    "full_name": user.full_name,
-                    "email": user.email,
-                    "phone": user.phone,
-                    "location": user.location,
-                    "bio": user.bio,
-                    "headline": user.headLine,
-                    "resume_url": user.resume_url,
-                    "cv_file_path": user.resume_url,
                     "skills": skills,
                     "educations": educations,
                     "experiences": experiences,
-                    "user": {
-                        "id": user.id,
-                        "full_name": user.full_name,
-                        "email": user.email,
-                        "role": user.role,
-                        "image": user.image,
-                    },
                 }
             ),
             200,
@@ -348,35 +331,45 @@ def get_saved_jobs(candidate_id: int):
         db.close()
 
 
-def add_skill(candidate_id: int):
-    """Add skill to candidate"""
+
+
+# career tab
+@is_auth
+def add_education():
     db: Session = next(get_db())
 
     try:
-        user = (
-            db.query(User)
-            .filter(User.id == candidate_id, User.role == "candidate")
-            .first()
+        user_id = request.user_id
+        data = request.get_json()
+
+        education = Education(
+            user_id=user_id,
+            school_name=data.get("school_name"),
+            degree=data.get("degree"),
+            field_of_study=data.get("field_of_study"),
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date"),
+            description=data.get("description"),
         )
 
-        if not user:
-            return jsonify({"error": "Candidate not found"}), 404
+        db.add(education)
+        db.commit()
+        db.refresh(education)
 
-        data = request.get_json()
-        skill_id = data.get("skill_id") or data.get("id")
-
-        if not skill_id:
-            return jsonify({"error": "skill_id is required"}), 400
-
-        skill = db.query(Skill).filter(Skill.id == skill_id).first()
-        if not skill:
-            return jsonify({"error": "Skill not found"}), 404
-
-        if skill not in user.skills:
-            user.skills.append(skill)
-            db.commit()
-
-        return jsonify({"message": "Skill added successfully"}), 200
+        # Return the newly added education
+        return jsonify({
+            "message": "Education added successfully",
+            "education": {
+                "id": education.id,
+                "user_id": education.user_id,
+                "school_name": education.school_name,
+                "degree": education.degree,
+                "field_of_study": education.field_of_study,
+                "start_date": education.start_date,
+                "end_date": education.end_date,
+                "description": education.description,
+            }
+        }), 200
 
     except Exception as e:
         db.rollback()
@@ -385,29 +378,233 @@ def add_skill(candidate_id: int):
         db.close()
 
 
-def remove_skill(candidate_id: int, skill_id: int):
-    """Remove skill from candidate"""
+
+
+@is_auth
+def update_education(education_id):
     db: Session = next(get_db())
 
     try:
-        user = (
-            db.query(User)
-            .filter(User.id == candidate_id, User.role == "candidate")
+        user_id = request.user_id
+        data = request.get_json()
+
+        education = (
+            db.query(Education)
+            .filter(Education.id == education_id, Education.user_id == user_id)
             .first()
         )
 
-        if not user:
-            return jsonify({"error": "Candidate not found"}), 404
+        if not education:
+            return jsonify({"error": "Education not found"}), 404
 
+        if "school_name" in data:
+            education.school_name = data["school_name"]
+        if "degree" in data:
+            education.degree = data["degree"]
+        if "field_of_study" in data:
+            education.field_of_study = data["field_of_study"]
+        if "start_date" in data:
+            education.start_date = data["start_date"]
+        if "end_date" in data:
+            education.end_date = data["end_date"]
+        if "description" in data:
+            education.description = data["description"]
+
+        db.commit()
+        db.refresh(education)
+
+        return jsonify({"message": "Education updated successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+
+# @education_bp.route("/educations/<int:education_id>", methods=["DELETE"])
+def delete_education(education_id):
+    db: Session = next(get_db())
+
+    try:
+        user_id = request.user_id
+
+        education = (
+            db.query(Education)
+            .filter(Education.id == education_id, Education.user_id == user_id)
+            .first()
+        )
+
+        if not education:
+            return jsonify({"error": "Education not found"}), 404
+
+        db.delete(education)
+        db.commit()
+
+        return jsonify({"message": "Education deleted successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+
+
+
+@is_auth
+def add_experience():
+    db: Session = next(get_db())
+
+    try:
+        user_id = request.user_id
+        data = request.get_json()
+
+        experience = Experience(
+            user_id=user_id,
+            job_title=data["job_title"],
+            company=data.get("company"),
+            start_date=data.get("start_date"),
+            end_date=data.get("end_date"),
+            description=data.get("description"),
+        )
+
+        db.add(experience)
+        db.commit()
+        db.refresh(experience)
+
+        return jsonify({
+            "message": "Experience added successfully",
+            "experience": {
+                "id": experience.id,
+                "user_id": experience.user_id,
+                "job_title": experience.job_title,
+                "company": experience.company,
+                "start_date": str(experience.start_date),
+                "end_date": str(experience.end_date),
+                "description": experience.description
+            }
+        }), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+
+
+# @experience_bp.route("/experiences/<int:experience_id>", methods=["PUT"])
+def update_experience(experience_id):
+    db: Session = next(get_db())
+
+    try:
+        user_id = request.user_id
+        data = request.get_json()
+
+        experience = (
+            db.query(Experience)
+            .filter(Experience.id == experience_id, Experience.user_id == user_id)
+            .first()
+        )
+
+        if not experience:
+            return jsonify({"error": "Experience not found"}), 404
+
+        if "job_title" in data:
+            experience.job_title = data["job_title"]
+        if "company" in data:
+            experience.company = data["company"]
+        if "start_date" in data:
+            experience.start_date = data["start_date"]
+        if "end_date" in data:
+            experience.end_date = data["end_date"]
+        if "description" in data:
+            experience.description = data["description"]
+
+        db.commit()
+        db.refresh(experience)
+
+        return jsonify({"message": "Experience updated successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+
+
+# @experience_bp.route("/experiences/<int:experience_id>", methods=["DELETE"])
+def delete_experience(experience_id):
+    db: Session = next(get_db())
+
+    try:
+        user_id = request.user_id
+
+        experience = (
+            db.query(Experience)
+            .filter(Experience.id == experience_id, Experience.user_id == user_id)
+            .first()
+        )
+
+        if not experience:
+            return jsonify({"error": "Experience not found"}), 404
+
+        db.delete(experience)
+        db.commit()
+
+        return jsonify({"message": "Experience deleted successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+
+# @skill_bp.route("/skills", methods=["POST"])
+def add_skill():
+    db: Session = next(get_db())
+
+    try:
+        data = request.get_json()
+
+        skill = Skill(name=data["name"])
+
+        db.add(skill)
+        db.commit()
+        db.refresh(skill)
+
+        return jsonify({"message": "Skill added successfully"}), 201
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+
+# @skill_bp.route("/skills/<int:skill_id>", methods=["DELETE"])
+def delete_skill(skill_id):
+    db: Session = next(get_db())
+
+    try:
         skill = db.query(Skill).filter(Skill.id == skill_id).first()
+
         if not skill:
             return jsonify({"error": "Skill not found"}), 404
 
-        if skill in user.skills:
-            user.skills.remove(skill)
-            db.commit()
+        db.delete(skill)
+        db.commit()
 
-        return jsonify({"message": "Skill removed successfully"}), 200
+        return jsonify({"message": "Skill deleted successfully"}), 200
 
     except Exception as e:
         db.rollback()
