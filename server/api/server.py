@@ -48,7 +48,10 @@ app.register_blueprint(employers, url_prefix="/api/employers")
 app.register_blueprint(applications, url_prefix="/api/applications")
 
 from routes.connections import connections
+from routes.notifications import notifications
+
 app.register_blueprint(connections, url_prefix="/api/connections")
+app.register_blueprint(notifications, url_prefix="/api/notifications")
 
 # OAuth routes
 app.add_url_rule(

@@ -15,6 +15,8 @@ import type {
   RecommendedJob,
   RecommendedCandidate,
   User,
+  ConnectionRequest,
+  Notification,
 } from "@/types";
 
 // Auth API
@@ -202,6 +204,34 @@ export const connectionsApi = {
     await apiClient.post("/api/connections/request", {
       receiver_id: receiverId,
     });
+  },
+
+  getAll: async (): Promise<{ received: ConnectionRequest[]; sent: ConnectionRequest[] }> => {
+    const { data } = await apiClient.get<{
+      received: ConnectionRequest[];
+      sent: ConnectionRequest[];
+    }>("/api/connections/requests");
+    return data;
+  },
+
+  accept: async (requestId: number): Promise<void> => {
+    await apiClient.put(`/api/connections/requests/${requestId}/accept`);
+  },
+
+  reject: async (requestId: number): Promise<void> => {
+    await apiClient.put(`/api/connections/requests/${requestId}/reject`);
+  },
+};
+
+// Notifications API
+export const notificationsApi = {
+  getAll: async (): Promise<Notification[]> => {
+    const { data } = await apiClient.get<Notification[]>("/api/notifications/");
+    return data;
+  },
+
+  markAsRead: async (notificationId: number): Promise<void> => {
+    await apiClient.put(`/api/notifications/${notificationId}/read`);
   },
 };
 

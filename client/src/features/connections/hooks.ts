@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { connectionsApi } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -18,5 +18,38 @@ export function useSendConnectionRequest() {
             const message = error.response?.data?.error || "Failed to send request";
             toast.error(message);
         },
+    });
+}
+
+export function useConnectionRequests() {
+    return useQuery({
+        queryKey: ["connection-requests"],
+        queryFn: () => connectionsApi.getAll(),
+    });
+}
+
+export function useAcceptConnection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (requestId: number) => connectionsApi.accept(requestId),
+        onSuccess: () => {
+            toast.success("Connection accepted!");
+            queryClient.invalidateQueries({ queryKey: ["connection-requests"] });
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        },
+        onError: () => toast.error("Failed to accept connection"),
+    });
+}
+
+export function useRejectConnection() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (requestId: number) => connectionsApi.reject(requestId),
+        onSuccess: () => {
+            toast.success("Connection rejected");
+            queryClient.invalidateQueries({ queryKey: ["connection-requests"] });
+            queryClient.invalidateQueries({ queryKey: ["notifications"] });
+        },
+        onError: () => toast.error("Failed to reject connection"),
     });
 }

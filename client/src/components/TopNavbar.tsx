@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Bell, User, LogOut, Bookmark } from "lucide-react";
+import { Search, Bell, User, LogOut, Bookmark, Check, X, Clock } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/features/auth/hook";
@@ -19,12 +19,23 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { getToken } from "@/lib";
+import { useNotifications, useMarkNotificationRead } from "@/features/notifications/hooks";
+import { useAcceptConnection, useRejectConnection, useConnectionRequests } from "@/features/connections/hooks";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default function TopNavbar() {
   const router = useRouter();
   const { data: currentUser } = useCurrentUser(getToken()!);
-  
+  const { data: notifications } = useNotifications();
+  const { data: connectionRequests } = useConnectionRequests();
+  const markRead = useMarkNotificationRead();
+  const acceptConnection = useAcceptConnection();
+  const rejectConnection = useRejectConnection();
+
   const [searchQuery, setSearchQuery] = useState("");
+
+  const unreadCount = notifications?.filter(n => n.is_read === 0).length || 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,8 +62,18 @@ export default function TopNavbar() {
       .slice(0, 2);
   };
 
-  // Note: employer_id is not available from /auth/me endpoint
-  // Using user.id as fallback for employer profile
+  const formatTime = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+
+    if (diff < 60000) return "Just now";
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;
+    return date.toLocaleDateString();
+  };
+
   const profileUrl =
     currentUser?.role === "candidate"
       ? "/dashboard/candidate/profile"
@@ -60,8 +81,6 @@ export default function TopNavbar() {
         ? "/dashboard/employer/profile"
         : "/dashboard/candidate/profile";
 
-  // Note: candidate_id is not available from /auth/me endpoint
-  // Saved jobs endpoint doesn't exist in backend yet anyway
   const savedJobsUrl =
     currentUser?.role === "candidate" ? "/dashboard/candidate/saved-jobs" : "#";
 
@@ -120,14 +139,103 @@ export default function TopNavbar() {
 
           <ThemeToggle />
 
-          {/* Notifications - Placeholder */}
-          <button
-            className="relative p-2 rounded-md hover:bg-accent transition-colors"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-foreground rounded-full" />
-          </button>
+          {/* Notifications Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="relative p-2 rounded-md hover:bg-accent transition-colors focus:outline-none"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 h-4 w-4 bg-foreground text-background text-[10px] flex items-center justify-center font-bold rounded-full">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 max-h-[500px] overflow-y-auto">
+              <DropdownMenuLabel className="flex items-center justify-between">
+                <span>Notifications</span>
+                {unreadCount > 0 && (
+                  <Badge variant="outline" className="text-[10px] py-0">
+                    {unreadCount} New
+                  </Badge>
+                )}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {notifications && notifications.length > 0 ? (
+                notifications.slice(0, 10).map((notif) => {
+                  // Find related request if it's a connection request
+                  const senderId = notif.sender_id || notif.sender?.id;
+                  const relatedReq = notif.type === "connection_request" && senderId
+                    ? connectionRequests?.received.find(r => Number(r.sender?.id) === Number(senderId) && r.status === "pending")
+                    : null;
+
+                  return (
+                    <div
+                      key={notif.id}
+                      className={cn(
+                        "p-3 text-sm transition-colors",
+                        notif.is_read === 0 ? "bg-accent/40" : "opacity-75"
+                      )}
+                      onMouseEnter={() => notif.is_read === 0 && markRead.mutate(notif.id)}
+                    >
+                      <div className="flex gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={notif.sender?.image || undefined} />
+                          <AvatarFallback>{notif.sender?.full_name?.charAt(0) || "N"}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-1">
+                          <p className="font-medium leading-none">{notif.title}</p>
+                          <p className="text-xs text-muted-foreground leading-snug">
+                            {notif.message}
+                          </p>
+                          <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-1">
+                            <Clock className="h-3 w-3" />
+                            {formatTime(notif.created_at)}
+                          </div>
+
+                          {/* Connection Request Actions */}
+                          {relatedReq && (
+                            <div className="flex gap-2 mt-2">
+                              <Button
+                                size="sm"
+                                className="h-7 px-2 text-[11px]"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  acceptConnection.mutate(relatedReq.id);
+                                }}
+                              >
+                                <Check className="h-3 w-3 mr-1" />
+                                Accept
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 px-2 text-[11px]"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  rejectConnection.mutate(relatedReq.id);
+                                }}
+                              >
+                                <X className="h-3 w-3 mr-1" />
+                                Decline
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  No notifications yet
+                </div>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Avatar Dropdown */}
           {currentUser ? (
