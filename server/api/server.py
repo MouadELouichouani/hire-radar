@@ -4,13 +4,12 @@ load_dotenv()
 
 from flask import Flask, jsonify, send_from_directory, redirect, request
 from flask_cors import CORS
-from api.config.db import Base, engine
-from api.routes.auth import auth
-from api.routes.job import job  # Fixed this line
-from api.routes.candidates import candidates
-from api.routes.employers import employers
-from api.routes.applications import applications
-from api.controllers.auth import github_connect, github_callback
+from config.db import Base, engine
+from routes.auth import auth
+from routes.job import job  # Fixed this line
+from routes.candidates import candidates
+from routes.employers import employers
+from routes.applications import applications
 import os
 from pathlib import Path
 
@@ -57,19 +56,6 @@ from routes.notifications import notifications
 app.register_blueprint(connections, url_prefix="/api/connections")
 app.register_blueprint(notifications, url_prefix="/api/notifications")
 
-# OAuth routes
-app.add_url_rule(
-    "/api/oauth/github/connect",
-    "github_connect",
-    github_connect,
-    methods=["GET"],
-)
-app.add_url_rule(
-    "/api/oauth/github/callback",
-    "github_callback",
-    github_callback,
-    methods=["GET"],
-)
 
 
 @app.route("/")
@@ -82,14 +68,6 @@ def home():
 def serve_upload(filename):
     return send_from_directory(str(UPLOADS_DIR), filename)
 
-
-# Handle incorrect OAuth redirect URI (without /api prefix)
-# This redirects to the Next.js frontend route handler
-@app.route("/auth/google/callback")
-def handle_incorrect_oauth_callback():
-    # Redirect to Next.js frontend route handler with all query params
-    frontend_url = f"http://localhost:3000/api/auth/google/callback?{request.query_string.decode()}"
-    return redirect(frontend_url, code=302)
 
 
 if __name__ == "__main__":

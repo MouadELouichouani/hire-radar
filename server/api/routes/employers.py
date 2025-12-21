@@ -1,5 +1,5 @@
 from flask import Blueprint
-from api.controllers.employers import (
+from controllers.employers import (
     get_employer,
     update_employer,
     upload_profile_image,

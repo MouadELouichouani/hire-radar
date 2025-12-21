@@ -1,5 +1,5 @@
 from flask import Blueprint
-from api.controllers.applications import (
+from controllers.applications import (
     get_all_applications,
     get_application,
     update_application,

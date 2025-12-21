@@ -3,8 +3,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import jwt
 from dotenv import load_dotenv
-from api.config.db import SessionLocal
-from api.core.models import User
+from config.db import SessionLocal
+from core.models import User, DeleteRequest
 from google_auth_oauthlib.flow import Flow
 import os
 import requests
@@ -292,99 +292,25 @@ def login():
         db.close()
 
 
-def github_connect():
-    """Initiate GitHub OAuth flow for account linking"""
-
-    auth = request.headers.get("Authorization")
-    if not auth or not auth.startswith("Bearer "):
-        return jsonify({"error": "Authentication required"}), 401
-
-    token = auth.split(" ")[1]
-
+@is_auth
+def update_password():
+    db = SessionLocal()  #
+    
     try:
-        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        user_id = decoded["id"]
-    except jwt.InvalidTokenError:
-        return jsonify({"error": "Invalid token"}), 401
+        data = request.get_json()
+        current_password = data.get("currentPassword")
+        new_password = data.get("newPassword")
+        confirm_password = data.get("confirmPassword")
 
-    # Store user id in session
-    session["github_link_user_id"] = user_id
+        if not current_password or not new_password or not confirm_password:
+            return jsonify({"message": "All fields are required."}), 400
 
-    # Create state token (CSRF protection)
-    state = jwt.encode(
-        {
-            "user_id": user_id,
-            "exp": datetime.utcnow() + timedelta(minutes=10),
-        },
-        JWT_SECRET,
-        algorithm="HS256",
-    )
+        if new_password != confirm_password:
+            return jsonify({"message": "New password and confirm password do not match."}), 400
 
-    session["github_state"] = state
+        user_id = request.user_id  
 
-    # GitHub OAuth authorization URL
-    auth_url = (
-        "https://github.com/login/oauth/authorize"
-        f"?client_id={GITHUB_CLIENT_ID}"
-        f"&redirect_uri={GITHUB_REDIRECT_URI}"
-        f"&scope=user:email"
-        f"&state={state}"
-    )
-
-    return jsonify({"auth_url": auth_url}), 200
-
-
-def github_callback():
-    """Handle GitHub OAuth callback and link account"""
-    code = request.args.get("code")
-    state = request.args.get("state")
-    error = request.args.get("error")
-
-    if error:
-        return redirect(f"http://localhost:3000/profile?error={error}")
-
-    if not code or not state:
-        return redirect("http://localhost:3000/profile?error=missing_params")
-
-    # Verify state
-    try:
-        decoded_state = jwt.decode(state, JWT_SECRET, algorithms=["HS256"])
-        user_id = decoded_state["user_id"]
-    except:
-        return redirect("http://localhost:3000/profile?error=invalid_state")
-
-    # Exchange code for access token
-    token_url = "https://github.com/login/oauth/access_token"
-    token_data = {
-        "client_id": GITHUB_CLIENT_ID,
-        "client_secret": GITHUB_CLIENT_SECRET,
-        "code": code,
-        "redirect_uri": GITHUB_REDIRECT_URI,
-    }
-    token_headers = {"Accept": "application/json"}
-
-    token_res = requests.post(token_url, data=token_data, headers=token_headers).json()
-    access_token = token_res.get("access_token")
-
-    if not access_token:
-        return redirect("http://localhost:3000/profile?error=token_failed")
-
-    # Get GitHub user info
-    user_info = requests.get(
-        "https://api.github.com/user",
-        headers={"Authorization": f"Bearer {access_token}"},
-    ).json()
-
-    github_id = str(user_info.get("id"))
-    github_username = user_info.get("login")
-
-    if not github_id:
-        return redirect("http://localhost:3000/profile?error=no_github_id")
-
-    # Link GitHub account to user
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.id == user_id).first()
+        user = db.get(User, user_id) 
         if not user:
             return jsonify({"message": "User not found."}), 404
 

@@ -2,9 +2,9 @@ from flask import request, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 from sqlalchemy import or_, and_
 from sqlalchemy.orm import Session
-from api.config.db import SessionLocal
-from api.core.models import Job, User, SavedJob, Application, Skill
-from api.controllers.utils import get_user_id_from_token
+from config.db import SessionLocal
+from core.models import Job, User, SavedJob, Application, Skill
+from controllers.utils import get_user_id_from_token
 from typing import Optional, List
 from decimal import Decimal
 from datetime import datetime

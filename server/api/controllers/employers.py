@@ -3,9 +3,9 @@ from werkzeug.utils import secure_filename
 import os
 from datetime import datetime
 from sqlalchemy.orm import Session
-from api.config.db import SessionLocal
-from api.core.models import User
-
+from config.db import SessionLocal
+from core.models import User
+from middlewares.auth import is_auth
 
 def get_db():
     db = SessionLocal()

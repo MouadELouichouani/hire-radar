@@ -41,11 +41,8 @@ export function AddJobModal({
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [skillsLoading, setSkillsLoading] = useState(true);
 
-  // Fetch available skills when modal opens
   useEffect(() => {
-    if (open) {
-      fetchSkills();
-    }
+    if (open) fetchSkills();
   }, [open]);
 
   const fetchSkills = async () => {
@@ -53,8 +50,7 @@ export function AddJobModal({
       setSkillsLoading(true);
       const skills = await getAvailableSkills();
       setAvailableSkills(skills);
-    } catch (error) {
-      console.error("Failed to fetch skills:", error);
+    } catch {
       toast.error("Failed to load skills");
     } finally {
       setSkillsLoading(false);
@@ -67,7 +63,6 @@ export function AddJobModal({
     try {
       setIsLoading(true);
 
-      // Validate required fields
       if (!formData.title.trim()) {
         toast.error("Job title is required");
         return;
@@ -100,7 +95,6 @@ export function AddJobModal({
 
       toast.success("Job posted successfully");
 
-      // Reset form
       setFormData({
         title: "",
         description: "",
@@ -115,7 +109,6 @@ export function AddJobModal({
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error("Failed to create job:", error);
       toast.error(
         error instanceof Error ? error.message : "Failed to post job",
       );
@@ -151,7 +144,7 @@ export function AddJobModal({
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           {/* Title */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Job Title *
             </label>
             <Input
@@ -160,14 +153,13 @@ export function AddJobModal({
                 setFormData({ ...formData, title: e.target.value })
               }
               placeholder="e.g., Senior React Developer"
-              required
               disabled={isLoading}
             />
           </div>
 
           {/* Company */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Company Name
             </label>
             <Input
@@ -182,7 +174,7 @@ export function AddJobModal({
 
           {/* Description */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Description *
             </label>
             <Textarea
@@ -192,14 +184,13 @@ export function AddJobModal({
               }
               placeholder="Enter job description"
               rows={5}
-              required
               disabled={isLoading}
             />
           </div>
 
           {/* Location */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Location *
             </label>
             <Input
@@ -208,14 +199,13 @@ export function AddJobModal({
                 setFormData({ ...formData, location: e.target.value })
               }
               placeholder="e.g., New York, NY"
-              required
               disabled={isLoading}
             />
           </div>
 
           {/* Employment Type */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Employment Type
             </label>
             <select
@@ -223,7 +213,7 @@ export function AddJobModal({
               onChange={(e) =>
                 setFormData({ ...formData, emp_type: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
               disabled={isLoading}
             >
               <option value="">Select type</option>
@@ -235,9 +225,9 @@ export function AddJobModal({
             </select>
           </div>
 
-          {/* Salary Range */}
+          {/* Salary */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Salary Range
             </label>
             <Input
@@ -263,7 +253,7 @@ export function AddJobModal({
 
           {/* Responsibilities */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Responsibilities
             </label>
             <Textarea
@@ -280,7 +270,9 @@ export function AddJobModal({
               rows={4}
               disabled={isLoading}
             />
-            <p className="text-xs text-gray-500">One responsibility per line</p>
+            <p className="text-xs text-muted-foreground">
+              One responsibility per line
+            </p>
           </div>
 
           <DialogFooter>

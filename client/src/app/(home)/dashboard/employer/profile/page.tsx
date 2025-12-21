@@ -1,7 +1,7 @@
 "use client";
 
-import ProfileContent from "./components/profile-content";
 import { useEffect, useState } from "react";
+import ProfileContent from "../../components/profile-content";
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("profile");
