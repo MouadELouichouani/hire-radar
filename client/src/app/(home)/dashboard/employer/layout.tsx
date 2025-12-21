@@ -1,10 +1,10 @@
 "use client";
 
-import ProfileHeader from "./profile/components/profile-header";
-import ProfileSidebar from "@/app/(home)/profile/components/profile-sidebar";
 import { useCurrentUser } from "@/features/auth/hook";
 import type { User } from "@/types";
 import { useEffect, useState } from "react";
+import ProfileHeader from "../components/profile-header";
+import ProfileSidebar from "../../profile/components/profile-sidebar";
 
 export default function EmployerLayout({
   children,
