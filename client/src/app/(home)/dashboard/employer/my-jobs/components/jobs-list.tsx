@@ -30,7 +30,7 @@ export function JobsList({
   if (jobs.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-base">
+        <p className="text-base">
           No job postings yet. Create your first job to get started.
         </p>
       </div>

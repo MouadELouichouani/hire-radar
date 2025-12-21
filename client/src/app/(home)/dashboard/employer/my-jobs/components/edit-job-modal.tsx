@@ -48,7 +48,6 @@ export function EditJobModal({
   const [availableSkills, setAvailableSkills] = useState<Skill[]>([]);
   const [skillsLoading, setSkillsLoading] = useState(true);
 
-  // Update form data when job changes and fetch skills
   useEffect(() => {
     if (job) {
       setFormData({
@@ -80,7 +79,6 @@ export function EditJobModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!job) return;
 
     try {
@@ -104,7 +102,7 @@ export function EditJobModal({
     } catch (error) {
       console.error("Failed to update job:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to update job",
+        error instanceof Error ? error.message : "Failed to update job"
       );
     } finally {
       setIsLoading(false);
@@ -122,7 +120,7 @@ export function EditJobModal({
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
           {/* Title */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Job Title *
             </label>
             <Input
@@ -137,7 +135,7 @@ export function EditJobModal({
 
           {/* Company */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Company Name
             </label>
             <Input
@@ -151,7 +149,7 @@ export function EditJobModal({
 
           {/* Description */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Description *
             </label>
             <Textarea
@@ -167,7 +165,7 @@ export function EditJobModal({
 
           {/* Location */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Location *
             </label>
             <Input
@@ -182,7 +180,7 @@ export function EditJobModal({
 
           {/* Employment Type */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Employment Type
             </label>
             <select
@@ -190,7 +188,9 @@ export function EditJobModal({
               onChange={(e) =>
                 setFormData({ ...formData, emp_type: e.target.value })
               }
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border rounded-md text-sm
+                         border-border bg-background
+                         focus:outline-none focus:ring-2 focus:ring-ring"
             >
               <option value="">Select type</option>
               <option value="full-time">Full-time</option>
@@ -203,7 +203,7 @@ export function EditJobModal({
 
           {/* Salary Range */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Salary Range
             </label>
             <Input
@@ -229,7 +229,7 @@ export function EditJobModal({
 
           {/* Responsibilities */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-muted-foreground">
               Responsibilities
             </label>
             <Textarea
@@ -245,7 +245,9 @@ export function EditJobModal({
               placeholder="Enter each responsibility on a new line"
               rows={4}
             />
-            <p className="text-xs text-gray-500">One responsibility per line</p>
+            <p className="text-xs text-muted-foreground">
+              One responsibility per line
+            </p>
           </div>
 
           <DialogFooter>

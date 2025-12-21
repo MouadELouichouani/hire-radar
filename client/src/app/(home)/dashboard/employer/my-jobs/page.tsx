@@ -9,6 +9,7 @@ import { Pagination } from "./components/pagination";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function MyJobsPage() {
   const [jobs, setJobs] = useState<EmployerJob[]>([]);
@@ -36,8 +37,7 @@ export default function MyJobsPage() {
       setJobs(response.jobs);
       setTotal(response.total);
       setTotalPages(response.total_pages);
-    } catch (error) {
-      console.error("Failed to fetch jobs:", error);
+    } catch {
       toast.error("Failed to load your jobs");
     } finally {
       setIsLoading(false);
@@ -57,15 +57,10 @@ export default function MyJobsPage() {
     try {
       setDeletingJobId(jobId);
       await deleteJob(jobId);
-
       toast.success("Job deleted successfully");
-
-      await fetchJobs();
-    } catch (error) {
-      console.error("Failed to delete job:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete job",
-      );
+      fetchJobs();
+    } catch {
+      toast.error("Failed to delete job");
     } finally {
       setDeletingJobId(null);
     }
@@ -77,62 +72,64 @@ export default function MyJobsPage() {
   };
 
   return (
-    <div className="space-y-6 mb-10">
+    <div className="space-y-8 pb-10">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">My Job Postings</h1>
-          <p className="text-gray-600 mt-1">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">
+            My Job Postings
+          </h1>
+          <p className="text-muted-foreground">
             Manage and monitor your job postings
           </p>
         </div>
-        <Button className="gap-2" onClick={() => setAddJobModalOpen(true)}>
+
+        <Button onClick={() => setAddJobModalOpen(true)} className="gap-2">
           <Plus className="h-4 w-4" />
           Post a New Job
         </Button>
-      </div>
-
-      {/* Stats */}
-      {total > 0 && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <p className="text-sm text-gray-600">
-            Total job postings: <span className="font-semibold">{total}</span>
-          </p>
-        </div>
-      )}
+      </div>      
 
       {/* Filters */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Sort by:</label>
-          <select
-            value={sortBy}
-            onChange={(e) => {
-              setSortBy(e.target.value as "created_at" | "title");
-              setPage(1);
-            }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="created_at">Recently Posted</option>
-            <option value="title">Title (A-Z)</option>
-          </select>
-        </div>
+      <Card>
+        <CardContent className="py-1 flex flex-wrap gap-6 items-center">
+          {total > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Total job postings:{" "}
+              <span className="font-medium text-foreground">{total}</span>
+            </p>
+          )}
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium">Sort by</span>
+            <select
+              value={sortBy}
+              onChange={(e) => {
+                setSortBy(e.target.value as "created_at" | "title");
+                setPage(1);
+              }}
+              className="h-9 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="created_at">Recently Posted</option>
+              <option value="title">Title (A–Z)</option>
+            </select>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">Order:</label>
-          <select
-            value={order}
-            onChange={(e) => {
-              setOrder(e.target.value as "asc" | "desc");
-              setPage(1);
-            }}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="desc">Descending</option>
-            <option value="asc">Ascending</option>
-          </select>
-        </div>
-      </div>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium">Order</span>
+            <select
+              value={order}
+              onChange={(e) => {
+                setOrder(e.target.value as "asc" | "desc");
+                setPage(1);
+              }}
+              className="h-9 rounded-md border bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="desc">Descending</option>
+              <option value="asc">Ascending</option>
+            </select>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Jobs List */}
       <JobsList
@@ -153,7 +150,7 @@ export default function MyJobsPage() {
         />
       )}
 
-      {/* Edit Modal */}
+      {/* Modals */}
       <EditJobModal
         job={editingJob}
         open={editModalOpen}
@@ -161,7 +158,6 @@ export default function MyJobsPage() {
         onSuccess={handleEditSuccess}
       />
 
-      {/* Add Job Modal */}
       <AddJobModal
         open={addJobModalOpen}
         onOpenChange={setAddJobModalOpen}

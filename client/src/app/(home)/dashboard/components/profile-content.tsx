@@ -31,6 +31,7 @@ import { getToken } from "@/lib";
 import { DeleteAccount } from "@/components/delete-account";
 import CareerTab from "@/components/career-tab";
 import UploadCV from "@/components/profile/UploadCV";
+import MyJobsPage from "../employer/my-jobs/page";
 
 interface ProfileContentProps {
   defaultTab?: string;
@@ -310,7 +311,7 @@ export default function ProfileContent({
         )}
 
         {currentUser?.role === "employer" && (
-          <TabsTrigger value="career">
+          <TabsTrigger value="jobs">
             <BriefcaseBusiness className="mr-2 h-4 w-4" />
             Posted jobs
           </TabsTrigger>
@@ -601,9 +602,13 @@ export default function ProfileContent({
         </Card>
       </TabsContent>
 
-      {/* Notifications Tab */}
+      {/* Career Tab */}
       <TabsContent value="career" className="space-y-6">
         <CareerTab />
+      </TabsContent>
+
+      <TabsContent value="jobs" className="space-y-6">
+        <MyJobsPage />
       </TabsContent>
 
       {/* Notifications Tab */}
