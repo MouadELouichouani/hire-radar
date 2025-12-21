@@ -39,7 +39,6 @@ def get_employer(employer_id: int):
                     "phone": user.phone,
                     "location": user.location,
                     "bio": user.bio,
-                    # Expose as snake_case to match frontend types, but store using DB field names
                     "company_name": user.companyName,
                     "website": user.webSite,
                     "image": user.image,
@@ -60,6 +59,7 @@ def get_employer(employer_id: int):
     finally:
         db.close()
 
+
 @is_auth
 def update_employer():
     """Update employer profile"""
@@ -75,14 +75,11 @@ def update_employer():
         if not user:
             return jsonify({"error": "Employer not found"}), 404
 
-        # Gracefully handle missing or empty JSON body
         data = request.get_json(silent=True) or {}
 
-        # Update fields
         if "full_name" in data:
             user.full_name = data["full_name"]
         if "email" in data:
-            # Check if email is already taken by another user
             existing_user = (
                 db.query(User)
                 .filter(User.email == data["email"], User.id != request.user_id)
@@ -175,6 +172,72 @@ def upload_profile_image(employer_id: int):
 
     except Exception as e:
         db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+def get_random_employers():
+    """Get 5 random employers who are not the current user and not already connected"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 401
+
+    import jwt
+    import os
+    from sqlalchemy.sql import func
+    from core.models import ConnectionRequest
+
+    token = auth_header.split(" ")[1]
+    JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
+
+    db: Session = next(get_db())
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        current_user_id = decoded["id"]
+
+        subquery = (
+            db.query(ConnectionRequest.receiver_id)
+            .filter(ConnectionRequest.sender_id == current_user_id)
+            .union(
+                db.query(ConnectionRequest.sender_id).filter(
+                    ConnectionRequest.receiver_id == current_user_id
+                )
+            )
+        )
+
+        employers = (
+            db.query(User)
+            .filter(
+                User.role == "employer",
+                User.id != current_user_id,
+                ~User.id.in_(subquery),
+            )
+            .order_by(func.random())
+            .limit(5)
+            .all()
+        )
+
+        return (
+            jsonify(
+                [
+                    {
+                        "id": emp.id,
+                        "full_name": emp.full_name,
+                        "company_name": emp.companyName,
+                        "image": emp.image,
+                        "role": emp.role,
+                    }
+                    for emp in employers
+                ]
+            ),
+            200,
+        )
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expired"}), 401
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()

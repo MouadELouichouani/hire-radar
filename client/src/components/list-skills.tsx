@@ -12,11 +12,24 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import apiClient from "@/lib/apiClient";
 import { getToken } from "@/lib";
 import { Icon } from "@iconify/react";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 
@@ -80,7 +93,12 @@ export function SkillCombobox({ onSelect, initialValue }: SkillSelectProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" role="combobox" aria-expanded={open} className="w-[90%]">
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-[90%]"
+        >
           {value ? value.name : "Select skill..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -94,24 +112,43 @@ export function SkillCombobox({ onSelect, initialValue }: SkillSelectProps) {
             onValueChange={(text) => setSearch(text)}
           />
           <CommandList>
-            <CommandEmpty>{loading ? "Loading..." : "No skill found."}</CommandEmpty>
+            <CommandEmpty>
+              {loading ? "Loading..." : "No skill found."}
+            </CommandEmpty>
             <CommandGroup>
               {skills.map((skill) => (
-                <CommandItem key={skill.id} value={skill.name} onSelect={() => handleSelectSkill(skill)}>
-                  <Icon icon={`devicon:${skill.name.toLowerCase()}`} className="w-4 h-4" />
+                <CommandItem
+                  key={skill.id}
+                  value={skill.name}
+                  onSelect={() => handleSelectSkill(skill)}
+                >
+                  <Icon
+                    icon={`devicon:${skill.name.toLowerCase()}`}
+                    className="w-4 h-4"
+                  />
                   {skill.name}
                   <Check
-                    className={cn("ml-auto", value?.id === skill.id ? "opacity-100" : "opacity-0")}
+                    className={cn(
+                      "ml-auto",
+                      value?.id === skill.id ? "opacity-100" : "opacity-0",
+                    )}
                   />
                 </CommandItem>
               ))}
 
-              {search && !skills.find((s) => s.name.toLowerCase() === search.toLowerCase()) && (
-                <CommandItem onSelect={() => handleSelectSkill(search)}>
-                  
-                  Add <Icon icon={`devicon:${search.toLowerCase()}`} className="w-4 h-4" /> "{search}"
-                </CommandItem>
-              )}
+              {search &&
+                !skills.find(
+                  (s) => s.name.toLowerCase() === search.toLowerCase(),
+                ) && (
+                  <CommandItem onSelect={() => handleSelectSkill(search)}>
+                    Add{" "}
+                    <Icon
+                      icon={`devicon:${search.toLowerCase()}`}
+                      className="w-4 h-4"
+                    />{" "}
+                    &quot;{search}&quot;
+                  </CommandItem>
+                )}
             </CommandGroup>
           </CommandList>
         </Command>
@@ -120,10 +157,7 @@ export function SkillCombobox({ onSelect, initialValue }: SkillSelectProps) {
   );
 }
 
-
-
-
-export function Delete({ id, toDelete }: { id: string, toDelete: string }) {
+export function Delete() {
   return (
     <Dialog>
       <form>
@@ -157,5 +191,5 @@ export function Delete({ id, toDelete }: { id: string, toDelete: string }) {
         </DialogContent>
       </form>
     </Dialog>
-  )
+  );
 }

@@ -24,7 +24,6 @@ def search_jobs():
     db: Session = next(get_db())
 
     try:
-        # Get query parameters
         search = request.args.get("search", "").strip()
         location = request.args.get("location", "").strip()
         salary_min = request.args.get("salary_min")
@@ -32,10 +31,8 @@ def search_jobs():
         page = int(request.args.get("page", 1))
         limit = int(request.args.get("limit", 10))
 
-        # Start with base query
         query = db.query(Job)
 
-        # Apply search filter
         if search:
             search_filter = or_(
                 Job.title.ilike(f"%{search}%"),
@@ -44,11 +41,9 @@ def search_jobs():
             )
             query = query.filter(search_filter)
 
-        # Apply location filter
         if location:
             query = query.filter(Job.location.ilike(f"%{location}%"))
 
-        # Apply salary filter
         if salary_min:
             try:
                 min_salary = Decimal(salary_min)
@@ -56,21 +51,16 @@ def search_jobs():
             except (ValueError, TypeError):
                 pass
 
-        # Apply skill filter
         if skill:
             query = query.filter(Job.skills.contains([skill]))
 
-        # Get total count before pagination
         total = query.count()
 
-        # Apply pagination
         offset = (page - 1) * limit
         jobs = query.order_by(Job.posted_at.desc()).offset(offset).limit(limit).all()
 
-        # Calculate total pages
         total_pages = (total + limit - 1) // limit
 
-        # Convert to JSON format
         jobs_data = [job_to_dict(job) for job in jobs]
 
         return (
@@ -128,10 +118,15 @@ def create_job():
 
         # Verify user is an employer
         if employer.role != "employer":
-            return jsonify({
-                "error": "Only employers can post jobs",
-                "current_role": employer.role
-            }), 403
+            return (
+                jsonify(
+                    {
+                        "error": "Only employers can post jobs",
+                        "current_role": employer.role,
+                    }
+                ),
+                403,
+            )
 
         data = request.get_json()
 
@@ -145,33 +140,43 @@ def create_job():
         skill_ids = data.get("skill_ids", [])
         skill_names = data.get("skill_names", [])
         job_skills = []
-        
+
         # Handle skill_ids (existing skills by ID)
         if skill_ids:
             # Validate skill_ids are integers
             try:
                 skill_ids = [int(id) for id in skill_ids]
             except (ValueError, TypeError):
-                return jsonify({
-                    "error": "Invalid skill_ids format. Expected array of integers",
-                    "example": "skill_ids: [1, 2, 3]"
-                }), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Invalid skill_ids format. Expected array of integers",
+                            "example": "skill_ids: [1, 2, 3]",
+                        }
+                    ),
+                    400,
+                )
+
             # Query existing skills
             existing_skills = db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
             existing_skill_ids = {s.id for s in existing_skills}
-            
+
             # Check for missing skill IDs
             missing_skill_ids = set(skill_ids) - existing_skill_ids
             if missing_skill_ids:
-                return jsonify({
-                    "error": "Some skill IDs don't exist in the database",
-                    "missing_skill_ids": list(missing_skill_ids),
-                    "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills"
-                }), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Some skill IDs don't exist in the database",
+                            "missing_skill_ids": list(missing_skill_ids),
+                            "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills",
+                        }
+                    ),
+                    400,
+                )
+
             job_skills.extend(existing_skills)
-        
+
         # Handle skill_names (create new skills if they don't exist)
         if skill_names:
             for skill_name in skill_names:
@@ -193,10 +198,10 @@ def create_job():
             created_at=datetime.utcnow(),
             updated_at=datetime.utcnow(),
         )
-        
+
         # Set the relationship with employer
         job.employer = employer
-        
+
         # Set the many-to-many relationship with skills
         if job_skills:
             job.skills = job_skills
@@ -232,13 +237,10 @@ def update_job(job_id: int):
 
         # Verify user is the employer who posted the job
         if job.employer_id != user_id:
-            return jsonify({
-                "error": "You can only update jobs you posted"
-            }), 403
+            return jsonify({"error": "You can only update jobs you posted"}), 403
 
         data = request.get_json()
 
-        # Update fields
         if "title" in data:
             job.title = data["title"]
         if "description" in data:
@@ -253,37 +255,47 @@ def update_job(job_id: int):
             job.emp_type = data["emp_type"]
         if "responsibilities" in data:
             job.responsibilities = data["responsibilities"]
-        
+
         # Handle skills update with validation
         if "skill_ids" in data:
             skill_ids = data.get("skill_ids", [])
             job_skills = []
-            
+
             # Validate skill_ids are integers
             try:
                 skill_ids = [int(id) for id in skill_ids]
             except (ValueError, TypeError):
-                return jsonify({
-                    "error": "Invalid skill_ids format. Expected array of integers",
-                    "example": "skill_ids: [1, 2, 3]"
-                }), 400
-            
+                return (
+                    jsonify(
+                        {
+                            "error": "Invalid skill_ids format. Expected array of integers",
+                            "example": "skill_ids: [1, 2, 3]",
+                        }
+                    ),
+                    400,
+                )
+
             if skill_ids:
                 # Query existing skills
                 existing_skills = db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
                 existing_skill_ids = {s.id for s in existing_skills}
-                
+
                 # Check for missing skill IDs
                 missing_skill_ids = set(skill_ids) - existing_skill_ids
                 if missing_skill_ids:
-                    return jsonify({
-                        "error": "Some skill IDs don't exist in the database",
-                        "missing_skill_ids": list(missing_skill_ids),
-                        "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills"
-                    }), 400
-                
+                    return (
+                        jsonify(
+                            {
+                                "error": "Some skill IDs don't exist in the database",
+                                "missing_skill_ids": list(missing_skill_ids),
+                                "hint": "Use only valid skill IDs. Available endpoint: GET /api/skills",
+                            }
+                        ),
+                        400,
+                    )
+
                 job_skills = existing_skills
-            
+
             job.skills = job_skills
 
         job.updated_at = datetime.utcnow()
@@ -317,9 +329,7 @@ def delete_job(job_id: int):
 
         # Verify user is the employer who posted the job
         if job.employer_id != user_id:
-            return jsonify({
-                "error": "You can only delete jobs you posted"
-            }), 403
+            return jsonify({"error": "You can only delete jobs you posted"}), 403
 
         db.delete(job)
         db.commit()
@@ -338,18 +348,14 @@ def save_job(job_id: int):
     db: Session = next(get_db())
 
     try:
-        # Get user ID from JWT token
         try:
             user_id = get_user_id_from_token()
         except ValueError as e:
             return jsonify({"error": str(e)}), 401
 
-        # Check if job exists
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
             return jsonify({"error": "Job not found"}), 404
-
-        # Check if already saved
         existing = (
             db.query(SavedJob)
             .filter(SavedJob.user_id == user_id, SavedJob.job_id == job_id)
@@ -359,7 +365,6 @@ def save_job(job_id: int):
         if existing:
             return jsonify({"message": "Job already saved"}), 200
 
-        # Create saved job
         saved_job = SavedJob(user_id=user_id, job_id=job_id)
         db.add(saved_job)
         db.commit()
@@ -378,13 +383,11 @@ def unsave_job(job_id: int):
     db: Session = next(get_db())
 
     try:
-        # Get user ID from JWT token
         try:
             user_id = get_user_id_from_token()
         except ValueError as e:
             return jsonify({"error": str(e)}), 401
 
-        # Find and delete saved job
         saved_job = (
             db.query(SavedJob)
             .filter(SavedJob.user_id == user_id, SavedJob.job_id == job_id)
@@ -411,13 +414,11 @@ def apply_to_job(job_id: int):
     db: Session = next(get_db())
 
     try:
-        # Get user ID from JWT token
         try:
             user_id = get_user_id_from_token()
         except ValueError as e:
             return jsonify({"error": str(e)}), 401
 
-        # Get cover letter from form data or JSON
         cover_letter = None
         if request.form:
             cover_letter = request.form.get("cover_letter")
@@ -425,12 +426,9 @@ def apply_to_job(job_id: int):
             data = request.get_json()
             cover_letter = data.get("cover_letter")
 
-        # Check if job exists
         job = db.query(Job).filter(Job.id == job_id).first()
         if not job:
             return jsonify({"error": "Job not found"}), 404
-
-        # Check if user already applied
         existing = (
             db.query(Application)
             .filter(Application.user_id == user_id, Application.job_id == job_id)
@@ -440,7 +438,6 @@ def apply_to_job(job_id: int):
         if existing:
             return jsonify({"error": "You have already applied to this job"}), 400
 
-        # Handle CV file upload if provided
         cv_file_path = None
         if "cv_file" in request.files or "cv" in request.files:
             file = request.files.get("cv_file") or request.files.get("cv")
@@ -461,19 +458,15 @@ def apply_to_job(job_id: int):
                         400,
                     )
 
-                # Create uploads directory
                 upload_dir = "uploads/applications"
                 os.makedirs(upload_dir, exist_ok=True)
 
-                # Generate filename
                 filename = f"cv_{user_id}_job_{job_id}.{file_ext}"
                 filepath = os.path.join(upload_dir, filename)
 
-                # Save file
                 file.save(filepath)
                 cv_file_path = f"/uploads/applications/{filename}"
 
-        # Create application
         application = Application(
             job_id=job_id,
             user_id=user_id,
@@ -520,7 +513,10 @@ def get_employer_jobs():
             return jsonify({"error": "User not found"}), 404
 
         if user.role != "employer":
-            return jsonify({"error": "Only employers can access their job listings"}), 403
+            return (
+                jsonify({"error": "Only employers can access their job listings"}),
+                403,
+            )
 
         # Get pagination parameters
         page = int(request.args.get("page", 1))
@@ -585,7 +581,9 @@ def job_to_dict(job: Job) -> dict:
         "salary_range": job.salary_range,
         "emp_type": job.emp_type,
         "responsibilities": job.responsibilities,
-        "skills": [{"id": skill.id, "name": skill.name} for skill in (job.skills or [])],
+        "skills": [
+            {"id": skill.id, "name": skill.name} for skill in (job.skills or [])
+        ],
         "created_at": job.created_at.isoformat() if job.created_at else None,
         "updated_at": job.updated_at.isoformat() if job.updated_at else None,
     }
@@ -597,10 +595,8 @@ def get_skills():
 
     try:
         skills = db.query(Skill).order_by(Skill.name).all()
-        
-        return jsonify({
-            "skills": [{"id": s.id, "name": s.name} for s in skills]
-        }), 200
+
+        return jsonify({"skills": [{"id": s.id, "name": s.name} for s in skills]}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -611,19 +607,19 @@ def get_skills():
 def create_skill_if_not_exists(skill_name: str, db: Session) -> Skill:
     """Create a skill if it doesn't exist, return the existing or new skill"""
     # Check if skill exists (case-insensitive)
-    existing_skill = db.query(Skill).filter(
-        Skill.name.ilike(skill_name.strip())
-    ).first()
-    
+    existing_skill = (
+        db.query(Skill).filter(Skill.name.ilike(skill_name.strip())).first()
+    )
+
     if existing_skill:
         return existing_skill
-    
+
     # Create new skill
     new_skill = Skill(name=skill_name.strip())
     db.add(new_skill)
     db.commit()
     db.refresh(new_skill)
-    
+
     return new_skill
 
 
@@ -639,12 +635,17 @@ def create_or_get_skill():
             return jsonify({"error": "Skill name is required"}), 400
 
         skill = create_skill_if_not_exists(skill_name, db)
-        
-        return jsonify({
-            "id": skill.id,
-            "name": skill.name,
-            "message": "Skill created" if skill.id else "Skill already exists"
-        }), 201
+
+        return (
+            jsonify(
+                {
+                    "id": skill.id,
+                    "name": skill.name,
+                    "message": "Skill created" if skill.id else "Skill already exists",
+                }
+            ),
+            201,
+        )
 
     except Exception as e:
         db.rollback()

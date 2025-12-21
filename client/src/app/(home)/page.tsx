@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import TopNavbar from "@/components/TopNavbar";
 import LeftSidebar from "@/app/(home)/components/LeftSidebar";
 import RightSidebar from "@/app/(home)/components/RightSidebar";
 import PostCreator from "@/app/(home)/components/PostCreator";
@@ -19,10 +18,9 @@ export default function Home() {
     isError: isJobsError,
   } = useRecentJobs(10);
 
-  const jobs = jobsData?.jobs || [];
-
   // Format job as feed post
   const jobFeedPosts = useMemo(() => {
+    const jobs = jobsData?.jobs || [];
     return jobs.map((job) => {
       // If current user is the employer who posted this job, use their image
       const isCurrentUserJob =
@@ -74,7 +72,7 @@ export default function Home() {
         job: job,
       };
     });
-  }, [jobs, currentUser]);
+  }, [jobsData, currentUser]);
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -83,7 +81,7 @@ export default function Home() {
         <LeftSidebar />
 
         {/* Main Content Area */}
-        <main className="flex-1 min-w-0 px-8 py-8 ml-64 mr-96">
+        <main className="flex-1 min-w-0 px-8 py-8">
           <div className="space-y-6 max-w-4xl">
             <PostCreator />
 

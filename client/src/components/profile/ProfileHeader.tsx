@@ -3,6 +3,7 @@
 import { Camera, MapPin, Briefcase, Building2 } from "lucide-react";
 import { CandidateProfile, EmployerProfile } from "@/types/profile";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
 interface ProfileHeaderProps {
   profile: CandidateProfile | EmployerProfile;
@@ -35,13 +36,15 @@ export default function ProfileHeader({
         <div className="relative group">
           <div className="relative w-32 h-32 rounded-full overflow-hidden ring-4 ring-purple-200/50 dark:ring-purple-800/50 shadow-lg">
             {imageUrl ? (
-              <img
+              <Image
                 src={imageUrl}
                 alt={
                   isCandidate
                     ? candidateProfile?.full_name || "Candidate"
                     : employerProfile?.company_name || "Company"
                 }
+                width={128}
+                height={128}
                 className="w-full h-full object-cover"
               />
             ) : (

@@ -1,13 +1,9 @@
 "use client";
 
 import ProfileContent from "./components/profile-content";
-import { useCurrentUser } from "@/features/auth/hook";
-import type { User } from "@/types";
 import { useEffect, useState } from "react";
 
 export default function Page() {
-  const { data } = useCurrentUser();
-  const currentUser = data as User | undefined;
   const [activeTab, setActiveTab] = useState("profile");
 
   useEffect(() => {
@@ -35,7 +31,5 @@ export default function Page() {
     };
   }, []);
 
-  return (
-    <ProfileContent defaultTab={activeTab} />
-  );
+  return <ProfileContent defaultTab={activeTab} />;
 }

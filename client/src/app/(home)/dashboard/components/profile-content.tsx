@@ -8,7 +8,7 @@ import {
   Lock,
   Bell,
   GraduationCap,
-  BriefcaseBusiness
+  BriefcaseBusiness,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,13 +23,9 @@ import {
   useCandidateProfile,
   useUploadCandidateCV,
 } from "@/features/profile/hooks";
-import {
-  useEmployerProfile,
-  useUpdateEmployerProfile,
-} from "@/features/profile/hooks";
+import { useEmployerProfile } from "@/features/profile/hooks";
 import type { User } from "@/types";
 import { useCurrentUserId } from "@/hooks/useCurrentUserId";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import apiClient from "@/lib/apiClient";
 import { getToken } from "@/lib";
 import { DeleteAccount } from "@/components/delete-account";
@@ -40,25 +36,32 @@ interface ProfileContentProps {
   defaultTab?: string;
 }
 
-
 interface PasswordUpdatePayload {
   currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }
 
-type UserProfile = {
-  firstName: string,
-  lastName: string,
-  companyName: string,
-  email: string,
-  headLine: string,
-  github_url?: string,
-  phone: string,
-  location: string,
-  bio: string,
-  website: string,
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
 }
+
+type UserProfile = {
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  email: string;
+  headLine: string;
+  github_url?: string;
+  phone: string;
+  location: string;
+  bio: string;
+  website: string;
+};
 
 export default function ProfileContent({
   defaultTab = "profile",
@@ -68,17 +71,15 @@ export default function ProfileContent({
   const userId = useCurrentUserId();
   const [activeTab, setActiveTab] = useState(defaultTab);
 
-
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const [updateCandidateLoading,setUpdateCandidateLoading] = useState(false)
-  const [updateEmployerLoading,setUpdateEmployerLoading] = useState(false)
+  const [updateCandidateLoading, setUpdateCandidateLoading] = useState(false);
+  const [updateEmployerLoading, setUpdateEmployerLoading] = useState(false);
   const uploadCV = useUploadCandidateCV(userId);
-
 
   const handleUpdatePassword = async () => {
     setError(null);
@@ -94,7 +95,7 @@ export default function ProfileContent({
       return;
     }
 
-    if(newPassword.trim().length < 8 || confirmPassword.trim().length < 8){
+    if (newPassword.trim().length < 8 || confirmPassword.trim().length < 8) {
       setError("Password must be at least 8 charachters");
       return;
     }
@@ -107,11 +108,15 @@ export default function ProfileContent({
 
     setLoading(true);
     try {
-      const response = await apiClient.put("/api/auth/update-password",payload, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
-      });
+      const response = await apiClient.put(
+        "/api/auth/update-password",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        },
+      );
 
       if (response.status === 200) {
         setSuccess("Password updated successfully!");
@@ -119,13 +124,18 @@ export default function ProfileContent({
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setError(response.data.message || "Failed to update password.");        
+        setError(response.data.message || "Failed to update password.");
       }
-    } catch (err:any) {
-      if (err.response && err.response.data) {
-        setError(err.response.data.message || "Something went wrong");
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        apiError.response?.data?.message
+      ) {
+        setError(apiError.response.data.message);
       } else {
-        setError(err.message || "Something went wrong");
+        setError((err as Error).message || "Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -154,9 +164,7 @@ export default function ProfileContent({
   // Fetch profile data based on role
   const { data: candidateProfile, isLoading: isLoadingCandidate } =
     useCandidateProfile(userId);
-  const { data: employerProfile, isLoading: isLoadingEmployer } =
-    useEmployerProfile(userId);
-  const updateEmployer = useUpdateEmployerProfile(userId);
+  const { isLoading: isLoadingEmployer } = useEmployerProfile(userId);
 
   const isLoading =
     currentUser?.role === "candidate" ? isLoadingCandidate : isLoadingEmployer;
@@ -168,13 +176,12 @@ export default function ProfileContent({
     companyName: "",
     email: "",
     headLine: "",
-    github_url:"",
+    github_url: "",
     phone: "",
     location: "",
     bio: "",
     website: "",
   });
-
 
   // Update form data when profile loads
   // Note: This syncs form state with async profile data - necessary use case
@@ -183,12 +190,11 @@ export default function ProfileContent({
       if (currentUser.role === "candidate") {
         setFormData({
           firstName: currentUser.full_name?.split(" ")[0] || "",
-          lastName:
-            currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+          lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
           email: currentUser.email || currentUser.email || "",
-          companyName: currentUser.companyName || '',
-          headLine: currentUser.headLine || '',
-          github_url:currentUser.github_url || '',
+          companyName: currentUser.companyName || "",
+          headLine: currentUser.headLine || "",
+          github_url: currentUser.github_url || "",
           phone: currentUser.phone || "",
           location: currentUser.location || "",
           bio: currentUser.bio || "",
@@ -197,11 +203,10 @@ export default function ProfileContent({
       } else if (currentUser.role === "employer") {
         setFormData({
           firstName: currentUser.full_name?.split(" ")[0] || "",
-          lastName:
-            currentUser.full_name?.split(" ").slice(1).join(" ") || "",
+          lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
           email: currentUser.email || currentUser.email || "",
-          companyName: currentUser?.companyName || '',
-          headLine: currentUser?.headLine || '',
+          companyName: currentUser?.companyName || "",
+          headLine: currentUser?.headLine || "",
           phone: currentUser?.phone || "",
           location: currentUser?.location || "",
           bio: currentUser?.bio || "",
@@ -213,8 +218,8 @@ export default function ProfileContent({
           lastName: currentUser.full_name?.split(" ").slice(1).join(" ") || "",
           email: currentUser.email || "",
           companyName: "",
-          github_url:"",
-          headLine:"",
+          github_url: "",
+          headLine: "",
           phone: currentUser.phone || "",
           location: currentUser.location || "",
           bio: currentUser.bio || "",
@@ -223,7 +228,7 @@ export default function ProfileContent({
       }
     }
   }, [currentUser]);
-  
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -233,38 +238,46 @@ export default function ProfileContent({
 
     if (currentUser?.role === "candidate") {
       try {
-        setUpdateCandidateLoading(true)
-        const response = await apiClient.put(`/api/candidates/update-profile`,formData,{
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
-        })
-        if(response.status === 200){
+        setUpdateCandidateLoading(true);
+        const response = await apiClient.put(
+          `/api/candidates/update-profile`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          },
+        );
+        if (response.status === 200) {
           toast.success("Profile updated successfully!");
         }
       } catch {
         toast.error("Failed to update profile. Please try again.");
-      } finally{
-        setUpdateCandidateLoading(false)
+      } finally {
+        setUpdateCandidateLoading(false);
       }
     } else if (currentUser?.role === "employer") {
       try {
-        setUpdateEmployerLoading(true)
-        const response = await apiClient.put(`/api/employers/update-profile`,formData,{
-          headers: {
-            Authorization: `Bearer ${getToken()}`
-          }
-        })
-        if(response.status === 200){
+        setUpdateEmployerLoading(true);
+        const response = await apiClient.put(
+          `/api/employers/update-profile`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          },
+        );
+        if (response.status === 200) {
           toast.success("Profile updated successfully!");
         }
       } catch {
         toast.error("Failed to update profile. Please try again.");
-      } finally{
-        setUpdateEmployerLoading(false)
+      } finally {
+        setUpdateEmployerLoading(false);
       }
     }
-  }  
+  };
 
   if (isLoading) {
     return (
@@ -289,20 +302,19 @@ export default function ProfileContent({
           <Bell className="mr-2 h-4 w-4" />
           Notifications
         </TabsTrigger>
-          {
-            currentUser?.role === "candidate" && <TabsTrigger value="career">
-                <GraduationCap className="mr-2 h-4 w-4" />
-                Career
-              </TabsTrigger>
-          }
+        {currentUser?.role === "candidate" && (
+          <TabsTrigger value="career">
+            <GraduationCap className="mr-2 h-4 w-4" />
+            Career
+          </TabsTrigger>
+        )}
 
-          {
-            currentUser?.role === "employer" && <TabsTrigger value="career">
-                <BriefcaseBusiness className="mr-2 h-4 w-4" />
-                Posted jobs
-              </TabsTrigger>
-          }
-         
+        {currentUser?.role === "employer" && (
+          <TabsTrigger value="career">
+            <BriefcaseBusiness className="mr-2 h-4 w-4" />
+            Posted jobs
+          </TabsTrigger>
+        )}
       </TabsList>
 
       {/* Profile Tab */}
@@ -314,150 +326,144 @@ export default function ProfileContent({
             </CardHeader>
 
             <CardContent className="space-y-8">
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  {/* First name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input
-                      id="firstName"
-                      placeholder="Jhon"
-                      value={formData.firstName}
-                      onChange={(e) =>
-                        handleInputChange("firstName", e.target.value)
-                      }
-                      required
-                    />
-                  </div>
-
-                  {/* Last name */}
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input
-                      id="lastName"
-                      placeholder="Doe"
-                      value={formData.lastName}
-                      onChange={(e) =>
-                        handleInputChange("lastName", e.target.value)
-                      }
-                      required
-                    />
-                  </div>
-
-                  {/* Company */}
-                  <div className="space-y-2">
-                    <Label htmlFor="companyName">Company name</Label>
-                    <Input
-                      id="companyName"
-                      placeholder="Oracle"
-                      value={formData.companyName}
-                      onChange={(e) =>
-                        handleInputChange("companyName", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      value={formData.email}
-                      onChange={(e) =>
-                        handleInputChange("email", e.target.value)
-                      }
-                      required
-                    />
-                  </div>
-
-                  {/* Phone */}
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone</Label>
-                    <Input
-                      id="phone"
-                      placeholder="+212627096056"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        handleInputChange("phone", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  {/* Headline */}
-                  <div className="space-y-2">
-                    <Label htmlFor="headLine">Headline</Label>
-                    <Input
-                      id="headLine"
-                      placeholder="Full stack engineer"
-                      value={formData.headLine}
-                      onChange={(e) =>
-                        handleInputChange("headLine", e.target.value)
-                      }
-                    />
-                  </div>
-
-                  {/* Website / Location / Github */}
-                  <div
-                    className={`grid gap-6 md:col-span-2 ${
-                      currentUser?.role === "candidate"
-                        ? "grid-cols-1 md:grid-cols-3"
-                        : "grid-cols-1 md:grid-cols-2"
-                    }`}
-                  >
-                    <div className="space-y-2">
-                      <Label htmlFor="website">Website</Label>
-                      <Input
-                        id="website"
-                        placeholder="www.oracle.com"
-                        value={formData.website}
-                        onChange={(e) =>
-                          handleInputChange("website", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="location">Location</Label>
-                      <Input
-                        id="location"
-                        placeholder="213 LOT LOUBANE HAMA"
-                        value={formData.location}
-                        onChange={(e) =>
-                          handleInputChange("location", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    {currentUser?.role === "candidate" && (
-                      <div className="space-y-2">
-                        <Label htmlFor="github_url">Github url</Label>
-                        <Input
-                          id="github_url"
-                          placeholder="www.github.com/username"
-                          value={formData.github_url}
-                          onChange={(e) =>
-                            handleInputChange("github_url", e.target.value)
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Bio */}
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      rows={4}
-                      placeholder="Tell us about you..."
-                      value={formData.bio}
-                      onChange={(e) =>
-                        handleInputChange("bio", e.target.value)
-                      }
-                    />
-                  </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {/* First name */}
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First name</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="Jhon"
+                    value={formData.firstName}
+                    onChange={(e) =>
+                      handleInputChange("firstName", e.target.value)
+                    }
+                    required
+                  />
                 </div>
+
+                {/* Last name */}
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last name</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Doe"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      handleInputChange("lastName", e.target.value)
+                    }
+                    required
+                  />
+                </div>
+
+                {/* Company */}
+                <div className="space-y-2">
+                  <Label htmlFor="companyName">Company name</Label>
+                  <Input
+                    id="companyName"
+                    placeholder="Oracle"
+                    value={formData.companyName}
+                    onChange={(e) =>
+                      handleInputChange("companyName", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange("email", e.target.value)}
+                    required
+                  />
+                </div>
+
+                {/* Phone */}
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    placeholder="+212627096056"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                  />
+                </div>
+
+                {/* Headline */}
+                <div className="space-y-2">
+                  <Label htmlFor="headLine">Headline</Label>
+                  <Input
+                    id="headLine"
+                    placeholder="Full stack engineer"
+                    value={formData.headLine}
+                    onChange={(e) =>
+                      handleInputChange("headLine", e.target.value)
+                    }
+                  />
+                </div>
+
+                {/* Website / Location / Github */}
+                <div
+                  className={`grid gap-6 md:col-span-2 ${
+                    currentUser?.role === "candidate"
+                      ? "grid-cols-1 md:grid-cols-3"
+                      : "grid-cols-1 md:grid-cols-2"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      placeholder="www.oracle.com"
+                      value={formData.website}
+                      onChange={(e) =>
+                        handleInputChange("website", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input
+                      id="location"
+                      placeholder="213 LOT LOUBANE HAMA"
+                      value={formData.location}
+                      onChange={(e) =>
+                        handleInputChange("location", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  {currentUser?.role === "candidate" && (
+                    <div className="space-y-2">
+                      <Label htmlFor="github_url">Github url</Label>
+                      <Input
+                        id="github_url"
+                        placeholder="www.github.com/username"
+                        value={formData.github_url}
+                        onChange={(e) =>
+                          handleInputChange("github_url", e.target.value)
+                        }
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Bio */}
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    rows={4}
+                    placeholder="Tell us about you..."
+                    value={formData.bio}
+                    onChange={(e) => handleInputChange("bio", e.target.value)}
+                  />
+                </div>
+              </div>
 
               <div className="flex justify-end">
                 <Button
@@ -473,7 +479,6 @@ export default function ProfileContent({
             </CardContent>
           </Card>
         </form>
-
 
         {/* CV Upload Section - Only for Candidates */}
         {currentUser?.role === "candidate" && (
@@ -503,7 +508,6 @@ export default function ProfileContent({
         )}
       </TabsContent>
 
-
       {/* Security Tab */}
       <TabsContent value="security" className="space-y-6">
         <Card>
@@ -528,7 +532,8 @@ export default function ProfileContent({
               <div className="space-y-1">
                 <div className="font-semibold">Delete your account</div>
                 <div className="text-sm text-muted-foreground">
-                  Permanently removing a user account and all its associated data from a platform or service
+                  Permanently removing a user account and all its associated
+                  data from a platform or service
                 </div>
               </div>
               <DeleteAccount />
@@ -582,7 +587,12 @@ export default function ProfileContent({
               <Button
                 className="w-full"
                 onClick={handleUpdatePassword}
-                disabled={loading || newPassword === '' || currentPassword === '' || confirmPassword === ''}
+                disabled={
+                  loading ||
+                  newPassword === "" ||
+                  currentPassword === "" ||
+                  confirmPassword === ""
+                }
               >
                 {loading ? "Updating..." : "Update Password"}
               </Button>
@@ -595,7 +605,6 @@ export default function ProfileContent({
       <TabsContent value="career" className="space-y-6">
         <CareerTab />
       </TabsContent>
-
 
       {/* Notifications Tab */}
       <TabsContent value="notifications" className="space-y-6">
@@ -619,9 +628,7 @@ export default function ProfileContent({
 
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <p className="font-medium">
-                    Connection Request
-                  </p>
+                  <p className="font-medium">Connection Request</p>
                   <span className="text-xs text-muted-foreground">
                     2 minutes ago
                   </span>
@@ -647,9 +654,7 @@ export default function ProfileContent({
 
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
-                  <p className="font-medium">
-                    Application Status Updated
-                  </p>
+                  <p className="font-medium">Application Status Updated</p>
                   <span className="text-xs text-muted-foreground">
                     Yesterday
                   </span>

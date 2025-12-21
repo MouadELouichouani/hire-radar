@@ -94,7 +94,9 @@ const DeleteDialog = ({
           break;
 
         case "education":
-          const res6 = await apiClient.delete(`/api/candidates/educations/${id}`)
+          const res6 = await apiClient.delete(
+            `/api/candidates/educations/${id}`,
+          );
           if (res6.status === 200) {
             toast.success("Education deleted successfully");
             onDelete(id);
@@ -103,7 +105,9 @@ const DeleteDialog = ({
           break;
 
         case "experience":
-          const res7 = await apiClient.delete(`/api/candidates/experiences/${id}`)
+          const res7 = await apiClient.delete(
+            `/api/candidates/experiences/${id}`,
+          );
           if (res7.status === 200) {
             toast.success("Experience deleted successfully");
             onDelete(id);
@@ -112,7 +116,7 @@ const DeleteDialog = ({
           break;
 
         case "skill_user":
-          const res8 = await apiClient.delete(`/api/candidates/skills/${id}`)
+          const res8 = await apiClient.delete(`/api/candidates/skills/${id}`);
           if (res8.status === 200) {
             toast.success("Skill deleted successfully");
             onDelete(id);
@@ -140,14 +144,14 @@ const DeleteDialog = ({
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger>
-          <Button variant={variant} size={'sm'} onClick={() => setOpen(true)}>
-            {
-              toDelete === 'education' || toDelete === 'experience' || toDelete === 'skill' ?
-                (
-                  <Trash2  className="w-4 h-4"/>
-                )
-              : "Delete"
-            }
+          <Button variant={variant} size={"sm"} onClick={() => setOpen(true)}>
+            {toDelete === "education" ||
+            toDelete === "experience" ||
+            toDelete === "skill" ? (
+              <Trash2 className="w-4 h-4" />
+            ) : (
+              "Delete"
+            )}
           </Button>
         </DialogTrigger>
         <DialogContent>

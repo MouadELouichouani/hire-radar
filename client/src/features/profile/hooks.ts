@@ -1,17 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getCandidateProfile,
-  updateCandidateProfile,
   uploadCandidateCV,
   getEmployerProfile,
   updateEmployerProfile,
   uploadCandidateImage,
   uploadEmployerImage,
 } from "./api";
-import {
-  UpdateCandidateProfileRequest,
-  UpdateEmployerProfileRequest,
-} from "@/types/profile";
+import { UpdateEmployerProfileRequest } from "@/types/profile";
 
 // Candidate hooks
 export function useCandidateProfile(id: string) {

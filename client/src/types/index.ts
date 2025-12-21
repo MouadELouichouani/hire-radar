@@ -4,20 +4,20 @@
 export type User = {
   id: number;
   full_name: string;
+  email: string;
   role: "candidate" | "employer" | "admin";
   image?: string | null;
+  phone?: string | null;
+  location?: string | null;
+  bio?: string | null;
+  headLine?: string | null; // Used in some places
   created_at?: string;
 
-  companyName: string,
-  email: string,
-  headLine: string,
-  github_url?: string,
-  phone: string,
-  location: string,
-  bio: string,
-  website: string,
-  
-  resume_url: string,
+  companyName: string;
+  github_url?: string;
+  website: string;
+
+  resume_url: string;
 
   // These are not returned by /auth/me - will need to be fetched separately or derived
   candidate_id?: number;
@@ -142,4 +142,49 @@ export type SavedJob = {
   candidate_id: number;
   saved_at?: string;
   job?: Job;
+};
+
+// Connection Request types
+export type ConnectionRequest = {
+  id: number;
+  sender_id: number;
+  receiver_id: number;
+  status: "pending" | "accepted" | "rejected";
+  created_at?: string;
+  sender?: User;
+  receiver?: User;
+};
+
+export type Connection = {
+  id: number;
+  user: User;
+  created_at: string;
+};
+
+// Notification types
+export type Notification = {
+  id: number;
+  sender_id: number;
+  receiver_id: number;
+  type:
+    | "connection_request"
+    | "connection_accepted"
+    | "job_application"
+    | "application_status"
+    | "job_posted";
+  title: string;
+  message: string;
+  is_read: number;
+  created_at?: string;
+  sender?: User;
+};
+
+// Summary type for sidebar suggestions
+export type SuggestedPerson = {
+  id: number;
+  full_name: string;
+  image?: string | null;
+  headline?: string | null;
+  company_name?: string | null;
+  role?: string | null;
 };

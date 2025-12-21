@@ -66,6 +66,12 @@ export function DataTable<TData extends { id: number; name?: string }>({
   const table = useReactTable({
     data,
     columns,
+    state: {
+      sorting,
+      columnFilters,
+      columnVisibility,
+      rowSelection,
+    },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -74,19 +80,13 @@ export function DataTable<TData extends { id: number; name?: string }>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
-    state: {
-      sorting,
-      columnFilters,
-      columnVisibility,
-      rowSelection,
-    },
   });
 
-  // Dynamic filter for string columns: email or full_name
   const filterableColumns = columns.filter(
     (col) =>
-      col.accessorKey && ["full_name"].includes(col.accessorKey as string),
-  );
+      "accessorKey" in col &&
+      ["full_name"].includes((col as { accessorKey: string }).accessorKey),
+  ) as (ColumnDef<TData> & { accessorKey: string })[];
 
   return (
     <div className="w-full">

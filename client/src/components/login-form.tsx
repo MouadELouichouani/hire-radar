@@ -25,16 +25,16 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const router = useRouter()
+  const router = useRouter();
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
-    if (error) setError(""); 
+    if (error) setError("");
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
-    if (error) setError(""); 
+    if (error) setError("");
   };
 
   async function handleSubmit(e: React.FormEvent) {
@@ -42,19 +42,23 @@ export function LoginForm({
     setLoading(true);
 
     try {
-        console.log("Form submitted");
+      console.log("Form submitted");
       const res = await login(email, password);
-      if(res?.user.role === 'admin'){
-        router.push(`/admin/users`)
-      }else{
-        router.push(`/`)
+      if (res?.user.role === "admin") {
+        router.push(`/admin/users`);
+      } else {
+        router.push(`/`);
       }
       toast.success("Logged in successfully!");
-    } catch (err: any) {
-      if (err.response && err.response.data) {
-        setError(err.response.data.error || "Something went wrong");
+    } catch (err: unknown) {
+      const error = err as {
+        response?: { data?: { error?: string } };
+        message?: string;
+      };
+      if (error.response?.data?.error) {
+        setError(error.response.data.error);
       } else {
-        setError(err.message || "Something went wrong");
+        setError(error.message || "Something went wrong");
       }
     } finally {
       setLoading(false);

@@ -1,6 +1,11 @@
 "use client";
 
-import { EmployerJob, updateJobWithSkills, getAvailableSkills, Skill } from "../api";
+import {
+  EmployerJob,
+  updateJobWithSkills,
+  getAvailableSkills,
+  Skill,
+} from "../api";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -99,7 +104,7 @@ export function EditJobModal({
     } catch (error) {
       console.error("Failed to update job:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to update job"
+        error instanceof Error ? error.message : "Failed to update job",
       );
     } finally {
       setIsLoading(false);
@@ -111,9 +116,7 @@ export function EditJobModal({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Job Posting</DialogTitle>
-          <DialogDescription>
-            Update the job details below
-          </DialogDescription>
+          <DialogDescription>Update the job details below</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
@@ -230,10 +233,7 @@ export function EditJobModal({
               Responsibilities
             </label>
             <Textarea
-              value={
-                (formData.responsibilities || []).join("\n") ||
-                ""
-              }
+              value={(formData.responsibilities || []).join("\n") || ""}
               onChange={(e) =>
                 setFormData({
                   ...formData,
@@ -245,9 +245,7 @@ export function EditJobModal({
               placeholder="Enter each responsibility on a new line"
               rows={4}
             />
-            <p className="text-xs text-gray-500">
-              One responsibility per line
-            </p>
+            <p className="text-xs text-gray-500">One responsibility per line</p>
           </div>
 
           <DialogFooter>

@@ -20,7 +20,7 @@ export function useCandidate(id: number) {
     queryFn: async () => {
       try {
         return await candidatesApi.getById(id);
-      } catch (error) {
+      } catch {
         // Endpoint doesn't exist, return null
         return null;
       }
@@ -92,5 +92,14 @@ export function useRemoveSkill() {
     onError: () => {
       toast.error("Failed to remove skill. Please try again.");
     },
+  });
+}
+
+// Get random candidates
+export function useRandomCandidates() {
+  return useQuery({
+    queryKey: ["random-candidates"],
+    queryFn: () => candidatesApi.getRandom(),
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }

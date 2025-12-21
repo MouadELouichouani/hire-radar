@@ -33,6 +33,9 @@ def init_db():
         print(f"Warning: Could not create database tables: {e}")
         print("Make sure PostgreSQL is running and the database is accessible.")
 
+
+print(UPLOADS_DIR)
+
 print(UPLOADS_DIR)
 
 CORS(
@@ -47,6 +50,26 @@ app.register_blueprint(job, url_prefix="/api/jobs")
 app.register_blueprint(candidates, url_prefix="/api/candidates")
 app.register_blueprint(employers, url_prefix="/api/employers")
 app.register_blueprint(applications, url_prefix="/api/applications")
+
+from routes.connections import connections
+from routes.notifications import notifications
+
+app.register_blueprint(connections, url_prefix="/api/connections")
+app.register_blueprint(notifications, url_prefix="/api/notifications")
+
+# OAuth routes
+app.add_url_rule(
+    "/api/oauth/github/connect",
+    "github_connect",
+    github_connect,
+    methods=["GET"],
+)
+app.add_url_rule(
+    "/api/oauth/github/callback",
+    "github_callback",
+    github_callback,
+    methods=["GET"],
+)
 
 
 @app.route("/")

@@ -2,12 +2,21 @@ from flask import request, jsonify
 from werkzeug.utils import secure_filename
 from sqlalchemy.orm import Session
 from api.config.db import SessionLocal
-from api.core.models import User, SavedJob, Job, Skill, Education, Experience, user_skills
+from api.core.models import (
+    User,
+    SavedJob,
+    Job,
+    Skill,
+    Education,
+    Experience,
+    user_skills,
+)
 from typing import Optional
 import os
 from datetime import datetime
-from middlewares.auth import is_auth 
+from middlewares.auth import is_auth
 from sqlalchemy import select
+
 
 def get_db():
     db = SessionLocal()
@@ -31,10 +40,8 @@ def get_candidate_career():
         if not user:
             return jsonify({"error": "Candidate not found"}), 404
 
-        # Get skills
         skills = [{"id": skill.id, "name": skill.name} for skill in user.skills]
 
-        # Get education
         educations = [
             {
                 "id": edu.id,
@@ -48,7 +55,6 @@ def get_candidate_career():
             for edu in user.educations
         ]
 
-        # Get experience
         experiences = [
             {
                 "id": exp.id,
@@ -95,11 +101,9 @@ def update_candidate():
 
         data = request.get_json()
 
-        # Update basic fields
         if "full_name" in data:
             user.full_name = data["full_name"]
         if "email" in data:
-            # Check if email is already taken by another user
             existing_user = (
                 db.query(User)
                 .filter(User.email == data["email"], User.id != request.user_id)
@@ -119,15 +123,97 @@ def update_candidate():
         if "github_url" in data:
             user.github_url = data.get("github_url")
         if "website" in data:
-            user.webSite = data.get("website") 
+            user.webSite = data.get("website")
         if "companyName" in data:
-            user.companyName = data.get("companyName")        
-        
+            user.companyName = data.get("companyName")
+
         print(data.get("github_url"))
 
+        if "skills" in data:
+            skill_ids = [
+                s.get("id") if isinstance(s, dict) else s for s in data["skills"]
+            ]
+            skills = db.query(Skill).filter(Skill.id.in_(skill_ids)).all()
+            user.skills = skills
+
+        if "educations" in data:
+            db.query(Education).filter(Education.user_id == candidate_id).delete()
+            for edu_data in data["educations"]:
+                education = Education(
+                    user_id=candidate_id,
+                    school_name=edu_data.get("school_name"),
+                    degree=edu_data.get("degree"),
+                    field_of_study=edu_data.get("field_of_study"),
+                    start_date=(
+                        datetime.fromisoformat(
+                            edu_data["start_date"].replace("Z", "+00:00")
+                        )
+                        if edu_data.get("start_date")
+                        else None
+                    ),
+                    end_date=(
+                        datetime.fromisoformat(
+                            edu_data["end_date"].replace("Z", "+00:00")
+                        )
+                        if edu_data.get("end_date")
+                        else None
+                    ),
+                    description=edu_data.get("description"),
+                )
+                db.add(education)
+
+        if "experiences" in data:
+            db.query(Experience).filter(Experience.user_id == candidate_id).delete()
+            for exp_data in data["experiences"]:
+                experience = Experience(
+                    user_id=candidate_id,
+                    job_title=exp_data.get("job_title"),
+                    company=exp_data.get("company"),
+                    start_date=(
+                        datetime.fromisoformat(
+                            exp_data["start_date"].replace("Z", "+00:00")
+                        )
+                        if exp_data.get("start_date")
+                        else None
+                    ),
+                    end_date=(
+                        datetime.fromisoformat(
+                            exp_data["end_date"].replace("Z", "+00:00")
+                        )
+                        if exp_data.get("end_date")
+                        else None
+                    ),
+                    description=exp_data.get("description"),
+                )
+                db.add(experience)
 
         db.commit()
         db.refresh(user)
+
+        skills = [{"id": skill.id, "name": skill.name} for skill in user.skills]
+        educations = [
+            {
+                "id": edu.id,
+                "school_name": edu.school_name,
+                "degree": edu.degree,
+                "field_of_study": edu.field_of_study,
+                "start_date": edu.start_date.isoformat() if edu.start_date else None,
+                "end_date": edu.end_date.isoformat() if edu.end_date else None,
+                "description": edu.description,
+            }
+            for edu in user.educations
+        ]
+        experiences = [
+            {
+                "id": exp.id,
+                "job_title": exp.job_title,
+                "company": exp.company,
+                "start_date": exp.start_date.isoformat() if exp.start_date else None,
+                "end_date": exp.end_date.isoformat() if exp.end_date else None,
+                "description": exp.description,
+            }
+            for exp in user.experiences
+        ]
 
         return (
             jsonify(
@@ -176,7 +262,6 @@ def upload_cv(candidate_id: int):
         if file.filename == "":
             return jsonify({"error": "No file selected"}), 400
 
-        # Check file extension
         allowed_extensions = {"pdf", "doc", "docx"}
         file_ext = (
             file.filename.rsplit(".", 1)[1].lower() if "." in file.filename else ""
@@ -188,18 +273,13 @@ def upload_cv(candidate_id: int):
                 400,
             )
 
-        # Create uploads directory if it doesn't exist
         upload_dir = "uploads/cvs"
         os.makedirs(upload_dir, exist_ok=True)
-
-        # Generate filename
         filename = f"cv_{candidate_id}.{file_ext}"
         filepath = os.path.join(upload_dir, filename)
 
-        # Save file
         file.save(filepath)
 
-        # Update user's resume_url
         resume_url = f"/uploads/cvs/{filename}"
         user.resume_url = resume_url
         db.commit()
@@ -333,8 +413,6 @@ def get_saved_jobs(candidate_id: int):
         db.close()
 
 
-
-
 # career tab
 @is_auth
 def add_education():
@@ -359,27 +437,30 @@ def add_education():
         db.refresh(education)
 
         # Return the newly added education
-        return jsonify({
-            "message": "Education added successfully",
-            "education": {
-                "id": education.id,
-                "user_id": education.user_id,
-                "school_name": education.school_name,
-                "degree": education.degree,
-                "field_of_study": education.field_of_study,
-                "start_date": education.start_date,
-                "end_date": education.end_date,
-                "description": education.description,
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Education added successfully",
+                    "education": {
+                        "id": education.id,
+                        "user_id": education.user_id,
+                        "school_name": education.school_name,
+                        "degree": education.degree,
+                        "field_of_study": education.field_of_study,
+                        "start_date": education.start_date,
+                        "end_date": education.end_date,
+                        "description": education.description,
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         db.rollback()
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
-
-
 
 
 @is_auth
@@ -424,7 +505,6 @@ def update_education(education_id):
         db.close()
 
 
-
 @is_auth
 def delete_education(education_id):
     db: Session = next(get_db())
@@ -453,9 +533,6 @@ def delete_education(education_id):
         db.close()
 
 
-
-
-
 @is_auth
 def add_experience():
     db: Session = next(get_db())
@@ -477,26 +554,29 @@ def add_experience():
         db.commit()
         db.refresh(experience)
 
-        return jsonify({
-            "message": "Experience added successfully",
-            "experience": {
-                "id": experience.id,
-                "user_id": experience.user_id,
-                "job_title": experience.job_title,
-                "company": experience.company,
-                "start_date": str(experience.start_date),
-                "end_date": str(experience.end_date),
-                "description": experience.description
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Experience added successfully",
+                    "experience": {
+                        "id": experience.id,
+                        "user_id": experience.user_id,
+                        "job_title": experience.job_title,
+                        "company": experience.company,
+                        "start_date": str(experience.start_date),
+                        "end_date": str(experience.end_date),
+                        "description": experience.description,
+                    },
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         db.rollback()
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
-
-
 
 
 @is_auth
@@ -539,8 +619,6 @@ def update_experience(experience_id):
         db.close()
 
 
-
-
 @is_auth
 def delete_experience(experience_id):
     db: Session = next(get_db())
@@ -567,7 +645,6 @@ def delete_experience(experience_id):
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
-
 
 
 @is_auth
@@ -607,11 +684,7 @@ def add_skill():
         if not skill_name:
             return jsonify({"message": "Skill name is required"}), 400
 
-        skill = (
-            db.query(Skill)
-            .filter(Skill.name.ilike(skill_name))
-            .first()
-        )
+        skill = db.query(Skill).filter(Skill.name.ilike(skill_name)).first()
 
         if not skill:
             skill = Skill(name=skill_name)
@@ -622,27 +695,26 @@ def add_skill():
         user = db.query(User).filter(User.id == user_id).first()
 
         if skill in user.skills:
-            return jsonify({
-                "message": "Skill already added to user"
-            }), 400
+            return jsonify({"message": "Skill already added to user"}), 400
 
         user.skills.append(skill)
         db.commit()
 
-        return jsonify({
-            "message": "Skill added successfully",
-            "skill": {
-                "id": skill.id,
-                "name": skill.name
-            }
-        }), 200
+        return (
+            jsonify(
+                {
+                    "message": "Skill added successfully",
+                    "skill": {"id": skill.id, "name": skill.name},
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         db.rollback()
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
-
 
 
 @is_auth
@@ -673,6 +745,72 @@ def delete_skill(skill_id):
 
     except Exception as e:
         db.rollback()
+        return jsonify({"error": str(e)}), 500
+    finally:
+        db.close()
+
+
+def get_random_candidates():
+    """Get 5 random candidates who are not the current user and not already connected"""
+    auth_header = request.headers.get("Authorization")
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return jsonify({"error": "Missing or invalid Authorization header"}), 401
+
+    import jwt
+    import os
+    from sqlalchemy.sql import func
+    from core.models import ConnectionRequest
+
+    token = auth_header.split(" ")[1]
+    JWT_SECRET = os.getenv("JWT_SECRET", "secret123")
+
+    db: Session = next(get_db())
+
+    try:
+        decoded = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        current_user_id = decoded["id"]
+
+        subquery = (
+            db.query(ConnectionRequest.receiver_id)
+            .filter(ConnectionRequest.sender_id == current_user_id)
+            .union(
+                db.query(ConnectionRequest.sender_id).filter(
+                    ConnectionRequest.receiver_id == current_user_id
+                )
+            )
+        )
+
+        candidates = (
+            db.query(User)
+            .filter(
+                User.role == "candidate",
+                User.id != current_user_id,
+                ~User.id.in_(subquery),
+            )
+            .order_by(func.random())
+            .limit(5)
+            .all()
+        )
+
+        return (
+            jsonify(
+                [
+                    {
+                        "id": cand.id,
+                        "full_name": cand.full_name,
+                        "headline": cand.headLine,
+                        "image": cand.image,
+                        "role": cand.role,
+                    }
+                    for cand in candidates
+                ]
+            ),
+            200,
+        )
+
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expired"}), 401
+    except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()

@@ -13,7 +13,7 @@ export default function EmployerLayout({
 }) {
   const { data } = useCurrentUser();
   const currentUser = data as User | undefined;
-  const [activeTab, setActiveTab] = useState("profile");
+  const [, setActiveTab] = useState("profile");
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -55,9 +55,7 @@ export default function EmployerLayout({
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 min-w-0">
-          {children}
-        </div>
+        <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>
   );

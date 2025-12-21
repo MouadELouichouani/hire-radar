@@ -15,6 +15,10 @@ import type {
   RecommendedJob,
   RecommendedCandidate,
   User,
+  ConnectionRequest,
+  Notification,
+  SuggestedPerson,
+  Connection,
 } from "@/types";
 
 // Auth API
@@ -51,11 +55,9 @@ export const jobsApi = {
     params.append("limit", limit.toString());
 
     const { data } = await apiClient.get<{
-      jobs: Array<{
-        id: string;
-        employer_id: string;
-        [key: string]: unknown;
-      }>;
+      jobs: Array<
+        Omit<Job, "id" | "employer_id"> & { id: string; employer_id: string }
+      >;
       total: number;
       page: number;
       limit: number;
@@ -107,15 +109,22 @@ export const jobsApi = {
 
   // Note: These endpoints don't exist in the backend yet
   // Stubbing them out for now - they will return errors
-  apply: async (jobId: number, applicationData?: { cover_letter?: string }) => {
+  apply: async (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _jobId: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _applicationData?: { cover_letter?: string },
+  ) => {
     throw new Error("Job application endpoint not implemented in backend");
   },
 
-  save: async (jobId: number): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  save: async (_jobId: number): Promise<void> => {
     throw new Error("Save job endpoint not implemented in backend");
   },
 
-  unsave: async (jobId: number): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  unsave: async (_jobId: number): Promise<void> => {
     throw new Error("Unsave job endpoint not implemented in backend");
   },
 };
@@ -128,38 +137,54 @@ export const candidatesApi = {
     throw new Error("Candidates endpoint not implemented in backend");
   },
 
-  getById: async (id: number): Promise<Candidate> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getById: async (_id: number): Promise<Candidate> => {
     throw new Error("Candidate endpoint not implemented in backend");
   },
 
   update: async (
-    id: number,
-    candidateData: Partial<Candidate>,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _id: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _candidateData: Partial<Candidate>,
   ): Promise<Candidate> => {
     throw new Error("Update candidate endpoint not implemented in backend");
   },
 
   uploadCV: async (
-    id: number,
-    file: File,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _id: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _file: File,
   ): Promise<{ cv_file_path: string }> => {
     throw new Error("CV upload endpoint not implemented in backend");
   },
 
-  getSavedJobs: async (id: number): Promise<SavedJob[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getSavedJobs: async (_id: number): Promise<SavedJob[]> => {
     throw new Error("Saved jobs endpoint not implemented in backend");
   },
 
-  getApplications: async (id: number): Promise<Application[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getApplications: async (_id: number): Promise<Application[]> => {
     throw new Error("Applications endpoint not implemented in backend");
   },
 
-  addSkill: async (id: number, skillId: number): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  addSkill: async (_id: number, _skillId: number): Promise<void> => {
     throw new Error("Add skill endpoint not implemented in backend");
   },
 
-  removeSkill: async (id: number, skillId: number): Promise<void> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  removeSkill: async (_id: number, _skillId: number): Promise<void> => {
     throw new Error("Remove skill endpoint not implemented in backend");
+  },
+
+  getRandom: async (): Promise<SuggestedPerson[]> => {
+    const { data } = await apiClient.get<SuggestedPerson[]>(
+      "/api/candidates/random",
+    );
+    return data;
   },
 };
 
@@ -172,14 +197,75 @@ export const employersApi = {
   },
 
   getById: async (id: number): Promise<Employer> => {
-    throw new Error("Employer endpoint not implemented in backend");
+    const { data } = await apiClient.get<Employer>(`/api/employers/${id}`);
+    return data;
   },
 
   update: async (
     id: number,
     employerData: Partial<Employer>,
   ): Promise<Employer> => {
-    throw new Error("Update employer endpoint not implemented in backend");
+    const { data } = await apiClient.put<Employer>(
+      `/api/employers/${id}`,
+      employerData,
+    );
+    return data;
+  },
+
+  getRandom: async (): Promise<SuggestedPerson[]> => {
+    const { data } = await apiClient.get<SuggestedPerson[]>(
+      "/api/employers/random",
+    );
+    return data;
+  },
+};
+
+// Connections API
+export const connectionsApi = {
+  sendRequest: async (receiverId: number): Promise<void> => {
+    await apiClient.post("/api/connections/request", {
+      receiver_id: receiverId,
+    });
+  },
+
+  getAll: async (): Promise<{
+    received: ConnectionRequest[];
+    sent: ConnectionRequest[];
+  }> => {
+    const { data } = await apiClient.get<{
+      received: ConnectionRequest[];
+      sent: ConnectionRequest[];
+    }>("/api/connections/requests");
+    return data;
+  },
+
+  accept: async (requestId: number): Promise<void> => {
+    await apiClient.put(`/api/connections/requests/${requestId}/accept`);
+  },
+
+  reject: async (requestId: number): Promise<void> => {
+    await apiClient.put(`/api/connections/requests/${requestId}/reject`);
+  },
+
+  getConnections: async (): Promise<Connection[]> => {
+    const { data } = await apiClient.get<Connection[]>("/api/connections/");
+    return data;
+  },
+
+  removeConnection: async (connectionId: number): Promise<void> => {
+    await apiClient.delete(`/api/connections/${connectionId}`);
+  },
+};
+
+// Notifications API
+export const notificationsApi = {
+  getAll: async (): Promise<Notification[]> => {
+    const { data } = await apiClient.get<Notification[]>("/api/notifications/");
+    return data;
+  },
+
+  markAsRead: async (notificationId: number): Promise<void> => {
+    await apiClient.put(`/api/notifications/${notificationId}/read`);
   },
 };
 
@@ -191,13 +277,16 @@ export const applicationsApi = {
     throw new Error("Applications endpoint not implemented in backend");
   },
 
-  getByJobId: async (jobId: number): Promise<Application[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  getByJobId: async (_jobId: number): Promise<Application[]> => {
     throw new Error("Job applications endpoint not implemented in backend");
   },
 
   update: async (
-    id: number,
-    status: Application["status"],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _id: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _status: Application["status"],
   ): Promise<Application> => {
     throw new Error("Update application endpoint not implemented in backend");
   },
@@ -207,13 +296,15 @@ export const applicationsApi = {
 // Note: These endpoints don't exist in the backend yet
 // Stubbing them out for now
 export const aiApi = {
-  recommendJobs: async (candidateId: number): Promise<RecommendedJob[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  recommendJobs: async (_candidateId: number): Promise<RecommendedJob[]> => {
     // Return empty array for now since endpoint doesn't exist
     return [];
   },
 
   recommendCandidates: async (
-    jobId: number,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _jobId: number,
   ): Promise<RecommendedCandidate[]> => {
     // Return empty array for now since endpoint doesn't exist
     return [];

@@ -2,20 +2,20 @@
 
 import { SignupForm } from "@/components/signup-form";
 
-export default function SignupPage() {
+import Image from "next/image";
 
+export default function SignupPage() {
   return (
     <div className="grid min-h-svh lg:grid-cols-1">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <a href="#" className="flex items-center gap-2 font-medium">
-            <img
+            <Image
               src={"/radar.svg"}
               alt="hire-radar"
               width={25}
               height={25}
-              className="invert dark:invert-0 border-0 bg-transparent outline-none"
-              style={{ display: "block" }}
+              className="invert dark:invert-0 border-0 bg-transparent outline-none block"
             />
             Hire-radar
           </a>

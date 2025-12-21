@@ -20,7 +20,7 @@ export function useEmployer(id: number) {
     queryFn: async () => {
       try {
         return await employersApi.getById(id);
-      } catch (error) {
+      } catch {
         // Endpoint doesn't exist, return null
         return null;
       }
@@ -44,5 +44,15 @@ export function useUpdateEmployer() {
     onError: () => {
       toast.error("Failed to update profile. Please try again.");
     },
+  });
+}
+
+// Get random employers
+export function useRandomEmployers() {
+  return useQuery({
+    queryKey: ["random-employers"],
+    queryFn: () => employersApi.getRandom(),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false,
   });
 }

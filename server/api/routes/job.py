@@ -16,7 +16,6 @@ from api.controllers.job import (
 job = Blueprint("job", __name__)
 
 
-# Job routes
 @job.route("", methods=["GET"])
 def search_jobs_route():
     return search_jobs()

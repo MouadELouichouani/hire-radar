@@ -8,8 +8,6 @@ import {
   Contact,
   HelpCircle,
   LayoutDashboard,
-  Map,
-  PieChart,
   Users,
   UserStar,
 } from "lucide-react";

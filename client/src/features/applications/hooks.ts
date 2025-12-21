@@ -33,7 +33,7 @@ export function useUpdateApplication() {
       id: number;
       status: Application["status"];
     }) => applicationsApi.update(id, status),
-    onSuccess: (_, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["applications"] });
       toast.success("Application status updated!");
     },

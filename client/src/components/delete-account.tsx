@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -11,55 +11,71 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea" 
-import { Trash2 } from "lucide-react"
-import apiClient from "@/lib/apiClient"
-import { getToken } from "@/lib"
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Trash2 } from "lucide-react";
+import apiClient from "@/lib/apiClient";
+import { getToken } from "@/lib";
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 export function DeleteAccount() {
-  const [reason, setReason] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [reason, setReason] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setSuccess(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
 
     if (!reason.trim()) {
-      setError("Please provide a reason for deleting your account.")
-      setLoading(false)
-      return
+      setError("Please provide a reason for deleting your account.");
+      setLoading(false);
+      return;
     }
 
     try {
-      const response = await apiClient.post(`/api/auth/delete-account`,{reason},{
-        headers: {
-            Authorization: `Bearer ${getToken()}`
-        }
-      })
+      const response = await apiClient.post(
+        `/api/auth/delete-account`,
+        { reason },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        },
+      );
 
       if (response.status === 200) {
-        setSuccess("Delete request submitted successfully!")
-        setReason("")
+        setSuccess("Delete request submitted successfully!");
+        setReason("");
       } else {
-        setError(response.data.message || "Failed to submit delete request.")        
+        setError(response.data.message || "Failed to submit delete request.");
       }
-    } catch (err: any) {
-        if (err.response && err.response.data) {
-            setError(err.response.data.message || "Something went wrong");
-        } else {
-            setError(err.message || "Something went wrong");
-        }
+    } catch (err: unknown) {
+      const apiError = err as ApiError;
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        apiError.response?.data?.message
+      ) {
+        setError(apiError.response.data.message);
+      } else {
+        setError((err as Error).message || "Something went wrong");
+      }
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Dialog>
@@ -99,12 +115,16 @@ export function DeleteAccount() {
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" disabled={loading || reason === ''} onClick={handleSubmit}>
+            <Button
+              type="submit"
+              disabled={loading || reason === ""}
+              onClick={handleSubmit}
+            >
               {loading ? "Submitting..." : "Submit"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </form>
     </Dialog>
-  )
+  );
 }
