@@ -1,5 +1,5 @@
-from api.config.db import SessionLocal
-from api.core.models import Application, Job, User
+from config.db import SessionLocal
+from core.models import Application, Job, User
 from datetime import datetime
 
 

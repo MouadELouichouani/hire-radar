@@ -1,6 +1,6 @@
 from flask import Blueprint
-from api.middlewares.auth import admin_required
-from api.controllers.admin import (
+from middlewares.auth import admin_required
+from controllers.admin import (
     get_platform_stats,
     get_all_users,
     delete_user,
