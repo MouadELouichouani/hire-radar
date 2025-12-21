@@ -22,7 +22,7 @@ interface JobCardProps {
 }
 
 export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport }: JobCardProps) => {
-    const { emp_type, skills, createdAt, employer, responsibilities, category } = jobData
+    const { emp_type, skills, createdAt, employer, responsibilities } = jobData
 
     return (
         <Card className="group relative overflow-hidden hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/10 bg-card">
@@ -38,8 +38,8 @@ export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport
                                         <Image
                                             width={20}
                                             height={20}
-                                            src={"https://img.freepik.com/free-photo/portrait-white-man-isolated_53876-40306.jpg?semt=ais_hybrid&w=740&q=80"} 
-                                            alt={employer.full_name} 
+                                            src={employer.image} 
+                                            alt={employer.full_name[0].toLowerCase()} 
                                             className="w-12 h-12 rounded-full object-cover border-2 border-primary/20"
                                         />
                                     )}
@@ -110,9 +110,9 @@ export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport
                     <h3 className="text-xl font-bold tracking-tight group-hover:text-primary transition-colors leading-tight">
                         {jobData.title || "Untitled Job"}
                     </h3>
-                    {category && (
+                    {jobData.category && (
                         <Badge variant="outline" className="text-xs px-2 py-1">
-                            {category.name}
+                            {jobData.category}
                         </Badge>
                     )}
                 </div>
@@ -205,7 +205,7 @@ export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport
                             <Users className="w-5 h-5 text-primary" />
                             <div className="space-y-1">
                                 <p className="text-sm font-semibold">
-                                    {jobData.applicants?.length || 0} {jobData.applicants?.length === 1 ? 'Applicant' : 'Applicants'}
+                                    {jobData.applicants || 0} {jobData.applicants === 1 ? 'Applicant' : 'Applicants'}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                     Apply before {getApplicationDeadline(createdAt)}

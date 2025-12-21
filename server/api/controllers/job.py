@@ -12,7 +12,6 @@ import os
 from middlewares.auth import is_auth
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-import random
 
 def get_db():
     db = SessionLocal()
@@ -33,96 +32,69 @@ def get_jobs_for_user():
         page = int(request.args.get("page", 1))
         page_size = 10
 
+        # Fetch user
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return jsonify({"error": "User not found"}), 404
 
         user_skill_ids = [skill.id for skill in user.skills]
-        user_location = user.location
+
+        
+        print(user_skill_ids)
+        user_location = user.location or ""
+
+        jobs_query = db.query(Job)
+
+        # if user_location:
+        #     jobs_query = jobs_query.filter(Job.location.ilike(f"%{user_location}%"))
 
         if user_skill_ids:
-            jobs_query = (
-                db.query(Job)
-                .join(job_skills, Job.id == job_skills.c.job_id)
-                .filter(job_skills.c.skill_id.in_(user_skill_ids))
-                .filter(Job.location.ilike(f"%{user_location}%"))  # location match
-                .distinct()
-                .order_by(desc(Job.created_at))
-            )
-        else:
-            jobs_query = db.query(Job)
-            if user_location:
-                jobs_query = jobs_query.filter(Job.location.ilike(f"%{user_location}%"))
-            total_jobs_count = jobs_query.count()
-            if total_jobs_count > 0:
-                # Randomize job selection
-                random_offset = random.randint(0, max(total_jobs_count - page_size, 0))
-                jobs = jobs_query.offset(random_offset).limit(page_size).all()
-                total_pages = (total_jobs_count + page_size - 1) // page_size
+            jobs_query = jobs_query.join(Job.skills).filter(Job.skills.any(Skill.id.in_(user_skill_ids)))
 
-                results = []
-                for job in jobs:
-                    results.append(
-                        {
-                            "id": job.id,
-                            "title": job.title,
-                            "company": job.company,
-                            "location": job.location,
-                            "salary_range": job.salary_range,
-                            "emp_type": job.emp_type,
-                            "description": job.description,
-                            "responsibilities": job.responsibilities,
-                            "skills": [skill.name for skill in job.skills],
-                            "created_at": job.created_at.isoformat(),
-                        }
-                    )
+        
 
-                return jsonify(
-                    {
-                        "jobs": results,
-                        "total": total_jobs_count,
-                        "total_pages": total_pages,
-                        "page": page,
-                    }
-                )
-            else:
-                return jsonify({"jobs": [], "total": 0, "total_pages": 0, "page": page})
+        jobs_query = jobs_query.order_by(desc(Job.created_at))
 
         total_jobs = jobs_query.count()
         total_pages = (total_jobs + page_size - 1) // page_size
+        
         jobs = jobs_query.offset((page - 1) * page_size).limit(page_size).all()
 
         results = []
         for job in jobs:
-            results.append(
-                {
-                    "id": job.id,
-                    "title": job.title,
-                    "company": job.company,
-                    "location": job.location,
-                    "salary_range": job.salary_range,
-                    "emp_type": job.emp_type,
-                    "description": job.description,
-                    "responsibilities": job.responsibilities,
-                    "skills": [skill.name for skill in job.skills],
-                    "created_at": job.created_at.isoformat(),
-                }
-            )
+            results.append({
+                "id": job.id,
+                "title": job.title,
+                "company": job.company,
+                "category": job.category.name,
+                "location": job.location,
+                "salary_range": job.salary_range,
+                "emp_type": job.emp_type,
+                "description": job.description,
+                "responsibilities": job.responsibilities or [],
+                "skills": [skill.name for skill in job.skills],
+                "created_at": job.created_at.isoformat() if job.created_at else None,
+                "employer": {
+                    "id": job.employer.id,
+                    "full_name": job.employer.full_name,
+                    "image": job.employer.image,
+                    "headline": getattr(job.employer, "headLine", ""),
+                },
+                "applicants": len(job.applicants),
+            })
 
-        return jsonify(
-            {
-                "jobs": results,
-                "total": total_jobs,
-                "total_pages": total_pages,
-                "page": page,
-            }
-        )
+        
+        return jsonify({
+            "jobs": results,
+            "total": total_jobs,
+            "total_pages": total_pages,
+            "page": page
+        })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
         db.close()
-
 
 
 def search_jobs():

@@ -76,26 +76,8 @@ export default function Home() {
         <main className="flex-1 min-w-0 px-8 py-4">
           <div className="space-y-6 max-w-5xl">
             <PostCreator />
-
-            {/* Posted Jobs */}
-            {postedJobs.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-lg font-bold mb-3">Your Posted Jobs</h2>
-                {postedJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    jobData={job}
-                    onOpenDelete={() => {}}
-                    onOpenUpdate={() => {}}
-                    onApply={() => {}}
-                    onReport={() => {}}
-                  />
-                ))}
-              </div>
-            )}
-
             {/* Suggested Jobs */}
-            <div>
+            <div className="flex flex-col gap-4">
               <h2 className="text-lg font-bold mb-3">Suggested Jobs</h2>
               {jobs.map((job) => (
                 <JobCard
