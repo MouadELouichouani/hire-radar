@@ -336,5 +336,29 @@ class DeleteRequest(Base):
     user = relationship("User", backref="delete_requests")
 
 
+
+
+# ============================================================
+# PASSWORD RESET TOKEN MODEL
+# ============================================================
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    token = Column(String(255), unique=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    used = Column(Integer, server_default="0")  # 0 = unused, 1 = used
+
+    # Relationship
+    user = relationship("User", backref="reset_tokens")
+
+
 Base.metadata.create_all(engine)
 print("Tables created successfully!")
+
+
+
