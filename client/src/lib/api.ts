@@ -83,13 +83,34 @@ export const jobsApi = {
     const { data } = await apiClient.get<{
       id: string;
       employer_id: string;
+      company?: string;
+      company_name?: string;
+      employer?: {
+        id?: number | null;
+        full_name?: string | null;
+        email?: string | null;
+        role?: string | null;
+        headLine?: string | null;
+        image?: string | null;
+      } | null;
+      skills?: Array<{ id?: number; name?: string } | string> | null;
       [key: string]: unknown;
     }>(`/api/jobs/${id}`);
+
+    // Normalize skills to string array
+    const normalizedSkills =
+      (data.skills || [])?.map((s) =>
+        typeof s === "string" ? s : (s?.name as string),
+      ) || [];
+
     // Backend returns string IDs, convert to numbers
     return {
       ...data,
       id: parseInt(data.id),
       employer_id: parseInt(data.employer_id),
+      company_name: data.company_name || (data as { company?: string }).company || "",
+      skills: normalizedSkills,
+      applicants_count: (data as { applicants_count?: number }).applicants_count,
     } as Job;
   },
 
@@ -110,22 +131,30 @@ export const jobsApi = {
   // Note: These endpoints don't exist in the backend yet
   // Stubbing them out for now - they will return errors
   apply: async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _jobId: number,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _applicationData?: { cover_letter?: string },
+    jobId: number,
+    applicationData?: { cover_letter?: string },
   ) => {
-    throw new Error("Job application endpoint not implemented in backend");
+    const { data } = await apiClient.post<{ application_id: number }>(
+      `/api/jobs/${jobId}/apply`,
+      applicationData || {},
+    );
+    return data;
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  save: async (_jobId: number): Promise<void> => {
-    throw new Error("Save job endpoint not implemented in backend");
+  save: async (jobId: number): Promise<void> => {
+    await apiClient.post(`/api/jobs/${jobId}/save`);
   },
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  unsave: async (_jobId: number): Promise<void> => {
-    throw new Error("Unsave job endpoint not implemented in backend");
+  unsave: async (jobId: number): Promise<void> => {
+    await apiClient.delete(`/api/jobs/${jobId}/save`);
+  },
+
+  report: async (jobId: number, reason: string): Promise<{ message: string }> => {
+    const { data } = await apiClient.post<{ message: string }>(
+      `/api/jobs/${jobId}/report`,
+      { reason },
+    );
+    return data;
   },
 };
 
@@ -266,6 +295,21 @@ export const notificationsApi = {
 
   markAsRead: async (notificationId: number): Promise<void> => {
     await apiClient.put(`/api/notifications/${notificationId}/read`);
+  },
+};
+
+// Search API
+export const searchApi = {
+  search: async (query: string) => {
+    const params = new URLSearchParams();
+    if (query) params.append("query", query);
+    const { data } = await apiClient.get<{
+      employers: Array<{ id: number; role: string; full_name: string; headLine: string; image?: string }>;
+      candidates: Array<{ id: number; role: string; full_name: string; headLine: string; image?: string }>;
+      jobs: Array<{ id: number; title: string; description: string }>;
+    }>(`/api/search?${params.toString()}`);
+
+    return data;
   },
 };
 

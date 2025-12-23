@@ -44,6 +44,14 @@ export type Job = {
   experience_level?: string | null;
   description: string;
   skills?: string[] | null;
+  employer?: {
+    id?: number | null;
+    full_name?: string | null;
+    email?: string | null;
+    role?: string | null;
+    headLine?: string | null;
+    image?: string | null;
+  } | null;
   requirements?: string | null;
   benefits?: string | null;
   responsibilities?: string[] | null; // Legacy field
@@ -51,6 +59,7 @@ export type Job = {
   posted_at?: string;
   created_at?: string; // Legacy field - use posted_at
   updated_at?: string;
+  applicants_count?: number;
   is_saved?: boolean; // Frontend-only flag
   is_applied?: boolean; // Frontend-only flag
 };
