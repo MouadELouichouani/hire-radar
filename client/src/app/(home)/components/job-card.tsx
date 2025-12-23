@@ -1,4 +1,4 @@
-'use client'
+"use client"
 
 import { Job } from '@/interfaces'
 import React from 'react'
@@ -16,14 +16,20 @@ import { Icon } from '@iconify/react'
 
 interface JobCardProps {
     jobData: Job
-    onOpenDelete: (val: { open: boolean, jobId: string }) => void
+    onOpenDelete: (val: { open: boolean, jobId: number }) => void
     onOpenUpdate: (val: { open: boolean, jobData: Job }) => void
-    onApply: (jobId: number) => void
-    onReport: (jobId: number) => void
+    onApply: (jobId: number) => Promise<void>
+    onReport: (jobId: number) => Promise<void>
+    onViewDetails?: (jobId: number) => void
 }
 
-export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport }: JobCardProps) => {
-    const { emp_type, skills, createdAt, employer, responsibilities } = jobData
+export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport, onViewDetails }: JobCardProps) => {
+    const { emp_type, skills, employer, responsibilities } = jobData
+    const createdAt = (jobData as { created_at?: string }).created_at || jobData.posted_at || jobData.updated_at || ""
+    const applicantsCount = (jobData as { applicants_count?: number }).applicants_count ?? (jobData as { applicants?: number }).applicants ?? 0
+    const [isApplying, setIsApplying] = React.useState(false)
+    const [isReporting, setIsReporting] = React.useState(false)
+    const [hasApplied, setHasApplied] = React.useState(false)
 
     return (
         <Card className="group relative overflow-hidden hover:shadow-md transition-all duration-300 border-border/50 hover:border-primary/10 bg-card">
@@ -89,7 +95,14 @@ export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport
                             <DropdownMenuItem className="gap-2" onClick={() => {/* View Details */ }}>
                                 <ExternalLink className="w-4 h-4" /> View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="gap-2 text-red-500" onClick={() => onReport(jobData.id)}>
+                            <DropdownMenuItem className="gap-2 text-red-500" onClick={async () => {
+                                try {
+                                    setIsReporting(true)
+                                    await onReport(jobData.id)
+                                } finally {
+                                    setIsReporting(false)
+                                }
+                            }}>
                                 <FileText className="w-4 h-4" /> Report
                             </DropdownMenuItem>
                             <DropdownMenuItem
@@ -206,7 +219,7 @@ export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport
                             <Users className="w-5 h-5 text-primary" />
                             <div className="space-y-1">
                                 <p className="text-sm font-semibold">
-                                    {jobData.applicants || 0} {jobData.applicants === 1 ? 'Applicant' : 'Applicants'}
+                                    {applicantsCount} {applicantsCount === 1 ? 'Applicant' : 'Applicants'}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
                                     Apply before {getApplicationDeadline(createdAt || new Date().toISOString())}
@@ -226,19 +239,36 @@ export const JobCard = ({ jobData, onOpenDelete, onOpenUpdate, onApply, onReport
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => onReport(jobData.id)}
+                            disabled={isReporting}
+                            onClick={async () => {
+                                try {
+                                    setIsReporting(true)
+                                    await onReport(jobData.id)
+                                } finally {
+                                    setIsReporting(false)
+                                }
+                            }}
                         >
                             <FileText className="w-4 h-4 mr-2" />
-                            Report
+                            {isReporting ? "Reporting..." : "Report"}
                         </Button>
                         <Button
                             variant="default"
                             size="sm"
-                            onClick={() => onApply(jobData.id)}
+                            disabled={isApplying || hasApplied}
+                            onClick={async () => {
+                                try {
+                                    setIsApplying(true)
+                                    await onApply(jobData.id)
+                                    setHasApplied(true)
+                                } finally {
+                                    setIsApplying(false)
+                                }
+                            }}
                             className="gap-2"
                         >
                             <UserCheck className="w-4 h-4" />
-                            Apply Now
+                            {hasApplied ? "Applied" : isApplying ? "Applying..." : "Apply Now"}
                         </Button>
                     </div>
                 </div>

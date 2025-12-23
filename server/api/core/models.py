@@ -275,6 +275,22 @@ class Notification(Base):
 
 
 # ============================================================
+# REPORT MODEL
+# ============================================================
+class Report(Base):
+    __tablename__ = "reports"
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    job_id = Column(Integer, ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False)
+    reason = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    user = relationship("User", backref="reports")
+    job = relationship("Job", backref="reports")
+
+
+# ============================================================
 # CONNECTION REQUEST MODEL
 # ============================================================
 class ConnectionRequest(Base):
@@ -321,28 +337,28 @@ class DeleteRequest(Base):
 
 
 
+
 # ============================================================
-# ReportedJob MODEL
+# PASSWORD RESET TOKEN MODEL
 # ============================================================
-class ReportedJob(Base):
-    __tablename__ = "reported_jobs"
+class PasswordResetToken(Base):
+    __tablename__ = "password_reset_tokens"
 
     id = Column(Integer, primary_key=True)
-
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    job_id = Column(
-        Integer, ForeignKey("jobs.id", ondelete="CASCADE"), nullable=False
-    )
-    
-    reason = Column(Text, nullable=False)
+    token = Column(String(255), unique=True, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
+    used = Column(Integer, server_default="0")  # 0 = unused, 1 = used
 
-    # Relationship to user
-    user = relationship("User", backref="reported_jobs")
-    job = relationship("Job", backref="reported_jobs")
+    # Relationship
+    user = relationship("User", backref="reset_tokens")
 
 
 Base.metadata.create_all(engine)
 print("Tables created successfully!")
+
+
+
