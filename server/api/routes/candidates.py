@@ -14,7 +14,8 @@ from controllers.candidates import (
     delete_experience,
     delete_skill,
     get_skills,
-    get_public_user
+    get_public_user,
+    get_random_candidates,
 )
 
 
@@ -37,6 +38,9 @@ candidates.add_url_rule(
 )
 candidates.add_url_rule(
     "/<int:candidate_id>/saved-jobs", "get_saved_jobs", get_saved_jobs, methods=["GET"]
+)
+candidates.add_url_rule(
+    "/random", "get_random_candidates", get_random_candidates, methods=["GET"]
 )
 
 # Profile image upload
