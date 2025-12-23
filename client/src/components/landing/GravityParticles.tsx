@@ -1,84 +1,143 @@
 'use client'
 
-import { motion, useMotionValue, useSpring, useTransform, MotionValue } from 'framer-motion'
-import { useEffect, useState, useRef } from 'react'
+import { motion, useAnimationFrame, motionValue, MotionValue } from 'framer-motion'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useTheme } from 'next-themes'
 
-/**
- * GravityParticles Component
- * 
- * Implements a "Gravity Halo" effect.
- * The cursor acts as a gravity center, but particles are constrained to a minimum radius,
- * forming a floating cloud/ring around the cursor that never collapses to the center.
- */
-
-interface ParticleConfig {
+interface ParticleData {
     id: number
-    initialX: number
-    initialY: number
-    // Polar coordinates relative to cursor for the "Halo" target
-    targetRadius: number
-    targetAngle: number
-    scale: number
+    x: number
+    y: number
+    vx: number
+    vy: number
+    size: number
+    baseOpacity: number
+    currentOpacity: number
     mass: number
-    floatDuration: number
+    mx: MotionValue<number>
+    my: MotionValue<number>
+    mOpacity: MotionValue<number>
 }
+
+const PARTICLE_COUNT = 200
+const MOVEMENT_SPEED = 0.5
+const MOUSE_INFLUENCE = 150
+const GRAVITY_STRENGTH = 5
+const USE_GLOW = true
 
 export const GravityParticles = () => {
     const { theme } = useTheme()
-
-    // Track cursor position
-    const mouseX = useMotionValue(0)
-    const mouseY = useMotionValue(0)
-
-    // Strength of the pull: 0 = Idle (distributed), 1 = Active (Halo)
-    const gravityStrength = useMotionValue(0)
-
-    const [particles, setParticles] = useState<ParticleConfig[]>([])
     const containerRef = useRef<HTMLDivElement>(null)
-
-    useEffect(() => {
-        // Initialize particles
-        // Use a decent count for the "cloud" feel, but keep performant
-        const count = window.innerWidth < 768 ? 40 : 120
-        const newParticles: ParticleConfig[] = []
-
-        for (let i = 0; i < count; i++) {
-            newParticles.push({
+    const [isReady, setIsReady] = useState(false)
+    const mouseRef = useRef({ x: -1000, y: -1000 })
+    const particles = useMemo(() => {
+        const temp: ParticleData[] = []
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+            temp.push({
                 id: i,
-                initialX: Math.random() * window.innerWidth,
-                initialY: Math.random() * window.innerHeight,
-                // The "Halo" zone: 80px to 220px from cursor
-                targetRadius: Math.random() * 140 + 80,
-                targetAngle: Math.random() * Math.PI * 2,
-                scale: Math.random() * 0.5 + 0.5, // 0.5 to 1.0 scale
-                mass: Math.random() * 2 + 1, // varied internal inertia
-                floatDuration: Math.random() * 4 + 3
+                x: 0,
+                y: 0,
+                vx: 0,
+                vy: 0,
+                size: 2,
+                baseOpacity: 0.5,
+                currentOpacity: 0.5,
+                mass: 1,
+                mx: motionValue(0),
+                my: motionValue(0),
+                mOpacity: motionValue(0.5)
             })
         }
-        setParticles(newParticles)
+        return temp
+    }, [])
+
+    useEffect(() => {
+        if (typeof window === 'undefined') return
+
+        const width = window.innerWidth
+        const height = window.innerHeight
+
+        particles.forEach(p => {
+            const x = Math.random() * width
+            const y = Math.random() * height
+            const opacity = 0.3 + Math.random() * 0.5
+
+            p.x = x
+            p.y = y
+            p.vx = (Math.random() - 0.5) * MOVEMENT_SPEED
+            p.vy = (Math.random() - 0.5) * MOVEMENT_SPEED
+            p.size = Math.random() * 3 + 2
+            p.baseOpacity = opacity
+            p.currentOpacity = opacity
+            p.mass = Math.random() * 0.5 + 0.5
+
+            p.mx.set(x)
+            p.my.set(y)
+            p.mOpacity.set(opacity)
+        })
+
+        setIsReady(true)
 
         const handleMouseMove = (e: MouseEvent) => {
-            mouseX.set(e.clientX)
-            mouseY.set(e.clientY)
-            // Activate gravity on first move
-            if (gravityStrength.get() === 0) {
-                gravityStrength.set(1)
+            const rect = containerRef.current?.getBoundingClientRect()
+            if (rect) {
+                mouseRef.current = {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                }
             }
         }
 
-        const handleMouseLeave = () => {
-            // optional: gravityStrength.set(0)
-        }
-
         window.addEventListener('mousemove', handleMouseMove)
-        document.addEventListener('mouseleave', handleMouseLeave)
+        return () => window.removeEventListener('mousemove', handleMouseMove)
+    }, [particles])
 
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove)
-            document.removeEventListener('mouseleave', handleMouseLeave)
-        }
-    }, [gravityStrength, mouseX, mouseY])
+    useAnimationFrame((time) => {
+        if (!isReady) return
+
+        const width = containerRef.current?.offsetWidth || window.innerWidth
+        const height = containerRef.current?.offsetHeight || window.innerHeight
+        const mouse = mouseRef.current
+
+        particles.forEach(p => {
+            const dx = mouse.x - p.x
+            const dy = mouse.y - p.y
+            const distance = Math.sqrt(dx * dx + dy * dy)
+            if (distance < MOUSE_INFLUENCE && distance > 0) {
+                const force = (MOUSE_INFLUENCE - distance) / MOUSE_INFLUENCE
+                const normalizedDx = dx / distance
+                const normalizedDy = dy / distance
+                const gravityForce = force * GRAVITY_STRENGTH * 0.05
+
+                p.vx += normalizedDx * gravityForce
+                p.vy += normalizedDy * gravityForce
+
+                p.currentOpacity = Math.min(1, p.baseOpacity + force * 0.4)
+            } else {
+                p.currentOpacity = Math.max(p.baseOpacity, p.currentOpacity - 0.01)
+
+                p.vx *= 0.99
+                p.vy *= 0.99
+
+                if (Math.abs(p.vx) < 0.1) p.vx += (Math.random() - 0.5) * 0.01
+                if (Math.abs(p.vy) < 0.1) p.vy += (Math.random() - 0.5) * 0.01
+            }
+
+            p.x += p.vx
+            p.y += p.vy
+
+            if (p.x < 0) p.x = width
+            if (p.x > width) p.x = 0
+            if (p.y < 0) p.y = height
+            if (p.y > height) p.y = 0
+
+            p.mx.set(p.x)
+            p.my.set(p.y)
+            p.mOpacity.set(p.currentOpacity)
+        })
+    })
+
+    const particleColor = theme === 'dark' ? '#FFFFFF' : '#0ea5e9'
 
     return (
         <div
@@ -86,67 +145,30 @@ export const GravityParticles = () => {
             className="absolute inset-0 z-0 overflow-hidden pointer-events-none"
             aria-hidden="true"
         >
-            {particles.map((p) => (
+            {isReady && particles.map((p) => (
                 <Particle
                     key={p.id}
-                    config={p}
-                    mouseX={mouseX}
-                    mouseY={mouseY}
-                    gravityStrength={gravityStrength}
+                    data={p}
+                    color={particleColor}
                 />
             ))}
         </div>
     )
 }
 
-const Particle = ({
-    config,
-    mouseX,
-    mouseY,
-    gravityStrength
-}: {
-    config: ParticleConfig,
-    mouseX: MotionValue<number>,
-    mouseY: MotionValue<number>,
-    gravityStrength: MotionValue<number>
-}) => {
-    // 1. Calculate Target Position
-    // Idle: Initial grid/random position
-    // Active: Cursor Pos + (Radius * cos(angle))
-
-    const targetX = useTransform(() => {
-        const strength = gravityStrength.get()
-        const haloX = mouseX.get() + Math.cos(config.targetAngle) * config.targetRadius
-        return config.initialX * (1 - strength) + haloX * strength
-    })
-
-    const targetY = useTransform(() => {
-        const strength = gravityStrength.get()
-        const haloY = mouseY.get() + Math.sin(config.targetAngle) * config.targetRadius
-        return config.initialY * (1 - strength) + haloY * strength
-    })
-
-    // 2. Physics (Spring)
-    // Smooth, airy, with slight "lag" (damping)
-    const springConfig = {
-        stiffness: 40, // Low stiffness = loose spring
-        damping: 15,   // Medium damping = some oscillation but settles
-        mass: config.mass
-    }
-
-    const x = useSpring(targetX, springConfig)
-    const y = useSpring(targetY, springConfig)
-
+const Particle = ({ data, color }: { data: ParticleData, color: string }) => {
     return (
         <motion.div
             style={{
-                x,
-                y,
-                scale: config.scale
+                x: data.mx,
+                y: data.my,
+                opacity: data.mOpacity,
+                width: data.size,
+                height: data.size,
+                backgroundColor: color,
+                boxShadow: `0 0 10px ${color}`
             }}
-            // Style: Tiny dot (2px)
-            className="absolute top-0 left-0 w-1 h-1 bg-slate-400/60 dark:bg-slate-300/60 rounded-full"
-        >
-        </motion.div>
+            className="absolute top-0 left-0 rounded-full"
+        />
     )
 }

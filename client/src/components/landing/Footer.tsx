@@ -1,15 +1,20 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 
 export const Footer = () => {
     return (
         <footer className="py-12 bg-slate-50 dark:bg-black border-t border-black/5 dark:border-white/5">
             <div className="container px-4 md:px-6 mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
                 <div className="flex items-center gap-2">
-                    <div className="h-6 w-6 bg-sky-500 rounded-full flex items-center justify-center">
-                        <div className="h-2 w-2 bg-white rounded-full" />
-                    </div>
+                    <Image
+                        src="/radar.svg"
+                        alt="Hire Radar"
+                        width={24}
+                        height={24}
+                        className="invert dark:invert-0"
+                    />
                     <span className="text-lg font-bold tracking-tighter">Hire Radar</span>
                 </div>
 
