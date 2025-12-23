@@ -37,7 +37,7 @@ export const Header = () => {
                         Log in
                     </Button>
                 </Link>
-                <Link href="/register">
+                <Link href="/signup">
                     <Button className="rounded-full px-6 bg-sky-600 hover:bg-sky-500 text-white border-none shadow-lg shadow-sky-500/20">
                         Get Started
                     </Button>

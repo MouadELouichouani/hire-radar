@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Globe, Zap, Shield, Rocket, Target, Briefcase } from 'lucide-react'
 import Link from 'next/link'
@@ -8,8 +8,13 @@ import { GravityParticles } from './GravityParticles'
 
 export const Hero = () => {
     const { scrollY } = useScroll()
-    const y = useTransform(scrollY, [0, 500], [0, 200])
-    const opacity = useTransform(scrollY, [0, 300], [1, 0])
+
+    // Smooth out scroll values
+    const rawY = useTransform(scrollY, [0, 500], [0, 200])
+    const rawOpacity = useTransform(scrollY, [0, 600], [1, 0]) // Extended range for smoother fade
+
+    const y = useSpring(rawY, { stiffness: 100, damping: 20 })
+    const opacity = useSpring(rawOpacity, { stiffness: 100, damping: 20 })
 
     return (
         <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden bg-gradient-to-b from-sky-50/50 to-white dark:from-slate-950 dark:to-black">
@@ -65,7 +70,7 @@ export const Hero = () => {
                     transition={{ duration: 0.5, delay: 0.3 }}
                     className="flex flex-col sm:flex-row gap-4 items-center"
                 >
-                    <Link href="/register">
+                    <Link href="/signup">
                         <Button size="lg" className="rounded-full h-12 px-8 text-base bg-sky-600 hover:bg-sky-500 shadow-xl shadow-sky-500/20 transition-transform hover:scale-105">
                             Start Exploring
                             <ArrowRight className="ml-2 h-4 w-4" />

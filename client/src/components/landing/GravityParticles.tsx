@@ -58,7 +58,8 @@ export const GravityParticles = () => {
 
             // Color based on theme
             const isDark = theme === 'dark' || document.documentElement.classList.contains('dark')
-            ctx.fillStyle = isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(59, 130, 246, 0.4)' // Sky blue in light, white in dark
+            // Made brighter/lighter as requested
+            ctx.fillStyle = isDark ? 'rgba(200, 230, 255, 0.5)' : 'rgba(14, 165, 233, 0.6)' // Lighter cyan/white in dark, stronger sky blue in light
 
             points.forEach(point => {
                 // Calculate distance to mouse
